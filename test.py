@@ -1,7 +1,7 @@
 import datetime
 
-from pynytimes import nytAPI
+from pynytimes import NYTAPI
 
 
-nyt = nytAPI("DgKALEQLVaCWyoZlfiJNAPPrsmY3MHaA")
-print(nyt.movie_reviews(max_results=80))
+nyt = NYTAPI("DgKALEQLVaCWyoZlfiJNAPPrsmY3MHaA")
+print(nyt.tags("pentagon", max_results=3, filter_options=["Des", "Per"]))
