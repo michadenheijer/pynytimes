@@ -1,6 +1,7 @@
 """The wrapper is here"""
 import datetime
 import math
+import time
 
 import requests
 
@@ -10,6 +11,8 @@ BASE_BOOKS = "https://api.nytimes.com/svc/books/v3/"
 BASE_MOVIE_REVIEWS = "https://api.nytimes.com/svc/movies/v2/reviews/search.json"
 BASE_META_DATA = "https://api.nytimes.com/svc/news/v3/content.json"
 BASE_TAGS = "https://api.nytimes.com/svc/suggest/v1/timestags.json"
+BASE_ARCHIVE_METADATA = "https://api.nytimes.com/svc/archive/v1/"
+BASE_ARTICLE_SEARCH = "https://api.nytimes.com/svc/search/v2/articlesearch.json"
 BASE_BOOK_REVIEWS = BASE_BOOKS + "reviews.json"
 BASE_BEST_SELLERS_LISTS = BASE_BOOKS + "lists/names.json"
 BASE_BEST_SELLERS_LIST = BASE_BOOKS + "lists/"
@@ -157,6 +160,51 @@ class GetResults:
 
         return result
 
+    @staticmethod
+    def archive_metadata(key, date):
+        """"Get all article metadata from one month"""
+        api_key = {"api-key": key}
+
+        url = BASE_ARCHIVE_METADATA + date + ".json"
+
+        res = requests.get(url, params=api_key)
+        res.raise_for_status()
+        result = res.json()
+
+        return result
+
+    @staticmethod
+    def article_search(key, options, results):
+        """Get articles from search"""
+        start = datetime.datetime.now()
+
+        params = options
+        params["api-key"] = key
+
+        rate_limit = options.get("rate_limit", True)
+
+        url = BASE_ARTICLE_SEARCH
+
+        result = []
+        for i in range(math.ceil(results/10)):
+            params["page"] = str(i)
+
+            res = requests.get(url, params=params)
+            result += res.json().get("response").get("docs")
+
+            if res.json().get("response").get("hits") <= i*10:
+                break
+
+            if (i + 1) % 10 == 0 and rate_limit:
+                now = datetime.datetime.now()
+                time_spend = now - start
+                time_sleep = math.ceil(60 - time_spend.total_seconds)
+                time.sleep(time_sleep)
+                start = datetime.datetime.now()
+
+
+        return result
+
 
 class NYTAPI:
     """This class interacts with the Python code, it primarily blocks wrong user input"""
@@ -281,7 +329,7 @@ class NYTAPI:
         """Load the metadata from an article"""
         return GetResults.article_metadata(self.key, url)
 
-    def tags(self, query, filter_option=None, filter_options=None, max_results=None):
+    def tag_query(self, query, filter_option=None, filter_options=None, max_results=None):
         """Load TimesTags"""
         _filter_options = ""
         if filter_options is not None:
@@ -295,3 +343,54 @@ class NYTAPI:
             _filter_options = filter_option
 
         return GetResults.tags(self.key, query, _filter_options, max_results)
+
+    def archive_metadata(self, date):
+        """Load all the metadate from one month"""
+        if not isinstance(date, datetime.datetime):
+            raise Exception("Date has to be datetime")
+
+        _date = date.strftime("%Y/%-m")
+
+        return GetResults.archive_metadata(self.key, _date)
+
+    def article_search(self, query=None, dates=None, options=None, results=None):
+        """Load articles from search"""
+        begin_date = dates.get("begin")
+        end_date = dates.get("end")
+
+        _begin_date = None
+        _end_date = None
+
+        if results is None:
+            results = 10
+
+        if results > 100:
+            raise Warning(
+                "Asking for a lot of results, because of rate limits it can take a while."
+            )
+
+        if results > 1010:
+            results = 1010
+            raise Warning(
+                "Asking for more results then the API can provide, loading maximum results."
+            )
+
+        if begin_date is not None:
+            if not isinstance(begin_date, datetime.datetime):
+                raise Exception("Begin date has to be datetime")
+
+            _begin_date = begin_date.strftime("%Y%m%d")
+
+        if end_date is not None:
+            if not isinstance(end_date, datetime.datetime):
+                raise Exception("End date has to be datetime")
+
+            _end_date = _end_date.strftime("%Y%m%d")
+
+        if query is not None:
+            options["q"] = query
+
+        options["begin_date"] = _begin_date
+        options["end_date"] = _end_date
+
+        return GetResults.article_search(self.key, options, results)
