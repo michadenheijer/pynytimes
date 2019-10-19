@@ -4,4 +4,4 @@ from pynytimes import nytAPI
 
 
 nyt = nytAPI("DgKALEQLVaCWyoZlfiJNAPPrsmY3MHaA")
-print(nyt.best_sellers_list(date=datetime.datetime(2019, 10, 20)))
+print(nyt.movie_reviews(max_results=80))
