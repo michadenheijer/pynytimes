@@ -1,4 +1,7 @@
-import pynytimes
+import datetime
 
-nyt = pynytimes.API("DgKALEQLVaCWyoZlfiJNAPPrsmY3MHaA")
-print(nyt.most_shared(days=30))
+from pynytimes import nytAPI
+
+
+nyt = nytAPI("DgKALEQLVaCWyoZlfiJNAPPrsmY3MHaA")
+print(nyt.best_sellers_list(date=datetime.datetime(2019, 10, 20)))
