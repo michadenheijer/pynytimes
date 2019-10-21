@@ -7,6 +7,6 @@ python:
   - "3.8"
   - "pypy3"
 install:
-  - python setup.py install
+  - pip install .
 script:
-  - python tests/tests.py
+  - python tests.py
