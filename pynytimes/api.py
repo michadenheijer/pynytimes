@@ -18,14 +18,14 @@ BASE_BEST_SELLERS_LISTS = BASE_BOOKS + "lists/names.json"
 BASE_BEST_SELLERS_LIST = BASE_BOOKS + "lists/"
 
 
-def load_data(key, url, options=None, location=None):
+def load_data(session, key, url, options=None, location=None):
     """This function loads the data for the wrapper for most API use cases"""
     params = {"api-key": key}
 
     if options is not None:
         params.update(options)
 
-    res = requests.get(url, params=params)
+    res = session.get(url, params=params, timeout=(4, 10))
     res.raise_for_status()
 
     if location is None:
@@ -41,28 +41,28 @@ def load_data(key, url, options=None, location=None):
 class GetResults:
     """In this class the data gets fetched from the New York Times Servers"""
     @staticmethod
-    def top_stories(key, section):
+    def top_stories(session, key, section):
         """Get the Top Stories"""
         url = BASE_TOP_STORIES + section + ".json"
-        return load_data(key, url)
+        return load_data(session, key, url)
 
     @staticmethod
-    def most_viewed(key, days):
+    def most_viewed(session, key, days):
         """Get the most viewed articles"""
         url = BASE_MOST_POPULAR + "viewed/" + str(days) + ".json"
-        return load_data(key, url)
+        return load_data(session, key, url)
 
     @staticmethod
-    def most_shared(key, days, method):
+    def most_shared(session, key, days, method):
         """Get the most shared articles"""
         if method is None:
             url = BASE_MOST_POPULAR + "shared/" + str(days) + ".json"
         else:
             url = BASE_MOST_POPULAR + "shared/" + str(days) + "/" + method + ".json"
-        return load_data(key, url)
+        return load_data(session, key, url)
 
     @staticmethod
-    def book_reviews(key, author, isbn, title):
+    def book_reviews(session, key, author, isbn, title):
         """Get book reviews"""
         options = {}
         if author is not None:
@@ -75,23 +75,23 @@ class GetResults:
             options["title"] = title
 
         url = BASE_BOOK_REVIEWS
-        return load_data(key, url, options=options)
+        return load_data(session, key, url, options=options)
 
     @staticmethod
-    def best_sellers_lists(key):
+    def best_sellers_lists(session, key):
         """Get the best sellers lists"""
         url = BASE_BEST_SELLERS_LISTS
-        return load_data(key, url)
+        return load_data(session, key, url)
 
     @staticmethod
-    def best_sellers_list(key, date, name):
+    def best_sellers_list(session, key, date, name):
         """Get a best sellers list"""
         url = BASE_BEST_SELLERS_LIST + date + "/" + name + ".json"
         location = ["results", "books"]
-        return load_data(key, url, location=location)
+        return load_data(session, key, url, location=location)
 
     @staticmethod
-    def movie_reviews(key, keyword, options, max_results):
+    def movie_reviews(session, key, keyword, options, max_results):
         """Get movie reviews"""
         params = {"api-key": key}
 
@@ -111,7 +111,7 @@ class GetResults:
         for i in range(math.ceil(max_results/20)):
             offset = i*20
             params["offset"] = str(offset)
-            res = requests.get(url, params=params)
+            res = session.get(url, params=params)
             res.raise_for_status()
             res_parsed = res.json()
             results += res_parsed.get("results")
@@ -122,15 +122,15 @@ class GetResults:
         return results
 
     @staticmethod
-    def article_metadata(key, url):
+    def article_metadata(session, key, url):
         """Get the article metadata"""
         options = {"url": url}
         url = BASE_META_DATA
 
-        return load_data(key, url, options=options)
+        return load_data(session, key, url, options=options)
 
     @staticmethod
-    def tags(key, query, filter_options, max_results):
+    def tags(session, key, query, filter_options, max_results):
         """Get TimesTags"""
         options = {
             "query": query,
@@ -142,17 +142,17 @@ class GetResults:
 
         url = BASE_TAGS
 
-        return load_data(key, url, options=options, location=[])[1]
+        return load_data(session, key, url, options=options, location=[])[1]
 
     @staticmethod
-    def archive_metadata(key, date):
+    def archive_metadata(session, key, date):
         """"Get all article metadata from one month"""
         url = BASE_ARCHIVE_METADATA + date + ".json"
         location = ["response", "docs"]
-        return load_data(key, url, location=location)
+        return load_data(session, key, url, location=location)
 
     @staticmethod
-    def article_search(key, options, results):
+    def article_search(session, key, options, results):
         """Get articles from search"""
         start = datetime.datetime.now()
 
@@ -167,7 +167,7 @@ class GetResults:
         for i in range(math.ceil(results/10)):
             params["page"] = str(i)
 
-            res = requests.get(url, params=params)
+            res = session.get(url, params=params)
             result += res.json().get("response").get("docs")
 
             if res.json().get("response").get("meta").get("hits") <= i*10:
@@ -188,6 +188,10 @@ class NYTAPI:
     """This class interacts with the Python code, it primarily blocks wrong user input"""
     def __init__(self, key=None):
         self.key = key
+        self.session = requests.Session()
+
+        self.session.headers.update({"User-Agent": "pynytimes/0.1-alpha"})
+
         if self.key is None:
             raise Exception("No API key")
 
@@ -196,7 +200,7 @@ class NYTAPI:
         if section is None:
             section = "home"
 
-        return GetResults.top_stories(self.key, section)
+        return GetResults.top_stories(self.session, self.key, section)
 
     def most_viewed(self, days=None):
         """Load most viewed articles"""
@@ -207,11 +211,11 @@ class NYTAPI:
         if days not in days_options:
             raise Exception("You can only select 1, 7 or 30 days")
 
-        return GetResults.most_viewed(self.key, days)
+        return GetResults.most_viewed(self.session, self.key, days)
 
     def most_shared(self, days=None, method=None):
         """Load most shared articles"""
-        method_options = ["email", "facebook", "twitter"]
+        method_options = [None, "email", "facebook", "twitter"]
         days_options = [1, 7, 30]
 
         if days is None:
@@ -223,7 +227,7 @@ class NYTAPI:
         if days not in days_options:
             raise Exception("You can only select 1, 7 or 30 days")
 
-        return GetResults.most_shared(self.key, days, method)
+        return GetResults.most_shared(self.session, self.key, days, method)
 
     def book_reviews(self, author=None, isbn=None, title=None):
         """Load book reviews"""
@@ -233,11 +237,11 @@ class NYTAPI:
         if int(isbn is not None) + int(title is not None) + int(author is not None) != 1:
             raise Exception("You can only define one of the following: ISBN, author or title.")
 
-        return GetResults.book_reviews(self.key, author, isbn, title)
+        return GetResults.book_reviews(self.session, self.key, author, isbn, title)
 
     def best_sellers_lists(self):
         """Load all the best seller lists"""
-        return GetResults.best_sellers_lists(self.key)
+        return GetResults.best_sellers_lists(self.session, self.key)
 
     def best_sellers_list(self, date=None, name=None):
         """Load a best seller list"""
@@ -253,13 +257,21 @@ class NYTAPI:
         if name is None:
             name = "combined-print-and-e-book-fiction"
 
-        return GetResults.best_sellers_list(self.key, _date, name)
+        return GetResults.best_sellers_list(self.session, self.key, _date, name)
 
-    def movie_reviews(
-            self,
-            keyword=None,
-            options=None):
+    def movie_reviews(self, keyword=None, options=None, dates=None):
         """Load movie reviews"""
+        if options is None: 
+            options = {}
+        
+        if dates is None:
+            dates = {}
+
+        options["opening_date_start"] = dates.get("opening_date_start")
+        options["opening_date_end"] = dates.get("opening_date_end")
+        options["publication_date_start"] = dates.get("publication_date_start")
+        options["publication_date_end"] = dates.get("publication_date_end")
+
         if options.get("order") not in [None, "by-opening-date", "by-publication-date", "by-title"]:
             raise Exception("Order is not a valid option")
 
@@ -287,7 +299,7 @@ class NYTAPI:
         if options.get("publication_date_end") is not None:
             _publication_dates += options.get("opening_date_end").strftime("%Y-%m-%d")
 
-        if options.get("critics") is True:
+        if options.get("critics_pick") is True:
             _critics_pick = "Y"
 
         settings = {
@@ -298,14 +310,15 @@ class NYTAPI:
             "publication": _publication_dates
         }
 
-        return GetResults.movie_reviews(self.key,
+        return GetResults.movie_reviews(self.session,
+                                        self.key,
                                         keyword,
                                         settings,
                                         options.get("max_results", 20))
 
     def article_metadata(self, url):
         """Load the metadata from an article"""
-        return GetResults.article_metadata(self.key, url)
+        return GetResults.article_metadata(self.session, self.key, url)
 
     def tag_query(self, query, filter_option=None, filter_options=None, max_results=None):
         """Load TimesTags"""
@@ -320,16 +333,16 @@ class NYTAPI:
         elif filter_option is not None:
             _filter_options = filter_option
 
-        return GetResults.tags(self.key, query, _filter_options, max_results)
+        return GetResults.tags(self.session, self.key, query, _filter_options, max_results)
 
     def archive_metadata(self, date):
-        """Load all the metadate from one month"""
+        """Load all the metadata from one month"""
         if not isinstance(date, datetime.datetime):
             raise Exception("Date has to be datetime")
 
         _date = date.strftime("%Y/%-m")
 
-        return GetResults.archive_metadata(self.key, _date)
+        return GetResults.archive_metadata(self.session, self.key, _date)
 
     def article_search(self, query=None, dates=None, options=None, results=None):
         """Load articles from search"""
@@ -374,4 +387,4 @@ class NYTAPI:
         options["begin_date"] = _begin_date
         options["end_date"] = _end_date
 
-        return GetResults.article_search(self.key, options, results)
+        return GetResults.article_search(self.session, self.key, options, results)
