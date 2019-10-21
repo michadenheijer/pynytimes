@@ -18,82 +18,77 @@ BASE_BEST_SELLERS_LISTS = BASE_BOOKS + "lists/names.json"
 BASE_BEST_SELLERS_LIST = BASE_BOOKS + "lists/"
 
 
+def load_data(key, url, options=None, location=None):
+    """This function loads the data for the wrapper for most API use cases"""
+    params = {"api-key": key}
 
+    if options is not None:
+        params.update(options)
+
+    res = requests.get(url, params=params)
+    res.raise_for_status()
+
+    if location is None:
+        results = res.json().get("results")
+
+    else:
+        results = res.json()
+        for loc in location:
+            results = results.get(loc)
+
+    return results
 
 class GetResults:
     """In this class the data gets fetched from the New York Times Servers"""
     @staticmethod
     def top_stories(key, section):
         """Get the Top Stories"""
-        api_key = {"api-key": key}
         url = BASE_TOP_STORIES + section + ".json"
-        res = requests.get(url, params=api_key)
-        res.raise_for_status()
-        results = res.json().get("results")
-        return results
+        return load_data(key, url)
 
     @staticmethod
     def most_viewed(key, days):
         """Get the most viewed articles"""
-        api_key = {"api-key": key}
         url = BASE_MOST_POPULAR + "viewed/" + str(days) + ".json"
-        res = requests.get(url, params=api_key)
-        res.raise_for_status()
-        results = res.json().get("results")
-        return results
+        return load_data(key, url)
 
     @staticmethod
     def most_shared(key, days, method):
         """Get the most shared articles"""
-        api_key = {"api-key": key}
         if method is None:
             url = BASE_MOST_POPULAR + "shared/" + str(days) + ".json"
         else:
             url = BASE_MOST_POPULAR + "shared/" + str(days) + "/" + method + ".json"
-        res = requests.get(url, params=api_key)
-        res.raise_for_status()
-        results = res.json().get("results")
-        return results
+        return load_data(key, url)
 
     @staticmethod
     def book_reviews(key, author, isbn, title):
         """Get book reviews"""
-        params = {
-            "api-key": key
-        }
+        options = {}
         if author is not None:
-            params["author"] = author
+            options["author"] = author
 
         elif isbn is not None:
-            params["isbn"] = str(isbn)
+            options["isbn"] = str(isbn)
 
         elif title is not None:
-            params["title"] = title
+            options["title"] = title
 
         url = BASE_BOOK_REVIEWS
-        res = requests.get(url, params=params)
-        results = res.json().get("results")
-        return results
+        return load_data(key, url, options=options)
 
     @staticmethod
     def best_sellers_lists(key):
         """Get the best sellers lists"""
-        api_key = {"api-key": key}
         url = BASE_BEST_SELLERS_LISTS
-        res = requests.get(url, params=api_key)
-        res.raise_for_status()
-        results = res.json().get("results")
-        return results
+        return load_data(key, url)
 
     @staticmethod
     def best_sellers_list(key, date, name):
         """Get a best sellers list"""
-        api_key = {"api-key": key}
         url = BASE_BEST_SELLERS_LIST + date + "/" + name + ".json"
-        res = requests.get(url, params=api_key)
-        res.raise_for_status()
-        results = res.json().get("results").get("books")
-        return results
+        location = ["results", "books"]
+        return load_data(key, url, location=location)
 
     @staticmethod
     def movie_reviews(key, keyword, options, max_results):
@@ -129,49 +124,32 @@ class GetResults:
     @staticmethod
     def article_metadata(key, url):
         """Get the article metadata"""
-        params = {
-            "api-key": key,
-            "url": url
-        }
+        options = {"url": url}
         url = BASE_META_DATA
 
-        res = requests.get(url, params=params)
-        res.raise_for_status()
-        result = res.json().get("results")
-
-        return result
+        return load_data(key, url, options=options)
 
     @staticmethod
     def tags(key, query, filter_options, max_results):
         """Get TimesTags"""
-        params = {
-            "api-key": key,
+        options = {
             "query": query,
             "filter": filter_options
         }
+
         if max_results is not None:
-            params["max"] = str(max_results)
+            options["max"] = str(max_results)
 
         url = BASE_TAGS
 
-        res = requests.get(url, params=params)
-        res.raise_for_status()
-        result = res.json()
-
-        return result
+        return load_data(key, url, options=options, location=[])[1]
 
     @staticmethod
     def archive_metadata(key, date):
         """"Get all article metadata from one month"""
-        api_key = {"api-key": key}
-
         url = BASE_ARCHIVE_METADATA + date + ".json"
-
-        res = requests.get(url, params=api_key)
-        res.raise_for_status()
-        result = res.json()
-
-        return result
+        location = ["response", "docs"]
+        return load_data(key, url, location=location)
 
     @staticmethod
     def article_search(key, options, results):
@@ -192,7 +170,7 @@ class GetResults:
             res = requests.get(url, params=params)
             result += res.json().get("response").get("docs")
 
-            if res.json().get("response").get("hits") <= i*10:
+            if res.json().get("response").get("meta").get("hits") <= i*10:
                 break
 
             if (i + 1) % 10 == 0 and rate_limit:
@@ -355,8 +333,11 @@ class NYTAPI:
 
     def article_search(self, query=None, dates=None, options=None, results=None):
         """Load articles from search"""
-        begin_date = dates.get("begin")
-        end_date = dates.get("end")
+        if options is None:
+            options = {}
+
+        begin_date = dates.get("begin") if dates is not None else None
+        end_date = dates.get("end") if dates is not None else None
 
         _begin_date = None
         _end_date = None
@@ -369,8 +350,8 @@ class NYTAPI:
                 "Asking for a lot of results, because of rate limits it can take a while."
             )
 
-        if results > 1010:
-            results = 1010
+        if results > 2010:
+            results = 2010
             raise Warning(
                 "Asking for more results then the API can provide, loading maximum results."
             )
