@@ -1,6 +1,6 @@
 # pynytimes
 
-[![Powered by the New York Times](.github/poweredby_nytimes.png)](https://developer.nytimes.com/) [![Build Status](https://travis-ci.com/michadenheijer/pynytimes.svg?token=8nhCHVYqgufX65p8PRDx&branch=master)](https://travis-ci.com/michadenheijer/pynytimes)
+[<img src=".github/poweredby_nytimes.png" height="20px">](https://developer.nytimes.com/) [![Build Status](https://travis-ci.com/michadenheijer/pynytimes.svg?token=8nhCHVYqgufX65p8PRDx&branch=master)](https://travis-ci.com/michadenheijer/pynytimes) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 Use all (actually most) New York Times APIs, get all the data you need from the New York Times!
 
@@ -198,3 +198,5 @@ data = nyt.archive_metadata(
 ## License
 
 [MIT](LICENSE)
+
+This project is not made by anyone from the New York Times, nor is it affiliated with the New York Times.
