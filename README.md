@@ -1,6 +1,7 @@
 # pynytimes
 
-[![Powered by the New York Times](.github/poweredby_nytimes.png)](https://developer.nytimes.com/)[![Build Status](https://travis-ci.com/michadenheijer/pynytimes.svg?token=8nhCHVYqgufX65p8PRDx&branch=master)](https://travis-ci.com/michadenheijer/pynytimes)
+[![Powered by the New York Times](.github/poweredby_nytimes.png)](https://developer.nytimes.com/) [![Build Status](https://travis-ci.com/michadenheijer/pynytimes.svg?token=8nhCHVYqgufX65p8PRDx&branch=master)](https://travis-ci.com/michadenheijer/pynytimes)
+
 Use all (actually most) New York Times APIs, get all the data you need from the New York Times!
 
 ## Usage
@@ -91,8 +92,8 @@ articles = nyt.article_search(
     query = "Obama",
     results = 30,
     dates = {
-        "begin_date": datetime.datetime(2019, 01, 31)
-        "end_date": datetime.datetime(2019, 02, 28)
+        "begin_date": datetime.datetime(2019, 1, 31)
+        "end_date": datetime.datetime(2019, 2, 28)
     }
     options = {
     }
@@ -190,7 +191,7 @@ If you want to load all the metadata from a specific month, then this API makes 
 import datetime
 
 data = nyt.archive_metadata(
-    date = datetime.datetime(2019, 01, 01)
+    date = datetime.datetime(2019, 1, 1)
 )
 ```
 
