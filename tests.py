@@ -2,10 +2,12 @@ from pynytimes import NYTAPI
 
 import datetime
 import time
+import os
 
 begin = datetime.datetime.now()
 
-nyt = NYTAPI("DgKALEQLVaCWyoZlfiJNAPPrsmY3MHaA")
+API_KEY = os.environ["NewYorkTimesAPIKey"]
+nyt = NYTAPI(API_KEY)
 
 nyt.top_stories(section="science")
 nyt.most_viewed(days=30)

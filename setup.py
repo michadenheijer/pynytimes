@@ -11,7 +11,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     author="Micha den Heijer",
     author_email="micha@michadenheijer.com",
-    python_requires="~=3.4",
+    python_requires="~=3.5",
     packages=setuptools.find_packages(),
     license="MIT",
     install_requires = [
