@@ -2,7 +2,9 @@
 
 [<img src=".github/poweredby_nytimes.png" height="20px">](https://developer.nytimes.com/) [![Build Status](https://travis-ci.com/michadenheijer/pynytimes.svg?token=8nhCHVYqgufX65p8PRDx&branch=master)](https://travis-ci.com/michadenheijer/pynytimes) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Use all (actually most) New York Times APIs, get all the data you need from the New York Times!
+Use all (actually most) New York Times APIs, get all the data you need from the Times!
+
+This project is not made by anyone from the New York Times, nor is it affiliated with the New York Times.
 
 ## Usage
 
@@ -12,7 +14,7 @@ You can easily import this library using:
 from pynytimes import NYTAPI
 ```
 
-Then you can simply add your API key:
+Then you can simply add your API key (get your API key from [The New York Times Dev Portal](https://developer.nytimes.com/)):
 
 ```python
 nyt = NYTAPI("Your API key")
@@ -198,5 +200,3 @@ data = nyt.archive_metadata(
 ## License
 
 [MIT](LICENSE)
-
-This project is not made by anyone from the New York Times, nor is it affiliated with the New York Times.
