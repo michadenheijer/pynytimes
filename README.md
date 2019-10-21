@@ -1,6 +1,6 @@
 # pynytimes
 
-![Powered by the New York Times](.github/poweredby_nytimes.png)
+[![Powered by the New York Times](.github/poweredby_nytimes.png)](https://developer.nytimes.com/)[![Build Status](https://travis-ci.com/michadenheijer/pynytimes.svg?token=8nhCHVYqgufX65p8PRDx&branch=master)](https://travis-ci.com/michadenheijer/pynytimes)
 Use all (actually most) New York Times APIs, get all the data you need from the New York Times!
 
 ## Usage

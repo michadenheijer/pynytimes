@@ -13,5 +13,8 @@ setuptools.setup(
     author_email="micha@michadenheijer.com",
     python_requires="~=3.4",
     packages=setuptools.find_packages(),
-    license="MIT"
+    license="MIT",
+    install_requires = [
+        "requests==2.22.0"
+    ]
 )
