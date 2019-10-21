@@ -12,7 +12,7 @@ setuptools.setup(
     author="Micha den Heijer",
     author_email="micha@michadenheijer.com",
     python_requires="~=3.4",
-    packages=setuptools.find_packages(exclude("tests",)),
+    packages=setuptools.find_packages(setuptools.exclude("tests",)),
     license="MIT",
     install_requires = [
         "requests==2.22.0"
