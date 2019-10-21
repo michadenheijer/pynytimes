@@ -19,7 +19,7 @@ nyt.book_reviews(
 nyt.best_sellers_lists()
 nyt.best_sellers_list(
     date = datetime.datetime(2019, 1, 1),
-    name = "mass-market-paperback"
+    name = "hardcover-fiction"
 )
 nyt.movie_reviews(
     keyword = "FBI",
