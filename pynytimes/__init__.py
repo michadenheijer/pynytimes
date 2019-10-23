@@ -2,3 +2,4 @@
 from .api import NYTAPI
 
 __all__ = ["NYTAPI"]
+__version__ = "0.2"

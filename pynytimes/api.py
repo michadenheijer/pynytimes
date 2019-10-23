@@ -190,7 +190,7 @@ class NYTAPI:
         self.key = key
         self.session = requests.Session()
 
-        self.session.headers.update({"User-Agent": "pynytimes/0.1-alpha"})
+        self.session.headers.update({"User-Agent": "pynytimes/0.2"})
 
         if self.key is None:
             raise Exception("No API key")
@@ -261,9 +261,9 @@ class NYTAPI:
 
     def movie_reviews(self, keyword=None, options=None, dates=None):
         """Load movie reviews"""
-        if options is None: 
+        if options is None:
             options = {}
-        
+
         if dates is None:
             dates = {}
 
@@ -349,8 +349,26 @@ class NYTAPI:
         if options is None:
             options = {}
 
-        begin_date = dates.get("begin") if dates is not None else None
-        end_date = dates.get("end") if dates is not None else None
+        if dates is None:
+            dates = {}
+
+        begin_date = dates.get("begin")
+        end_date = dates.get("end")
+
+        sources = options.get("source")
+        
+        if sources is not None:
+            _sources = "source:("
+
+            for i, source in enumerate(sources):
+                _sources += "\""
+                _sources += source
+                _sources += "\""
+
+                if i < len(sources) - 1:
+                    _sources += " "
+
+            _sources += ")"
 
         _begin_date = None
         _end_date = None

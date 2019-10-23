@@ -1,10 +1,28 @@
 # pynytimes
 
-[<img src=".github/poweredby_nytimes.png" height="20px">](https://developer.nytimes.com/) [![Build Status](https://travis-ci.com/michadenheijer/pynytimes.svg?token=8nhCHVYqgufX65p8PRDx&branch=master)](https://travis-ci.com/michadenheijer/pynytimes) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[<img src="https://raw.githubusercontent.com/michadenheijer/pynytimes/master/.github/poweredby_nytimes.png" height="20px">](https://developer.nytimes.com/) [![Build Status](https://travis-ci.com/michadenheijer/pynytimes.svg?token=8nhCHVYqgufX65p8PRDx&branch=master)](https://travis-ci.com/michadenheijer/pynytimes) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 Use all (actually most) New York Times APIs, get all the data you need from the Times!
 
 This project is not made by anyone from the New York Times, nor is it affiliated with the New York Times.
+
+## Installation
+
+There are multiple options to install pynytimes, but the easiest is by just installing it using pip (or pip3).
+
+```bash
+pip install pynytimes
+```
+
+### Advanced (not better, just different)
+
+You can also install pynytimes manually from GitHub itself. This can be done by cloning this repository first, and then installing it using Python.
+
+```bash
+git clone https://github.com/michadenheijer/pynytimes.git
+cd pynytimes
+python setup.py install
+```
 
 ## Usage
 
@@ -85,7 +103,7 @@ most_shared = nyt.most_shared(
 
 ### Article search (beta)
 
-You can also search all New York Times articles. (Not all functions are implemented)
+You can also search all New York Times articles. You can also define which sources you want to include. (Not all functions are implemented)
 
 ```python
 import datetime
@@ -98,6 +116,12 @@ articles = nyt.article_search(
         "end_date": datetime.datetime(2019, 2, 28)
     }
     options = {
+        sources = [
+            "New York Times",
+            "AP",
+            "Reuters",
+            "International Herald Tribune"
+        ]
     }
 )
 ```
