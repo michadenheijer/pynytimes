@@ -94,10 +94,10 @@ most_shared = nyt.most_shared(
     method = "facebook"    
 )
 
-# Get most shared articles to Twitter of the last 30 days
+# Get most shared articles to Facebook of the last 30 days
 most_shared = nyt.most_shared(
     days = 30,
-    method = "twitter"
+    method = "facebook"
 )
 ```
 
