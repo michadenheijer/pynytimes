@@ -57,6 +57,8 @@ class GetResults:
         """Get the most shared articles"""
         if method is None:
             url = BASE_MOST_POPULAR + "shared/" + str(days) + ".json"
+        elif method == "email":
+            url = BASE_MOST_POPULAR + "emailed/" + str(days) + ".json"
         else:
             url = BASE_MOST_POPULAR + "shared/" + str(days) + "/" + method + ".json"
         return load_data(session, key, url)
@@ -215,7 +217,7 @@ class NYTAPI:
 
     def most_shared(self, days=None, method=None):
         """Load most shared articles"""
-        method_options = [None, "email", "facebook", "twitter"]
+        method_options = [None, "email", "facebook"]
         days_options = [1, 7, 30]
 
         if days is None:
