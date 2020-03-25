@@ -179,7 +179,7 @@ class GetResults:
             if (i + 1) % 10 == 0 and rate_limit:
                 now = datetime.datetime.now()
                 time_spend = now - start
-                time_sleep = math.ceil(60 - time_spend.total_seconds)
+                time_sleep = math.ceil(60 - time_spend.total_seconds())
                 time.sleep(time_sleep)
                 start = datetime.datetime.now()
 
