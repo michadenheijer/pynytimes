@@ -358,7 +358,7 @@ class NYTAPI:
         end_date = dates.get("end")
 
         sources = options.get("source")
-        
+
         if sources is not None:
             _sources = "source:("
 
@@ -399,7 +399,7 @@ class NYTAPI:
             if not isinstance(end_date, datetime.datetime):
                 raise Exception("End date has to be datetime")
 
-            _end_date = _end_date.strftime("%Y%m%d")
+            _end_date = end_date.strftime("%Y%m%d")
 
         if query is not None:
             options["q"] = query
