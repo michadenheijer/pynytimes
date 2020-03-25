@@ -112,8 +112,8 @@ articles = nyt.article_search(
     query = "Obama",
     results = 30,
     dates = {
-        "begin_date": datetime.datetime(2019, 1, 31)
-        "end_date": datetime.datetime(2019, 2, 28)
+        "begin": datetime.datetime(2019, 1, 31),
+        "end": datetime.datetime(2019, 2, 28)
     }
     options = {
         sources = [
