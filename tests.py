@@ -52,8 +52,8 @@ nyt.article_search(
     query = "Trump",
     results = 20,
     dates = {
-        "begin_date": datetime.datetime(2019, 1, 1),
-        "end_date": datetime.datetime(2019, 2, 1)
+        "begin": datetime.datetime(2019, 1, 1),
+        "end": datetime.datetime(2019, 2, 1)
     },
     options = {
         "sort": "oldest"
