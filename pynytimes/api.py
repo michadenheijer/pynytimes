@@ -2,6 +2,7 @@
 import datetime
 import math
 import time
+import warnings
 
 import requests
 
@@ -178,7 +179,7 @@ class GetResults:
             if (i + 1) % 10 == 0 and rate_limit:
                 now = datetime.datetime.now()
                 time_spend = now - start
-                time_sleep = math.ceil(60 - time_spend.total_seconds)
+                time_sleep = math.ceil(60 - time_spend.total_seconds())
                 time.sleep(time_sleep)
                 start = datetime.datetime.now()
 
@@ -358,7 +359,7 @@ class NYTAPI:
         end_date = dates.get("end")
 
         sources = options.get("source")
-        
+
         if sources is not None:
             _sources = "source:("
 
@@ -379,13 +380,13 @@ class NYTAPI:
             results = 10
 
         if results > 100:
-            raise Warning(
+            warnings.warn(
                 "Asking for a lot of results, because of rate limits it can take a while."
             )
 
         if results > 2010:
             results = 2010
-            raise Warning(
+            warnings.warn(
                 "Asking for more results then the API can provide, loading maximum results."
             )
 
@@ -399,7 +400,7 @@ class NYTAPI:
             if not isinstance(end_date, datetime.datetime):
                 raise Exception("End date has to be datetime")
 
-            _end_date = _end_date.strftime("%Y%m%d")
+            _end_date = end_date.strftime("%Y%m%d")
 
         if query is not None:
             options["q"] = query
