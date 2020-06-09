@@ -195,7 +195,7 @@ class NYTAPI:
 
         self.session.mount("https://", HTTPAdapter(max_retries = retry_strategy))
 
-        self.session.headers.update({"User-Agent": "pynytimes/0.2"})
+        self.session.headers.update({"User-Agent": "pynytimes/0.3"})
 
         if self.key is None:
             raise Exception("No API key")
