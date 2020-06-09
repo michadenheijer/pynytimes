@@ -6,6 +6,9 @@ import warnings
 
 import requests
 
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
+
 BASE_TOP_STORIES = "https://api.nytimes.com/svc/topstories/v2/"
 BASE_MOST_POPULAR = "https://api.nytimes.com/svc/mostpopular/v2/"
 BASE_BOOKS = "https://api.nytimes.com/svc/books/v3/"
@@ -114,7 +117,7 @@ class GetResults:
         for i in range(math.ceil(max_results/20)):
             offset = i*20
             params["offset"] = str(offset)
-            res = session.get(url, params=params)
+            res = session.get(url, params=params, timeout=(4, 10))
             res.raise_for_status()
             res_parsed = res.json()
             results += res_parsed.get("results")
@@ -157,12 +160,8 @@ class GetResults:
     @staticmethod
     def article_search(session, key, options, results):
         """Get articles from search"""
-        start = datetime.datetime.now()
-
         params = options
         params["api-key"] = key
-
-        rate_limit = options.get("rate_limit", True)
 
         url = BASE_ARTICLE_SEARCH
 
@@ -171,17 +170,12 @@ class GetResults:
             params["page"] = str(i)
 
             res = session.get(url, params=params)
+            res.raise_for_status()
+
             result += res.json().get("response").get("docs")
 
             if res.json().get("response").get("meta").get("hits") <= i*10:
                 break
-
-            if (i + 1) % 10 == 0 and rate_limit:
-                now = datetime.datetime.now()
-                time_spend = now - start
-                time_sleep = math.ceil(60 - time_spend.total_seconds())
-                time.sleep(time_sleep)
-                start = datetime.datetime.now()
 
 
         return result
@@ -192,6 +186,14 @@ class NYTAPI:
     def __init__(self, key=None):
         self.key = key
         self.session = requests.Session()
+
+        retry_strategy = Retry(
+            total = 10,
+            backoff_factor = 1,
+            status_forcelist = [429, 500, 502, 503, 504]
+        )
+
+        self.session.mount("https://", HTTPAdapter(max_retries = retry_strategy))
 
         self.session.headers.update({"User-Agent": "pynytimes/0.2"})
 
@@ -379,12 +381,12 @@ class NYTAPI:
         if results is None:
             results = 10
 
-        if results > 100:
+        if results >= 100:
             warnings.warn(
                 "Asking for a lot of results, because of rate limits it can take a while."
             )
 
-        if results > 2010:
+        if results >= 2010:
             results = 2010
             warnings.warn(
                 "Asking for more results then the API can provide, loading maximum results."
