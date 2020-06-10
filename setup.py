@@ -1,6 +1,6 @@
 import setuptools
 
-from pynytimes import __version__
+from pynytimes.__version__ import __version__
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
