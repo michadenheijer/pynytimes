@@ -77,7 +77,7 @@ most_viewed = nyt.most_viewed(days = 30)
 
 ### Most shared articles
 
-Not only can you request the most viewed articles from the New York Times API, you can also request the most shared articles. You can even request the articles that are most shared by email, Facebook and Twitter. You can get the most shared articles per day, week or month.
+Not only can you request the most viewed articles from the New York Times API, you can also request the most shared articles. You can even request the articles that are most shared by email and Facebook. You can get the most shared articles per day, week or month.
 
 ```python
 most_shared = nyt.most_shared()
