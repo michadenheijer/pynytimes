@@ -1,10 +1,8 @@
 # pynytimes
 
-[<img src="https://raw.githubusercontent.com/michadenheijer/pynytimes/master/.github/poweredby_nytimes.png" height="20px">](https://developer.nytimes.com/) [![Build Status](https://travis-ci.com/michadenheijer/pynytimes.svg?token=8nhCHVYqgufX65p8PRDx&branch=master)](https://travis-ci.com/michadenheijer/pynytimes) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[<img src="https://raw.githubusercontent.com/michadenheijer/pynytimes/master/.github/poweredby_nytimes.png" height="20px">](https://developer.nytimes.com/) [![Build Status](https://travis-ci.com/michadenheijer/pynytimes.svg?token=8nhCHVYqgufX65p8PRDx&branch=master)](https://travis-ci.com/michadenheijer/pynytimes) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) ![PyPI](https://img.shields.io/pypi/v/pynytimes)
 
 Use all (actually most) New York Times APIs, get all the data you need from the Times!
-
-This project is not made by anyone from the New York Times, nor is it affiliated with the New York Times.
 
 ## Installation
 
@@ -77,7 +75,7 @@ most_viewed = nyt.most_viewed(days = 30)
 
 ### Most shared articles
 
-Not only can you request the most viewed articles from the New York Times API, you can also request the most shared articles. You can even request the articles that are most shared by email, Facebook and Twitter. You can get the most shared articles per day, week or month.
+Not only can you request the most viewed articles from the New York Times API, you can also request the most shared articles. You can even request the articles that are most shared by email and Facebook. You can get the most shared articles per day, week or month.
 
 ```python
 most_shared = nyt.most_shared()
@@ -224,3 +222,5 @@ data = nyt.archive_metadata(
 ## License
 
 [MIT](LICENSE)
+
+**Disclaimer**: *This project is not made by anyone from the New York Times, nor is it affiliated with The New York Times Company.*

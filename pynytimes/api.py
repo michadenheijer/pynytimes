@@ -5,9 +5,10 @@ import time
 import warnings
 
 import requests
-
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
+
+from . import __version__
 
 BASE_TOP_STORIES = "https://api.nytimes.com/svc/topstories/v2/"
 BASE_MOST_POPULAR = "https://api.nytimes.com/svc/mostpopular/v2/"
@@ -195,7 +196,7 @@ class NYTAPI:
 
         self.session.mount("https://", HTTPAdapter(max_retries = retry_strategy))
 
-        self.session.headers.update({"User-Agent": "pynytimes/0.3"})
+        self.session.headers.update({"User-Agent": "pynytimes/" + __version__})
 
         if self.key is None:
             raise Exception("No API key")
