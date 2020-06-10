@@ -1,13 +1,11 @@
 import setuptools
 
-from pynytimes.__version__ import __version__
-
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
     name="pynytimes",
-    version=__version__,
+    version="0.3.1",
     description="A Python wrapper for (most) New York Times APIs",
     long_description=long_description,
     long_description_content_type="text/markdown",
