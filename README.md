@@ -1,6 +1,6 @@
 # pynytimes
 
-[<img src="https://raw.githubusercontent.com/michadenheijer/pynytimes/master/.github/poweredby_nytimes.png" height="20px">](https://developer.nytimes.com/) [![Build Status](https://travis-ci.com/michadenheijer/pynytimes.svg?token=8nhCHVYqgufX65p8PRDx&branch=master)](https://travis-ci.com/michadenheijer/pynytimes) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) ![PyPI](https://img.shields.io/pypi/v/pynytimes)
+[<img src="https://raw.githubusercontent.com/michadenheijer/pynytimes/main/.github/poweredby_nytimes.png" height="20px">](https://developer.nytimes.com/) [![Build Status](https://travis-ci.com/michadenheijer/pynytimes.svg?token=8nhCHVYqgufX65p8PRDx&branch=main)](https://travis-ci.com/michadenheijer/pynytimes) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) ![PyPI](https://img.shields.io/pypi/v/pynytimes)
 
 Use all (actually most) New York Times APIs, get all the data you need from the Times!
 
