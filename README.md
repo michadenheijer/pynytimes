@@ -112,7 +112,7 @@ articles = nyt.article_search(
     dates = {
         "begin": datetime.datetime(2019, 1, 31),
         "end": datetime.datetime(2019, 2, 28)
-    }
+    },
     options = {
         sources = [
             "New York Times",
