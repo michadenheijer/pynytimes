@@ -36,6 +36,11 @@ Then you can simply add your API key (get your API key from [The New York Times 
 nyt = NYTAPI("Your API key")
 ```
 
+**Optionally you can also set to use ```http``` instead of ```https```.**
+```python
+nyt = NYTAPI("Your API key", https=False)
+```
+
 When you have imported this library you can use the following features from the New York Times API.
 - [Top stories](#top-stories)
 - [Most viewed articles](#most-viewed-articles)
