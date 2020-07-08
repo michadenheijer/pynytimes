@@ -24,9 +24,9 @@ BASE_BEST_SELLERS_LIST = BASE_BOOKS + "lists/"
 
 class NYTAPI:
     """This class interacts with the Python code, it primarily blocks wrong user input"""
-    def __init__(self, key=None, https=True):
+    def __init__(self, key=None, https=True, session = requests.Session()):
         self.key = key
-        self.session = requests.Session()
+        self.session = session
         
         if https:
             self.protocol = "https://"
@@ -45,8 +45,8 @@ class NYTAPI:
             status_forcelist = [500, 502, 503, 504]
         )
 
-        self.session.mount(self.protocol, HTTPAdapter(max_retries = backoff_strategy))
-        self.session.mount(self.protocol, HTTPAdapter(max_retries = server_error_strategy))
+        self.session.mount(self.protocol + "api.nytimes.com/", HTTPAdapter(max_retries = backoff_strategy))
+        self.session.mount(self.protocol + "api.nytimes.com/", HTTPAdapter(max_retries = server_error_strategy))
 
         self.session.headers.update({"User-Agent": "pynytimes/" + __version__})
 
@@ -155,7 +155,7 @@ class NYTAPI:
         if name is None:
             name = "combined-print-and-e-book-fiction"
 
-        url = self.protocol + BASE_BEST_SELLERS_LIST + date + "/" + name + ".json"
+        url = self.protocol + BASE_BEST_SELLERS_LIST + _date + "/" + name + ".json"
         location = ["results", "books"]
         return self.load_data(url, location=location)
 
