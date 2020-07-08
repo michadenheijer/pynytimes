@@ -167,7 +167,9 @@ class NYTAPI:
         if dates is None:
             dates = {}
 
-        options["max_results"] = options.get("max_results", 20)
+        if options.get("max_results") is None:
+            options["max_results"] = 20
+            
         options["opening_date_start"] = dates.get("opening_date_start")
         options["opening_date_end"] = dates.get("opening_date_end")
         options["publication_date_start"] = dates.get("publication_date_start")
