@@ -23,26 +23,6 @@ BASE_BEST_SELLERS_LISTS = BASE_BOOKS + "lists/names.json"
 BASE_BEST_SELLERS_LIST = BASE_BOOKS + "lists/"
 
 
-def load_data(session, key, url, options=None, location=None):
-    """This function loads the data for the wrapper for most API use cases"""
-    params = {"api-key": key}
-
-    if options is not None:
-        params.update(options)
-
-    res = session.get(url, params=params, timeout=(4, 10))
-    res.raise_for_status()
-
-    if location is None:
-        results = res.json().get("results")
-
-    else:
-        results = res.json()
-        for loc in location:
-            results = results.get(loc)
-
-    return results
-
 class GetResults:
     """In this class the data gets fetched from the New York Times Servers"""
     @staticmethod
@@ -213,6 +193,26 @@ class NYTAPI:
 
         if self.key is None:
             raise Exception("No API key")
+
+    def load_data(self, url, options=None, location=None):
+        """This function loads the data for the wrapper for most API use cases"""
+        params = { "api-key": self.key }
+
+        if options is not None:
+            params.update(options)
+
+        res = self.session.get(url, params=params, timeout=(4, 10))
+        res.raise_for_status()
+
+        if location is None:
+            results = res.json().get("results")
+
+        else:
+            results = res.json()
+            for loc in location:
+                results = results.get(loc)
+
+        return results
 
     def top_stories(self, section=None):
         """Load the top stories"""
