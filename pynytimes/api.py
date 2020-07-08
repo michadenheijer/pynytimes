@@ -188,13 +188,20 @@ class NYTAPI:
         self.key = key
         self.session = requests.Session()
 
-        retry_strategy = Retry(
+        backoff_strategy = Retry(
             total = 10,
             backoff_factor = 1,
-            status_forcelist = [429, 500, 502, 503, 504]
+            status_forcelist = [429, 509]
         )
 
-        self.session.mount("https://", HTTPAdapter(max_retries = retry_strategy))
+        server_error_strategy = Retry(
+            total = 2,
+            backoff_factor = 1,
+            status_forcelist = [500, 502, 503, 504]
+        )
+
+        self.session.mount("https://", HTTPAdapter(max_retries = backoff_strategy))
+        self.session.mount("https://", HTTPAdapter(max_retries = server_error_strategy))
 
         self.session.headers.update({"User-Agent": "pynytimes/" + __version__})
 
