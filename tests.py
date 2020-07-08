@@ -39,10 +39,11 @@ nyt.article_metadata(
     url = "https://www.nytimes.com/2019/10/20/world/middleeast/erdogan-turkey-nuclear-weapons-trump.html"
 )
 
-nyt.tag_query(
-    "Pentagon",
-    max_results = 20
-)
+## Remove tests for tags because the API doesnt work.
+#nyt.tag_query(
+#    "Pentagon",
+#    max_results = 20
+#)
 
 nyt.archive_metadata(
     date = datetime.datetime(2019, 1, 1)
