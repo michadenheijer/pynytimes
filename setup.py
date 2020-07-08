@@ -16,7 +16,7 @@ setuptools.setup(
     include_package_data = True,
     url="https://github.com/michadenheijer/pynytimes",
     license="MIT",
-    install_requires = ["requests==2.23.0"],
+    install_requires = ["requests==2.24.0"],
     classifiers = [
         "License :: OSI Approved :: MIT License",
         "Development Status :: 4 - Beta",
