@@ -22,172 +22,11 @@ BASE_BOOK_REVIEWS = BASE_BOOKS + "reviews.json"
 BASE_BEST_SELLERS_LISTS = BASE_BOOKS + "lists/names.json"
 BASE_BEST_SELLERS_LIST = BASE_BOOKS + "lists/"
 
-
-def load_data(session, key, url, options=None, location=None):
-    """This function loads the data for the wrapper for most API use cases"""
-    params = {"api-key": key}
-
-    if options is not None:
-        params.update(options)
-
-    res = session.get(url, params=params, timeout=(4, 10))
-    res.raise_for_status()
-
-    if location is None:
-        results = res.json().get("results")
-
-    else:
-        results = res.json()
-        for loc in location:
-            results = results.get(loc)
-
-    return results
-
-class GetResults:
-    """In this class the data gets fetched from the New York Times Servers"""
-    @staticmethod
-    def top_stories(session, key, section, protocol):
-        """Get the Top Stories"""
-        url = protocol + BASE_TOP_STORIES + section + ".json"
-        return load_data(session, key, url)
-
-    @staticmethod
-    def most_viewed(session, key, days, protocol):
-        """Get the most viewed articles"""
-        url = protocol + BASE_MOST_POPULAR + "viewed/" + str(days) + ".json"
-        return load_data(session, key, url)
-
-    @staticmethod
-    def most_shared(session, key, days, method, protocol):
-        """Get the most shared articles"""
-        url = protocol
-        if method is None:
-            url += BASE_MOST_POPULAR + "shared/" + str(days) + ".json"
-        elif method == "email":
-            url += BASE_MOST_POPULAR + "emailed/" + str(days) + ".json"
-        else:
-            url += BASE_MOST_POPULAR + "shared/" + str(days) + "/" + method + ".json"
-        return load_data(session, key, url)
-
-    @staticmethod
-    def book_reviews(session, key, author, isbn, title, protocol):
-        """Get book reviews"""
-        options = {}
-        if author is not None:
-            options["author"] = author
-
-        elif isbn is not None:
-            options["isbn"] = str(isbn)
-
-        elif title is not None:
-            options["title"] = title
-
-        url = protocol + BASE_BOOK_REVIEWS
-        return load_data(session, key, url, options=options)
-
-    @staticmethod
-    def best_sellers_lists(session, key, protocol):
-        """Get the best sellers lists"""
-        url = protocol + BASE_BEST_SELLERS_LISTS
-        return load_data(session, key, url)
-
-    @staticmethod
-    def best_sellers_list(session, key, date, name, protocol):
-        """Get a best sellers list"""
-        url = protocol + BASE_BEST_SELLERS_LIST + date + "/" + name + ".json"
-        location = ["results", "books"]
-        return load_data(session, key, url, location=location)
-
-    @staticmethod
-    def movie_reviews(session, key, keyword, options, max_results, protocol):
-        """Get movie reviews"""
-        params = {"api-key": key}
-
-        if keyword is not None:
-            params["query"] = keyword
-
-        params["critics-pick"] = options.get("critics")
-        params["reviewer"] = options.get("reviewer")
-        params["order"] = options.get("order")
-        params["opening-date"] = options.get("opening")
-        params["publication-date"] = options.get("publication")
-
-        url = protocol + BASE_MOVIE_REVIEWS
-
-        results = []
-
-        for i in range(math.ceil(max_results/20)):
-            offset = i*20
-            params["offset"] = str(offset)
-            res = session.get(url, params=params, timeout=(4, 10))
-            res.raise_for_status()
-            res_parsed = res.json()
-            results += res_parsed.get("results")
-
-            if res_parsed.get("has_more") is False:
-                break
-
-        return results
-
-    @staticmethod
-    def article_metadata(session, key, url, protocol):
-        """Get the article metadata"""
-        options = {"url": url}
-        url = protocol + BASE_META_DATA
-
-        return load_data(session, key, url, options=options)
-
-    @staticmethod
-    def tags(session, key, query, filter_options, max_results, protocol):
-        """Get TimesTags"""
-        options = {
-            "query": query,
-            "filter": filter_options
-        }
-
-        if max_results is not None:
-            options["max"] = str(max_results)
-
-        url = protocol + BASE_TAGS
-
-        return load_data(session, key, url, options=options, location=[])[1]
-
-    @staticmethod
-    def archive_metadata(session, key, date, protocol):
-        """"Get all article metadata from one month"""
-        url = protocol + BASE_ARCHIVE_METADATA + date + ".json"
-        location = ["response", "docs"]
-        return load_data(session, key, url, location=location)
-
-    @staticmethod
-    def article_search(session, key, options, results, protocol):
-        """Get articles from search"""
-        params = options
-        params["api-key"] = key
-
-        url = protocol + BASE_ARTICLE_SEARCH
-
-        result = []
-        for i in range(math.ceil(results/10)):
-            params["page"] = str(i)
-
-            res = session.get(url, params=params)
-            res.raise_for_status()
-
-            result += res.json().get("response").get("docs")
-
-            if res.json().get("response").get("meta").get("hits") <= i*10:
-                break
-
-
-        return result
-
-
 class NYTAPI:
     """This class interacts with the Python code, it primarily blocks wrong user input"""
-    def __init__(self, key=None, https=True):
+    def __init__(self, key=None, https=True, session = requests.Session()):
         self.key = key
-        self.session = requests.Session()
+        self.session = session
         
         if https:
             self.protocol = "https://"
@@ -200,26 +39,44 @@ class NYTAPI:
             status_forcelist = [429, 509]
         )
 
-        server_error_strategy = Retry(
-            total = 2,
-            backoff_factor = 1,
-            status_forcelist = [500, 502, 503, 504]
+        adapter = HTTPAdapter(
+            max_retries = backoff_strategy
         )
 
-        self.session.mount(self.protocol, HTTPAdapter(max_retries = backoff_strategy))
-        self.session.mount(self.protocol, HTTPAdapter(max_retries = server_error_strategy))
+        self.session.mount(self.protocol + "api.nytimes.com/", adapter)
 
         self.session.headers.update({"User-Agent": "pynytimes/" + __version__})
 
         if self.key is None:
             raise Exception("No API key")
 
+    def load_data(self, url, options=None, location=None):
+        """This function loads the data for the wrapper for most API use cases"""
+        params = { "api-key": self.key }
+
+        if options is not None:
+            params.update(options)
+
+        res = self.session.get(url, params=params, timeout=(4, 10))
+        res.raise_for_status()
+
+        if location is None:
+            results = res.json().get("results")
+
+        else:
+            results = res.json()
+            for loc in location:
+                results = results.get(loc)
+
+        return results
+
     def top_stories(self, section=None):
         """Load the top stories"""
         if section is None:
             section = "home"
 
-        return GetResults.top_stories(self.session, self.key, section, self.protocol)
+        url = self.protocol + BASE_TOP_STORIES + section + ".json"
+        return self.load_data(url)
 
     def most_viewed(self, days=None):
         """Load most viewed articles"""
@@ -230,15 +87,13 @@ class NYTAPI:
         if days not in days_options:
             raise Exception("You can only select 1, 7 or 30 days")
 
-        return GetResults.most_viewed(self.session, self.key, days, self.protocol)
+        url = self.protocol + BASE_MOST_POPULAR + "viewed/" + str(days) + ".json"
+        return self.load_data(url)
 
-    def most_shared(self, days=None, method=None):
+    def most_shared(self, days=1, method=None):
         """Load most shared articles"""
         method_options = [None, "email", "facebook"]
         days_options = [1, 7, 30]
-
-        if days is None:
-            days = 1
 
         if method not in method_options:
             raise Exception("Shared option does not exist")
@@ -246,7 +101,16 @@ class NYTAPI:
         if days not in days_options:
             raise Exception("You can only select 1, 7 or 30 days")
 
-        return GetResults.most_shared(self.session, self.key, days, method, self.protocol)
+        url = self.protocol
+
+        if method is None:
+            url += BASE_MOST_POPULAR + "shared/" + str(days) + ".json"
+        elif method == "email":
+            url += BASE_MOST_POPULAR + "emailed/" + str(days) + ".json"
+        else:
+            url += BASE_MOST_POPULAR + "shared/" + str(days) + "/" + method + ".json"
+        
+        return self.load_data(url)
 
     def book_reviews(self, author=None, isbn=None, title=None):
         """Load book reviews"""
@@ -256,11 +120,23 @@ class NYTAPI:
         if int(isbn is not None) + int(title is not None) + int(author is not None) != 1:
             raise Exception("You can only define one of the following: ISBN, author or title.")
 
-        return GetResults.book_reviews(self.session, self.key, author, isbn, title, self.protocol)
+        options = {}
+        if author is not None:
+            options["author"] = author
+
+        elif isbn is not None:
+            options["isbn"] = str(isbn)
+
+        elif title is not None:
+            options["title"] = title
+
+        url = self.protocol + BASE_BOOK_REVIEWS
+        return self.load_data(url, options=options)
 
     def best_sellers_lists(self):
         """Load all the best seller lists"""
-        return GetResults.best_sellers_lists(self.session, self.key, self.protocol)
+        url = self.protocol + BASE_BEST_SELLERS_LISTS
+        return self.load_data(url)
 
     def best_sellers_list(self, date=None, name=None):
         """Load a best seller list"""
@@ -276,7 +152,9 @@ class NYTAPI:
         if name is None:
             name = "combined-print-and-e-book-fiction"
 
-        return GetResults.best_sellers_list(self.session, self.key, _date, name, self.protocol)
+        url = self.protocol + BASE_BEST_SELLERS_LIST + _date + "/" + name + ".json"
+        location = ["results", "books"]
+        return self.load_data(url, location=location)
 
     def movie_reviews(self, keyword=None, options=None, dates=None):
         """Load movie reviews"""
@@ -286,6 +164,10 @@ class NYTAPI:
         if dates is None:
             dates = {}
 
+        if options.get("max_results") is None:
+            options["max_results"] = 20
+
+            
         options["opening_date_start"] = dates.get("opening_date_start")
         options["opening_date_end"] = dates.get("opening_date_end")
         options["publication_date_start"] = dates.get("publication_date_start")
@@ -321,24 +203,40 @@ class NYTAPI:
         if options.get("critics_pick") is True:
             _critics_pick = "Y"
 
-        settings = {
-            "critics": _critics_pick,
-            "reviewer": options.get("reviewer"),
-            "order": options.get("order"),
-            "opening": _opening_dates,
-            "publication": _publication_dates
-        }
+        params = {"api-key": self.key}
 
-        return GetResults.movie_reviews(self.session,
-                                        self.key,
-                                        keyword,
-                                        settings,
-                                        options.get("max_results", 20),
-                                        self.protocol)
+        if keyword is not None:
+            params["query"] = keyword
+
+        params["critics-pick"] = options.get("critics")
+        params["reviewer"] = options.get("reviewer")
+        params["order"] = options.get("order")
+        params["opening-date"] = options.get("opening")
+        params["publication-date"] = options.get("publication")
+
+        url = self.protocol + BASE_MOVIE_REVIEWS
+
+        results = []
+
+        for i in range(math.ceil(options["max_results"]/20)):
+            offset = i*20
+            params["offset"] = str(offset)
+            res = self.session.get(url, params=params, timeout=(4, 10))
+            res.raise_for_status()
+            res_parsed = res.json()
+            results += res_parsed.get("results")
+
+            if res_parsed.get("has_more") is False:
+                break
+
+        return results
 
     def article_metadata(self, url):
         """Load the metadata from an article"""
-        return GetResults.article_metadata(self.session, self.key, url, self.protocol)
+        options = { "url": url }
+        url = self.protocol + BASE_META_DATA
+
+        return self.load_data(url, options=options)
 
     def tag_query(self, query, filter_option=None, filter_options=None, max_results=None):
         """Load TimesTags"""
@@ -353,7 +251,17 @@ class NYTAPI:
         elif filter_option is not None:
             _filter_options = filter_option
 
-        return GetResults.tags(self.session, self.key, query, _filter_options, max_results, self.protocol)
+        options = {
+            "query": query,
+            "filter": filter_options
+        }
+
+        if max_results is not None:
+            options["max"] = str(max_results)
+
+        url = self.protocol + BASE_TAGS
+
+        return self.load_data(url, options=options, location=[])[1]
 
     def archive_metadata(self, date):
         """Load all the metadata from one month"""
@@ -362,7 +270,8 @@ class NYTAPI:
 
         _date = date.strftime("%Y/%-m")
 
-        return GetResults.archive_metadata(self.session, self.key, _date, self.protocol)
+        url = self.protocol + BASE_ARCHIVE_METADATA + _date + ".json"
+        return self.load_data(url, location=["response", "docs"])
 
     def article_search(self, query=None, dates=None, options=None, results=None):
         """Load articles from search"""
@@ -425,4 +334,22 @@ class NYTAPI:
         options["begin_date"] = _begin_date
         options["end_date"] = _end_date
 
-        return GetResults.article_search(self.session, self.key, options, results, self.protocol)
+        params = options
+        params["api-key"] = self.key
+
+        url = self.protocol + BASE_ARTICLE_SEARCH
+
+        result = []
+        for i in range(math.ceil(results/10)):
+            params["page"] = str(i)
+
+            res = self.session.get(url, params=params)
+            res.raise_for_status()
+
+            result += res.json().get("response").get("docs")
+
+            if res.json().get("response").get("meta").get("hits") <= i*10:
+                break
+
+
+        return result

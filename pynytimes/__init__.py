@@ -1,5 +1,5 @@
 """A Python 3 wrapper library for the New York Times API"""
-__version__ = "0.3.2"
+__version__ = "0.4.0"
 
 from .api import NYTAPI
 
