@@ -10,14 +10,17 @@ from requests.packages.urllib3.util.retry import Retry
 
 from . import __version__
 
-BASE_TOP_STORIES = "api.nytimes.com/svc/topstories/v2/"
-BASE_MOST_POPULAR = "api.nytimes.com/svc/mostpopular/v2/"
-BASE_BOOKS = "api.nytimes.com/svc/books/v3/"
-BASE_MOVIE_REVIEWS = "api.nytimes.com/svc/movies/v2/reviews/search.json"
-BASE_META_DATA = "api.nytimes.com/svc/news/v3/content.json"
-BASE_TAGS = "api.nytimes.com/svc/suggest/v1/timestags.json"
-BASE_ARCHIVE_METADATA = "api.nytimes.com/svc/archive/v1/"
-BASE_ARTICLE_SEARCH = "api.nytimes.com/svc/search/v2/articlesearch.json"
+BASE_URL = "api.nytimes.com"
+BASE_TOP_STORIES = BASE_URL + "/svc/topstories/v2/"
+BASE_MOST_POPULAR = BASE_URL + "/svc/mostpopular/v2/"
+BASE_BOOKS = BASE_URL + "/svc/books/v3/"
+BASE_MOVIE_REVIEWS = BASE_URL + "/svc/movies/v2/reviews/search.json"
+BASE_META_DATA = BASE_URL + "/svc/news/v3/content.json"
+BASE_TAGS = BASE_URL + "/svc/suggest/v1/timestags.json"
+BASE_ARCHIVE_METADATA = BASE_URL + "/svc/archive/v1/"
+BASE_ARTICLE_SEARCH = BASE_URL + "/svc/search/v2/articlesearch.json"
+BASE_LATEST_ARTICLES = BASE_URL + "svc/news/v3/content/"
+BASE_SECTION_LIST = BASE_URL + "/svc/news/v3/content/section-list.json"
 BASE_BOOK_REVIEWS = BASE_BOOKS + "reviews.json"
 BASE_BEST_SELLERS_LISTS = BASE_BOOKS + "lists/names.json"
 BASE_BEST_SELLERS_LIST = BASE_BOOKS + "lists/"
@@ -237,6 +240,23 @@ class NYTAPI:
         url = self.protocol + BASE_META_DATA
 
         return self.load_data(url, options=options)
+
+    def section_list(self):
+        """Load all sections"""
+        url = self.protocol + BASE_SECTION_LIST
+
+        return self.load_data(url)
+
+    def latest_articles(self, source = "all", section = "all"):
+        """Load the latest articles"""
+        source_options = ["all", "nyt", "inyt"]
+
+        if source not in source_options:
+            raise Exception("Source is not a valid option")
+
+        url = self.protocol + BASE_LATEST_ARTICLES + source + "/" + section + ".json"
+
+        return self.load_data(url)
 
     def tag_query(self, query, filter_option=None, filter_options=None, max_results=None):
         """Load TimesTags"""

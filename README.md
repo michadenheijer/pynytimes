@@ -209,6 +209,11 @@ metadata = nyt.article_metadata(
 )
 ```
 
+### Load latest articles (beta)
+
+**This needs to be updated**
+Still can't load all of them.
+
 ### Tag query
 
 The New York Times has their own tags library. You can query this library with this API.
