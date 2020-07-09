@@ -39,14 +39,14 @@ class NYTAPI:
             status_forcelist = [429, 509]
         )
 
-        server_error_strategy = Retry(
-            total = 2,
-            backoff_factor = 1,
-            status_forcelist = [500, 502, 503, 504]
-        )
+        #server_error_strategy = Retry(
+        #    total = 2,
+        #    backoff_factor = 1,
+        #    status_forcelist = [500, 502, 503, 504]
+        #)
 
         self.session.mount(self.protocol + "api.nytimes.com/", HTTPAdapter(max_retries = backoff_strategy))
-        self.session.mount(self.protocol + "api.nytimes.com/", HTTPAdapter(max_retries = server_error_strategy))
+        #self.session.mount(self.protocol + "api.nytimes.com/", HTTPAdapter(max_retries = server_error_strategy))
 
         self.session.headers.update({"User-Agent": "pynytimes/" + __version__})
 
