@@ -169,6 +169,7 @@ class NYTAPI:
 
         if options.get("max_results") is None:
             options["max_results"] = 20
+
             
         options["opening_date_start"] = dates.get("opening_date_start")
         options["opening_date_end"] = dates.get("opening_date_end")
@@ -220,7 +221,7 @@ class NYTAPI:
 
         results = []
 
-        for i in range(math.ceil(options.max_results/20)):
+        for i in range(math.ceil(options["max_results"]/20)):
             offset = i*20
             params["offset"] = str(offset)
             res = self.session.get(url, params=params, timeout=(4, 10))
