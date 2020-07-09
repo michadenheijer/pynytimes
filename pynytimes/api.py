@@ -206,8 +206,8 @@ class NYTAPI:
             status_forcelist = [500, 502, 503, 504]
         )
 
-        self.session.mount(self.protocol, HTTPAdapter(max_retries = backoff_strategy))
-        self.session.mount(self.protocol, HTTPAdapter(max_retries = server_error_strategy))
+        self.session.mount("https://", HTTPAdapter(max_retries = backoff_strategy))
+        self.session.mount("https://", HTTPAdapter(max_retries = server_error_strategy))
 
         self.session.headers.update({"User-Agent": "pynytimes/" + __version__})
 
