@@ -187,7 +187,7 @@ class NYTAPI:
     """This class interacts with the Python code, it primarily blocks wrong user input"""
     def __init__(self, key=None, https=True):
         self.key = key
-        self.session = requests.Session()
+        session = requests.Session()
         
         if https:
             self.protocol = "https://"
@@ -206,10 +206,12 @@ class NYTAPI:
             status_forcelist = [500, 502, 503, 504]
         )
 
-        self.session.mount("https://", HTTPAdapter(max_retries = backoff_strategy))
-        self.session.mount("https://", HTTPAdapter(max_retries = server_error_strategy))
+        session.mount(self.protocol, HTTPAdapter(max_retries = backoff_strategy))
+        session.mount(self.protocol, HTTPAdapter(max_retries = server_error_strategy))
 
-        self.session.headers.update({"User-Agent": "pynytimes/" + __version__})
+        session.headers.update({"User-Agent": "pynytimes/" + __version__})
+
+        self.session = session
 
         if self.key is None:
             raise Exception("No API key")
