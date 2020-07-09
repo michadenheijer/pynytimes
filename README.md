@@ -20,12 +20,12 @@ pip install --upgrade pynytimes
 python -m pip install --upgrade pynytimes
 ```
 
-### Advanced (not better, just different)
+### Development
 
-You can also install pynytimes manually from GitHub itself. This can be done by cloning this repository first, and then installing it using Python. *This might install an unreleased version, installation using this method is only advised if you want to modify the code or help maintain this library.*
+You can also install ```pynytimes``` manually from GitHub itself. This can be done by cloning this repository first, and then installing it using Python. *This might install an unreleased version, installation using this method is only advised if you want to modify the code or help maintain this library.*
 
 ```bash
-git clone https://github.com/michadenheijer/pynytimes.git --branch ```![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/michadenheijer/pynytimes?color=%23000&label=%20&style=flat-square)```
+git clone https://github.com/michadenheijer/pynytimes.git
 cd pynytimes
 python setup.py install
 ```
