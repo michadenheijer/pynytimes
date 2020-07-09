@@ -1,15 +1,23 @@
 # pynytimes
 
-[<img src="https://raw.githubusercontent.com/michadenheijer/pynytimes/main/.github/poweredby_nytimes.png" height="20px">](https://developer.nytimes.com/) [![Build Status](https://travis-ci.com/michadenheijer/pynytimes.svg?token=8nhCHVYqgufX65p8PRDx&branch=main)](https://travis-ci.com/michadenheijer/pynytimes) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) ![PyPI](https://img.shields.io/pypi/v/pynytimes)
+[<img src="https://raw.githubusercontent.com/michadenheijer/pynytimes/main/.github/poweredby_nytimes.png" height="20px">](https://developer.nytimes.com/) [![Build Status](https://travis-ci.com/michadenheijer/pynytimes.svg?token=8nhCHVYqgufX65p8PRDx&branch=main)](https://travis-ci.com/michadenheijer/pynytimes) ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pynytimes) ![PyPI](https://img.shields.io/pypi/v/pynytimes)
 
 Use all (actually most) New York Times APIs, get all the data you need from the Times!
 
 ## Installation
 
-There are multiple options to install pynytimes, but the easiest is by just installing it using pip (or pip3).
+There are multiple options to install and ugprade pynytimes, but the easiest is by just installing it using ```pip``` (or ```pip3```).
+
+### Linux and Mac
 
 ```bash
-pip install pynytimes
+pip install --upgrade pynytimes
+```
+
+### Windows
+
+```shell
+python -m pip install --upgrade pynytimes
 ```
 
 ### Advanced (not better, just different)
@@ -17,7 +25,7 @@ pip install pynytimes
 You can also install pynytimes manually from GitHub itself. This can be done by cloning this repository first, and then installing it using Python. *This might install an unreleased version, installation using this method is only advised if you want to modify the code or help maintain this library.*
 
 ```bash
-git clone https://github.com/michadenheijer/pynytimes.git
+git clone https://github.com/michadenheijer/pynytimes.git --branch ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/michadenheijer/pynytimes?color=%23000&label=%20&style=flat-square)
 cd pynytimes
 python setup.py install
 ```
@@ -221,6 +229,6 @@ data = nyt.archive_metadata(
 
 ## License
 
-[MIT](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **Disclaimer**: *This project is not made by anyone from the New York Times, nor is it affiliated with The New York Times Company.*
