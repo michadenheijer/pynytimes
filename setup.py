@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="pynytimes",
-    version="0.3.2",
+    version="0.4.0",
     description="A Python wrapper for (most) New York Times APIs",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -19,7 +19,7 @@ setuptools.setup(
     install_requires = ["requests==2.24.0"],
     classifiers = [
         "License :: OSI Approved :: MIT License",
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "Intended Audience :: Information Technology",
         "Intended Audience :: Science/Research",

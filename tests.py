@@ -40,10 +40,14 @@ nyt.article_metadata(
 )
 
 ## Remove tests for tags because the API doesnt work.
-#nyt.tag_query(
-#    "Pentagon",
-#    max_results = 20
-#)
+try:
+    nyt.tag_query(
+        "Pentagon",
+        max_results = 20
+    )
+except:
+    print("There is still an error with the Times Tags, it appears to be server related")
+
 
 nyt.archive_metadata(
     date = datetime.datetime(2019, 1, 1)
