@@ -114,7 +114,7 @@ most_shared = nyt.most_shared(
 
 ### Article search (beta)
 
-You can also search all New York Times articles. You can also define which sources you want to include. (Not all functions are implemented)
+You can also search all New York Times articles. Optionally you can define your search query (using the ```query``` option), the amount of results (using ```results```) and the amount of results you'd like. Additionally you can also define ```dates```, ```sources```, ```news_desk``` and ```type_of_material```. You can find valid options for [```news_desk```](VALID_SEARCH_OPTIONS.md) and [```type_of_material```](VALID_SEARCH_OPTIONS.md) in [```VALID_SEARCH_OPTIONS.md```](VALID_SEARCH_OPTIONS.md).
 
 ```python
 import datetime
@@ -127,11 +127,18 @@ articles = nyt.article_search(
         "end": datetime.datetime(2019, 2, 28)
     },
     options = {
-        sources = [
+        "sort": "oldest",
+        "sources": [
             "New York Times",
             "AP",
             "Reuters",
             "International Herald Tribune"
+        ],
+        "news_desk": [
+            "Politics"
+        ],
+        "type_of_material": [
+            "News Analysis"
         ]
     }
 )
@@ -208,6 +215,11 @@ metadata = nyt.article_metadata(
     url = "https://www.nytimes.com/2019/10/20/world/middleeast/erdogan-turkey-nuclear-weapons-trump.html"
 )
 ```
+
+### Load latest articles (beta)
+
+**This needs to be updated**
+Still can't load all of them.
 
 ### Tag query
 

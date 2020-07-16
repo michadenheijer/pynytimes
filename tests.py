@@ -7,6 +7,7 @@ begin = datetime.datetime.now()
 
 API_KEY = os.environ["NewYorkTimesAPIKey"]
 nyt = NYTAPI(API_KEY)
+httpNYT = NYTAPI(API_KEY, https = False)
 
 nyt.top_stories(section="science")
 
@@ -61,9 +62,23 @@ nyt.article_search(
         "end": datetime.datetime(2019, 2, 1)
     },
     options = {
-        "sort": "oldest"
+        "sort": "oldest",
+        "source": [
+            "The New York Times",
+            "AP"
+        ],
+        "news_desk": [
+            "Politics"
+        ],
+        "type_of_material": [
+            "News Analysis"
+        ]
     }
 )
+
+httpNYT.section_list()
+
+httpNYT.latest_articles()
 
 end = datetime.datetime.now()
 print(end - begin)
