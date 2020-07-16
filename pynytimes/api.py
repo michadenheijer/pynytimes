@@ -318,6 +318,68 @@ class NYTAPI:
                     _sources += " "
 
             _sources += ")"
+            
+            if options.get("fq") is not None:
+                options["fq"] += " AND "
+            else:
+                options["fq"] = ""
+            
+            options["fq"] += _sources
+
+            del options["source"]
+
+        news_desks = options.get("news_desk")
+
+        if news_desks is not None:
+            _news_desk = "news_desk:("
+
+            for i, news_desk in enumerate(news_desks):
+                _news_desk += "\""
+                _news_desk += news_desk
+                _news_desk += "\""
+
+                if i < len(news_desks) - 1:
+                    _news_desk += " "
+
+            _news_desk += ")"
+
+            if options.get("fq") is not None:
+                options["fq"] += " AND "
+            else:
+                options["fq"] = ""
+
+            options["fq"] += _news_desk
+
+            del options["news_desk"]
+
+        type_of_materials = options.get("type_of_material")
+
+        if type_of_materials is not None:
+            _type_of_material = "type_of_material:("
+
+            for i, type_of_material in enumerate(type_of_materials):
+                _type_of_material += "\""
+                _type_of_material += type_of_material
+                _type_of_material += "\""
+
+                if i < len(type_of_materials) - 1:
+                    _type_of_material += " "
+
+            _type_of_material += ")"
+
+            if options.get("fq") is not None:
+                options["fq"] += " AND "
+            else:
+                options["fq"] = ""
+
+            options["fq"] += _type_of_material
+
+            del options["type_of_material"]
+
+        sort = options.get("sort")
+
+        if sort not in [None, "newest", "oldest", "relevance"]:
+            raise Exception("Sort option is not valid")
 
         _begin_date = None
         _end_date = None

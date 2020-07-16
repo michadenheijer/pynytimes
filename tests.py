@@ -62,7 +62,17 @@ nyt.article_search(
         "end": datetime.datetime(2019, 2, 1)
     },
     options = {
-        "sort": "oldest"
+        "sort": "oldest",
+        "source": [
+            "The New York Times",
+            "AP"
+        ],
+        "news_desk": [
+            "Politics"
+        ],
+        "type_of_material": [
+            "News Analysis"
+        ]
     }
 )
 
