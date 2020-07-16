@@ -58,6 +58,7 @@ When you have imported this library you can use the following features from the 
 - [Movie reviews](#movie-reviews)
 - [Best sellers lists](#best-sellers-lists)
 - [Article metadata (Times Wire)](#article-metadata)
+- [Load latest articles (Times Wire)](#load-latest-articles)
 - [Tag query (TimesTags)](#tag-query)
 - [Archive metadata](#archive-metadata)
 
@@ -216,10 +217,21 @@ metadata = nyt.article_metadata(
 )
 ```
 
-### Load latest articles (beta)
+### Load latest articles
 
-**This needs to be updated**
-Still can't load all of them.
+You can easily load the latest articles published by the New York Times. 
+
+```python
+latest = nyt.latest_articles(
+    source = "nyt",
+    section = "books"
+)
+```
+
+```source``` and ```section``` are optional. Options for ```source``` are ```all```, ```nyt``` and ```inyt``` (International New York Times). You can find all possible sections using:
+```python
+sections = nyt.section_list()
+```
 
 ### Tag query
 
