@@ -147,7 +147,7 @@ most_shared = nyt.most_shared(
 
 ### Article search (beta)
 
-You can also search all New York Times articles. Optionally you can define your search query (using the ```query``` option), the amount of results (using ```results```) and the amount of results you'd like. Additionally you can also define ```dates```, ```sources```, ```news_desk``` and ```type_of_material```. You can find valid options for [```news_desk```](VALID_SEARCH_OPTIONS.md) and [```type_of_material```](VALID_SEARCH_OPTIONS.md) in [```VALID_SEARCH_OPTIONS.md```](VALID_SEARCH_OPTIONS.md).
+You can also search all New York Times articles. Optionally you can define your search query (using the ```query``` option), the amount of results (using ```results```) and the amount of results you'd like. You can even add more options so you can filter the results.
 
 ```python
 import datetime
@@ -217,6 +217,12 @@ reviews = nyt.book_reviews(isbn = 9780062963673)
 reviews = nyt.book_reviews(title = "Becoming")
 ```
 
+| Variables     | Description                       | Data type | Required           |
+|---------------|-----------------------------------|-----------|--------------------|
+| ```author```  | Reviews of books from this author | ```str``` | One of these three |
+| ```isbn```    | Reviews of books with this ISBN   | ```str``` | One of these three |
+| ```title```   | Reviews of books with this title  | ```str``` | One of these three |
+
 ### Movie reviews
 
 You can not only get the book reviews, but the movie reviews too.
@@ -238,6 +244,29 @@ reviews = nyt.movie_reviews(
         "publication_date_end": datetime.datetime(2019, 1, 1)
 })
 ```
+
+| Variables     | Description                          | Data type  | Required           |
+|---------------|--------------------------------------|------------|--------------------|
+| ```keyword``` | Reviews of movies with this keyword  | ```str```  | False              |
+| ```options``` | Dictionary of search options         | ```dict``` | False              |
+| ```dates```   | Dictionary of dates about the review | ```dict``` | False              |
+
+#### ```options```
+
+| Variables          | Description                                                                                 | Data type   | Required |
+|--------------------|---------------------------------------------------------------------------------------------|-------------|----------|
+| ```order```        | How to sort the results (```by-title```, ```by-publication-date```or ```by-opening-date```) | ```str```   | False    |
+| ```reviewer```     | Name of the reviewer                                                                        | ```str```   | False    |
+| ```critics_pick``` | Only return critics' pick if ```True```                                                     | ```bool```  | False    |
+
+#### ```dates```
+
+| Variables                    | Description                                           | Data type                | Required |
+|------------------------------|-------------------------------------------------------|--------------------------|----------|
+| ```opening_date_start```     | Reviews about movies released at or after this date   | ```datetime.datetime```  | False    |
+| ```opening_date_end```       | Reviews about movies released at or before this date  | ```datetime.datetime```  | False    |
+| ```publication_date_start``` | Reviews released at or after this date                | ```datetime.datetime```  | False    |
+| ```publication_date_end```   | Reviews released at or before this date               | ```datetime.datetime```  | False    |
 
 ### Best sellers lists
 
@@ -264,6 +293,11 @@ books = nyt.best_sellers_list(
 )
 ```
 
+| Variables   | Description               | Data type               | Required |
+|-------------|---------------------------|-------------------------|----------|
+| ```name```  | Name of best sellers list | ```str```               | False    |
+| ```date```  | Date of best sellers list | ```datetime.datetime``` | False    |
+
 ### Article metadata
 
 With an URL from a New York Times article you can easily get all the metadata you need from it.
@@ -273,6 +307,10 @@ metadata = nyt.article_metadata(
     url = "https://www.nytimes.com/2019/10/20/world/middleeast/erdogan-turkey-nuclear-weapons-trump.html"
 )
 ```
+
+| Variables | Description        | Data type  | Required |
+|-----------|--------------------|------------|----------|
+| ```url``` | URL of the article | ```str```  | True     |
 
 ### Load latest articles
 
@@ -285,7 +323,12 @@ latest = nyt.latest_articles(
 )
 ```
 
-```source``` and ```section``` are optional. Options for ```source``` are ```all```, ```nyt``` and ```inyt``` (International New York Times). You can find all possible sections using:
+| Variables     | Description                                              | Data type  | Required |
+|---------------|----------------------------------------------------------|------------|----------|
+| ```source```  | Source of article (```all```, ```nyt``` and ```inyt```)  | ```str```  | False    |
+| ```section``` | Section of articles                                      | ```str```  | False    |
+
+You can find all possible sections using:
 ```python
 sections = nyt.section_list()
 ```
@@ -301,6 +344,12 @@ tags = nyt.tag_query(
 )
 ```
 
+| Variables            | Description                | Data type  | Required |
+|----------------------|----------------------------|------------|----------|
+| ```query```          | Tags you're looking for    | ```str```  | True     |
+| ```max_results```    | Maximum results you'd like | ```int```  | False    |
+| ```filter_options``` | Filter options             | ```list``` | False    |
+
 ### Archive metadata
 
 If you want to load all the metadata from a specific month, then this API makes that possible. Be aware you'll download a big JSON file (about 20 Mb), so it can take a while.
@@ -312,6 +361,10 @@ data = nyt.archive_metadata(
     date = datetime.datetime(2019, 1, 1)
 )
 ```
+
+| Variables  | Description                       | Data type               | Required |
+|------------|-----------------------------------|-------------------------|----------|
+| ```date``` | Date of month of all the metadata | ```datetime.datetime``` | True     |
 
 ## License
 
