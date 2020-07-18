@@ -49,6 +49,13 @@ nyt = NYTAPI("Your API key")
 nyt = NYTAPI("Your API key", https=False)
 ```
 
+| Variables  | Description                                                           | Required |
+|------------|-----------------------------------------------------------------------|----------|
+| key        | The API key from [The New York Times](https://developer.nytimes.com/) | True     |
+| https      | Whether you'd want requests over https                                | False    |
+| session    | A requests session that you'd like the wrapper to use                 | False    |
+
+
 When you have imported this library you can use the following features from the New York Times API.
 - [Top stories](#top-stories)
 - [Most viewed articles](#most-viewed-articles)
