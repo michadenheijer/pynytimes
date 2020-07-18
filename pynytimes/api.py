@@ -359,7 +359,7 @@ class NYTAPI:
         fq = options.get("fq")
 
         # Set query options that are currently supported
-        current_filter_support = ["source", "news_desk", "section_name", "type_of_material"]
+        current_filter_support = ["source", "news_desk", "section_name", "glocation", "type_of_material"]
 
         # Run for every filter
         for _filter in current_filter_support:
