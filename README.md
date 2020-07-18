@@ -49,11 +49,11 @@ nyt = NYTAPI("Your API key")
 nyt = NYTAPI("Your API key", https=False)
 ```
 
-| Variables  | Description                                                           | Required |
-|------------|-----------------------------------------------------------------------|----------|
-| key        | The API key from [The New York Times](https://developer.nytimes.com/) | True     |
-| https      | Whether you'd want requests over https                                | False    |
-| session    | A requests session that you'd like the wrapper to use                 | False    |
+| Variables        | Description                                                           | Data type                       | Required |
+|------------------|-----------------------------------------------------------------------|---------------------------------|----------|
+| ```key```        | The API key from [The New York Times](https://developer.nytimes.com/) | ```str```                       | True     |
+| ```https```      | Whether you'd want requests over https                                | ```bool```                      | False    |
+| ```session```    | A requests session that you'd like the wrapper to use                 | ```requests.sessions.Session``` | False    |
 
 
 When you have imported this library you can use the following features from the New York Times API.
@@ -80,6 +80,10 @@ top_stories = nyt.top_stories()
 top_science_stories = nyt.top_stories(section = "science")
 ```
 
+| Variables       | Description                             | Data type       | Required |
+|-----------------|-----------------------------------------|-----------------|----------|
+| ```section```   | Get Top Stories from a specific section | ```str```       | False    |
+
 The possible sections are: arts, automobiles, books, business, fashion, food, health, home, insider, magazine, movies, national, nyregion, obituaries, opinion, politics, realestate, science, sports, sundayreview, technology, theater, tmagazine, travel, upshot, and world.
 
 ### Most viewed articles
@@ -93,6 +97,10 @@ most_viewed = nyt.most_viewed()
 most_viewed = nyt.most_viewed(days = 7)
 most_viewed = nyt.most_viewed(days = 30)
 ```
+
+| Variables       | Description                                                              | Data type       | Required |
+|-----------------|--------------------------------------------------------------------------|-----------------|----------|
+| ```days```      | Get most viewed articles over the last ```1```, ```7``` or ```30``` days | ```int```       | False    |
 
 ### Most shared articles
 
@@ -119,6 +127,12 @@ most_shared = nyt.most_shared(
     method = "facebook"
 )
 ```
+
+| Variables       | Description                                                              | Data type       | Required |
+|-----------------|--------------------------------------------------------------------------|-----------------|----------|
+| ```days```      | Get most viewed articles over the last ```1```, ```7``` or ```30``` days | ```int```       | False    |
+| ```method```    | Method of sharing (```email``` or ```facebook```)                        | ```str```       | False    |
+
 
 ### Article search (beta)
 
@@ -151,6 +165,30 @@ articles = nyt.article_search(
     }
 )
 ```
+
+| Variables       | Description                                                                           | Data type       | Required |
+|-----------------|---------------------------------------------------------------------------------------|-----------------|----------|
+| ```query```     | What you want to search for                                                           | ```str```       | False    |
+| ```results```   | The amount of results that you want to receive (returns a multiple of 10)             | ```int```       | False    |
+| ```dates```     | A dictionary of the dates you'd like the results to be between                        | ```dict```      | False    |
+| ```options```   | A dictionary of additional options                                                    | ```dict```      | False    |
+
+#### ```dates```
+
+| Variables       | Description                                        | Data type               | Required |
+|-----------------|----------------------------------------------------|-------------------------|----------|
+| ```begin```     | Results should be published at or after this date  | ```datetime.datetime``` | False    |
+| ```end```       | Results should be published at or before this date | ```datetime.datetime``` | False    |
+
+#### ````options````
+
+| Variables               | Description                                                                                                     | Data type       | Required |
+|-------------------------|-----------------------------------------------------------------------------------------------------------------|-----------------|----------|
+| ```sort```              | How you want the results to be sorted (```oldest```, ```newest``` or ```relevance```)                           | ```str```       | False    |
+| ```sources```           | Results should be from one of these sources                                                                     | ```list```      | False    |
+| ```news_desk```         | Results should be from one of these news desks ([valid options](VALID_SEARCH_OPTIONS.md#news-desk-values))      | ```list```      | False    |
+| ```type_of_material```  | Results should be from this type of material ([valid options](VALID_SEARCH_OPTIONS.md#type-of-material-values)) | ```list```      | False    |
+| ```section_name```      | Results should be from this section ([valid options](VALID_SEARCH_OPTIONS.md#section-name-values))              | ```list```      | False    |
 
 ### Book reviews
 
