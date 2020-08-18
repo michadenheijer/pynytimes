@@ -478,7 +478,6 @@ class NYTAPI:
 
             # Load data and raise error if there's and error status
             res = self.session.get(url, params=params)
-            print(res.url)
             res.raise_for_status()
 
             # Parse results and append them to results list
