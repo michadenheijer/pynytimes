@@ -11,7 +11,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     author="Micha den Heijer",
     author_email="micha@michadenheijer.com",
-    python_requires=">=3.5, <=3.9",
+    python_requires=">=3.5, <3.10",
     packages=setuptools.find_packages(),
     include_package_data = True,
     url="https://github.com/michadenheijer/pynytimes",
