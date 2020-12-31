@@ -64,7 +64,7 @@ When you have imported this library you can use the following features from the 
 - [Top stories](#top-stories)
 - [Most viewed articles](#most-viewed-articles)
 - [Most shared articles](#most-shared-articles)
-- [Article search](#article-search-beta)
+- [Article search](#article-search)
 - [Book reviews](#book-reviews)
 - [Movie reviews](#movie-reviews)
 - [Best sellers lists](#best-sellers-lists)
@@ -145,7 +145,7 @@ most_shared = nyt.most_shared(
 
 
 
-### Article search (beta)
+### Article search
 
 You can also search all New York Times articles. Optionally you can define your search query (using the ```query``` option), the amount of results (using ```results```) and the amount of results you'd like. You can even add more options so you can filter the results.
 
