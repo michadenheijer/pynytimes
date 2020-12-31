@@ -56,6 +56,8 @@ nyt = NYTAPI("Your API key", https=False)
 | ```key```        | The API key from [The New York Times](https://developer.nytimes.com/) | ```str```                       | True     |
 | ```https```      | Whether you'd want requests over https                                | ```bool```                      | False    |
 | ```session```    | A requests session that you'd like the wrapper to use                 | ```requests.sessions.Session``` | False    |
+| ```backoff```    | Enable [exponential backoff](https://en.wikipedia.org/wiki/Exponential_backoff) | ```bool```            | False    |
+| ```user_agent``` | The user agent that the client uses                                   | ```str```                       | False    |
 
 
 ### Supported APIs

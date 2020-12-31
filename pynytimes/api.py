@@ -29,7 +29,7 @@ BASE_BEST_SELLERS_LIST = BASE_BOOKS + "lists/"
 
 class NYTAPI:
     """This class interacts with the Python code, it primarily blocks wrong user input"""
-    def __init__(self, key=None, https=True, session = requests.Session()):
+    def __init__(self, key=None, https=True, session = requests.Session(), backoff=True, user_agent=None):
         self.key = key
         
         # Add session to class so connection can be reused
@@ -42,20 +42,24 @@ class NYTAPI:
             self.protocol = "http://"
 
         # Set strategy to prevent HTTP 429 (Too Many Requests) errors
-        backoff_strategy = Retry(
-            total = 10,
-            backoff_factor = 1,
-            status_forcelist = [429, 509]
-        )
+        if backoff:
+            backoff_strategy = Retry(
+                total = 10,
+                backoff_factor = 1,
+                status_forcelist = [429, 509]
+            )
 
-        adapter = HTTPAdapter(
-            max_retries = backoff_strategy
-        )
+            adapter = HTTPAdapter(
+                max_retries = backoff_strategy
+            )
 
-        self.session.mount(self.protocol + "api.nytimes.com/", adapter)
+            self.session.mount(self.protocol + "api.nytimes.com/", adapter)
 
         # Set header to show that this wrapper is used
-        self.session.headers.update({"User-Agent": "pynytimes/" + __version__})
+        if user_agent is None:
+            user_agent = "pynytimes/" + __version__
+        
+        self.session.headers.update({"User-Agent": user_agent})
 
         if self.key is None:
             raise ValueError("API key is not set, get an API-key from https://developer.nytimes.com.")
