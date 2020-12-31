@@ -62,7 +62,7 @@ class NYTAPI:
         self.session.headers.update({"User-Agent": user_agent})
 
         if self.key is None:
-            raise Exception("API key is not set, get an API-key from https://developer.nytimes.com.")
+            raise ValueError("API key is not set, get an API-key from https://developer.nytimes.com.")
 
     def load_data(self, url, options=None, location=None):
         """This function loads the data for the wrapper for most API use cases"""
@@ -75,6 +75,11 @@ class NYTAPI:
 
         # Load the data from the API, raise error if there's an invalid status code
         res = self.session.get(url, params=params, timeout=(4, 10))
+
+        if res.status_code == 401:
+            raise ValueError("Invalid API Key")
+        elif res.status_code == 404:
+            raise RuntimeError("Error 404: This page is not available")
         res.raise_for_status()
 
         # Get the data from the usual results location
@@ -98,7 +103,13 @@ class NYTAPI:
 
         # Set the URL the data can be loaded from, and load the data
         url = self.protocol + BASE_TOP_STORIES + section + ".json"
-        return self.load_data(url)
+        
+        try:
+            result = self.load_data(url)
+        except RuntimeError:
+            raise ValueError("Invalid section name")
+
+        return result
 
     def most_viewed(self, days=None):
         """Load most viewed articles"""
@@ -109,7 +120,7 @@ class NYTAPI:
 
         # Raise an Exception if number of days is invalid
         if days not in days_options:
-            raise Exception("You can only select 1, 7 or 30 days")
+            raise ValueError("You can only select 1, 7 or 30 days")
 
         # Load the data
         url = self.protocol + BASE_MOST_POPULAR + "viewed/" + str(days) + ".json"
@@ -122,10 +133,10 @@ class NYTAPI:
         days_options = [1, 7, 30]
 
         if method not in method_options:
-            raise Exception("Shared option does not exist")
+            raise ValueError("Shared option does not exist")
 
         if days not in days_options:
-            raise Exception("You can only select 1, 7 or 30 days")
+            raise ValueError("You can only select 1, 7 or 30 days")
 
         # Set URL of data that needs to be loaded
         url = self.protocol
@@ -144,10 +155,10 @@ class NYTAPI:
         """Load book reviews"""
         # Check if request is valid
         if author and isbn and title is None:
-            raise Exception("Not all fields in reviews can be empty")
+            raise ValueError("Not all fields in reviews can be empty")
 
         if int(isbn is not None) + int(title is not None) + int(author is not None) != 1:
-            raise Exception("You can only define one of the following: ISBN, author or title.")
+            raise ValueError("You can only define one of the following: ISBN, author or title.")
 
         # Set request options params
         options = {}
@@ -178,7 +189,7 @@ class NYTAPI:
 
         # Raise error if date is not a datetime.datetime object
         elif not isinstance(date, datetime.datetime):
-            raise Exception("Date has to be a datetime object")
+            raise TypeError("Date has to be a datetime object")
 
         # Set date if defined
         else:
@@ -193,7 +204,12 @@ class NYTAPI:
         
         # Set location in JSON of results, load and return data
         location = ["results", "books"]
-        return self.load_data(url, location=location)
+        try:
+            result = self.load_data(url, location=location)
+        except RuntimeError:
+            raise ValueError("Best sellers list name is invalid")
+
+        return result
 
     def movie_reviews(self, keyword=None, options=None, dates=None):
         """Load movie reviews"""
@@ -244,6 +260,8 @@ class NYTAPI:
 
         if options.get("critics_pick") is True:
             _critics_pick = "Y"
+        elif not isinstance(options.get("critics_pick", False), bool):
+            raise TypeError("Critics Pick needs to be a bool")
 
         # Load data from API, this doesn't uses the load_data function because it works slightly differently
 
@@ -309,11 +327,15 @@ class NYTAPI:
         source_options = ["all", "nyt", "inyt"]
 
         if source not in source_options:
-            raise Exception("Source is not a valid option")
+            raise ValueError("Source is not a valid option")
 
         # Set URL, load and return data
         url = self.protocol + BASE_LATEST_ARTICLES + source + "/" + section + ".json"
-        return self.load_data(url)
+        try:
+            result = self.load_data(url)
+        except RuntimeError:
+            raise ValueError("Section is not a valid option")
+        return result
 
     def tag_query(self, query, filter_option=None, filter_options=None, max_results=None):
         """Load TimesTags, currently the API seems to be broken"""
@@ -347,7 +369,7 @@ class NYTAPI:
         """Load all the metadata from one month"""
         # Raise Error if date is not defined
         if not isinstance(date, datetime.datetime):
-            raise Exception("Date has to be datetime")
+            raise TypeError("Date has to be datetime")
 
         # Get date as is needed in request
         _date = date.strftime("%Y/%-m")
@@ -423,7 +445,7 @@ class NYTAPI:
         sort = options.get("sort")
 
         if sort not in [None, "newest", "oldest", "relevance"]:
-            raise Exception("Sort option is not valid")
+            raise ValueError("Sort option is not valid")
 
         # Set dates
         _begin_date = None
@@ -449,13 +471,13 @@ class NYTAPI:
         # Raise error if dates aren't datetime.datetime objects
         if begin_date is not None:
             if not isinstance(begin_date, datetime.datetime):
-                raise Exception("Begin date has to be datetime")
+                raise TypeError("Begin date has to be datetime")
 
             _begin_date = begin_date.strftime("%Y%m%d")
 
         if end_date is not None:
             if not isinstance(end_date, datetime.datetime):
-                raise Exception("End date has to be datetime")
+                raise TypeError("End date has to be datetime")
 
             _end_date = end_date.strftime("%Y%m%d")
 
