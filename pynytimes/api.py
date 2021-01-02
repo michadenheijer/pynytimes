@@ -9,7 +9,7 @@ from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
 # Import version from __init__
-from . import __version__
+from .__version__ import __version__
 
 # Define all URLs that are needed
 BASE_URL = "api.nytimes.com"
