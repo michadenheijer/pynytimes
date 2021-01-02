@@ -3,26 +3,26 @@ import os
 
 location = os.path.abspath(os.path.dirname(__file__))
 
-about = {}
-with open(os.path.join(location, 'pynytimes', '__version__.py'), 'r', 'utf-8') as f:
-    exec(f.read(), about)
+about_module = {}
+with open(os.path.join(location, "pynytimes", "__version__.py"), mode="r", encoding="utf-8") as f:
+    exec(f.read(), about_module)
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name = about["__title__"],
-    version = about["__version__"],
-    description = about["__description__"],
+    name = about_module["__title__"],
+    version = about_module["__version__"],
+    description = about_module["__description__"],
     long_description=long_description,
     long_description_content_type="text/markdown",
-    author = about["__author__"],
-    author_email = about["__author_email__"],
+    author = about_module["__author__"],
+    author_email = about_module["__author_email__"],
     python_requires = ">=3.5, <3.10",
     packages = setuptools.find_packages(),
     include_package_data = True,
-    url = about["__url__"],
-    license = about["__license__"],
+    url = about_module["__url__"],
+    license = about_module["__license__"],
     install_requires = ["requests==2.25.1"],
     classifiers = [
         "License :: OSI Approved :: MIT License",
