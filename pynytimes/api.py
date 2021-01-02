@@ -4,6 +4,11 @@ import math
 import time
 import warnings
 
+try:
+    import orjson
+except ImportError:
+    orjson = None
+
 import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
@@ -74,22 +79,26 @@ class NYTAPI:
             params.update(options)
 
         # Load the data from the API, raise error if there's an invalid status code
-        res = self.session.get(url, params=params, timeout=(4, 10))
-
+        res = self.session.get(self.protocol + url, params=params, timeout=(4, 10))
         if res.status_code == 401:
             raise ValueError("Invalid API Key")
         elif res.status_code == 404:
             raise RuntimeError("Error 404: This page is not available")
         res.raise_for_status()
 
+        if orjson is None:
+            parsed_res = res.json()
+        else:
+            parsed_res = orjson.loads(res.content)
+
         # Get the data from the usual results location
         if location is None:
-            results = res.json().get("results")
+            results = parsed_res.get("results")
 
         # Sometimes the results are in a different location, this location can be defined in a list
         # Load the data from that location
         else:
-            results = res.json()
+            results = parsed_res
             for loc in location:
                 results = results.get(loc)
 
@@ -102,7 +111,7 @@ class NYTAPI:
             section = "home"
 
         # Set the URL the data can be loaded from, and load the data
-        url = self.protocol + BASE_TOP_STORIES + section + ".json"
+        url = BASE_TOP_STORIES + section + ".json"
         
         try:
             result = self.load_data(url)
@@ -123,7 +132,7 @@ class NYTAPI:
             raise ValueError("You can only select 1, 7 or 30 days")
 
         # Load the data
-        url = self.protocol + BASE_MOST_POPULAR + "viewed/" + str(days) + ".json"
+        url = BASE_MOST_POPULAR + "viewed/" + str(days) + ".json"
         return self.load_data(url)
 
     def most_shared(self, days = 1, method=None):
@@ -139,14 +148,14 @@ class NYTAPI:
             raise ValueError("You can only select 1, 7 or 30 days")
 
         # Set URL of data that needs to be loaded
-        url = self.protocol
+        url = BASE_MOST_POPULAR
 
         if method is None:
-            url += BASE_MOST_POPULAR + "shared/" + str(days) + ".json"
+            url +=  "shared/" + str(days) + ".json"
         elif method == "email":
-            url += BASE_MOST_POPULAR + "emailed/" + str(days) + ".json"
+            url += "emailed/" + str(days) + ".json"
         else:
-            url += BASE_MOST_POPULAR + "shared/" + str(days) + "/" + method + ".json"
+            url += "shared/" + str(days) + "/" + method + ".json"
         
         # Load and return the data
         return self.load_data(url)
@@ -172,13 +181,13 @@ class NYTAPI:
             options["title"] = title
 
         # Set URL, load and return data
-        url = self.protocol + BASE_BOOK_REVIEWS
+        url = BASE_BOOK_REVIEWS
         return self.load_data(url, options=options)
 
     def best_sellers_lists(self):
         """Load all the best seller lists"""
         # Set URL, load and return data
-        url = self.protocol + BASE_BEST_SELLERS_LISTS
+        url = BASE_BEST_SELLERS_LISTS
         return self.load_data(url)
 
     def best_sellers_list(self, date=None, name=None):
@@ -200,7 +209,7 @@ class NYTAPI:
             name = "combined-print-and-e-book-fiction"
 
         # Set URL and include data
-        url = self.protocol + BASE_BEST_SELLERS_LIST + _date + "/" + name + ".json"
+        url = BASE_BEST_SELLERS_LIST + _date + "/" + name + ".json"
         
         # Set location in JSON of results, load and return data
         location = ["results", "books"]
@@ -266,7 +275,7 @@ class NYTAPI:
         # Load data from API, this doesn't uses the load_data function because it works slightly differently
 
         # Set API key in query params
-        params = {"api-key": self.key}
+        params = {}
 
         # Set keyword if defined
         if keyword is not None:
@@ -280,7 +289,7 @@ class NYTAPI:
         params["publication-date"] = options.get("publication")
 
         # Set URL request data
-        url = self.protocol + BASE_MOVIE_REVIEWS
+        url = BASE_MOVIE_REVIEWS
 
         # Set results list
         results = []
@@ -292,15 +301,12 @@ class NYTAPI:
             params["offset"] = str(offset)
 
             # Load the data from the API and raise if there's an Error
-            res = self.session.get(url, params=params, timeout=(4, 10))
-            res.raise_for_status()
+            res = self.load_data(url, options = params, location = [])
 
-            # Parse results and append them to the results list
-            res_parsed = res.json()
-            results += res_parsed.get("results")
+            results += res.get("results")
 
             # Quit loading more data if no more data is available
-            if res_parsed.get("has_more") is False:
+            if res.get("has_more") is False:
                 break
 
         # Return the results
@@ -310,7 +316,7 @@ class NYTAPI:
         """Load the metadata from an article"""
         # Set metadata in requests params and define URL
         options = { "url": url }
-        url = self.protocol + BASE_META_DATA
+        url = BASE_META_DATA
 
         # Load and return the data
         return self.load_data(url, options=options)
@@ -318,7 +324,7 @@ class NYTAPI:
     def section_list(self):
         """Load all sections"""
         # Set URL, load and return the data
-        url = self.protocol + BASE_SECTION_LIST
+        url = BASE_SECTION_LIST
         return self.load_data(url)
 
     def latest_articles(self, source = "all", section = "all"):
@@ -330,7 +336,7 @@ class NYTAPI:
             raise ValueError("Source is not a valid option")
 
         # Set URL, load and return data
-        url = self.protocol + BASE_LATEST_ARTICLES + source + "/" + section + ".json"
+        url = BASE_LATEST_ARTICLES + source + "/" + section + ".json"
         try:
             result = self.load_data(url)
         except RuntimeError:
@@ -362,7 +368,7 @@ class NYTAPI:
             options["max"] = str(max_results)
 
         # Set URL, load and return data
-        url = self.protocol + BASE_TAGS
+        url = BASE_TAGS
         return self.load_data(url, options=options, location=[])[1]
 
     def archive_metadata(self, date):
@@ -375,8 +381,9 @@ class NYTAPI:
         _date = date.strftime("%Y/%-m")
 
         # Set URL, load and return data
-        url = self.protocol + BASE_ARCHIVE_METADATA + _date + ".json"
-        return self.load_data(url, location=["response", "docs"])
+        url = BASE_ARCHIVE_METADATA + _date + ".json"
+        location = ["response", "docs"]
+        return self.load_data(url, location = location)
 
     @staticmethod
     def _article_search_search_options_helper(options):
@@ -489,28 +496,23 @@ class NYTAPI:
         options["begin_date"] = _begin_date
         options["end_date"] = _end_date
 
-        # Set params is options and set API key in params
-        params = options
-        params["api-key"] = self.key
-
-        # Set url to load data from
-        url = self.protocol + BASE_ARTICLE_SEARCH
+        url = BASE_ARTICLE_SEARCH
 
         # Set result list and add request as much data as needed
         result = []
         for i in range(math.ceil(results/10)):
             # Set page
-            params["page"] = str(i)
+            options["page"] = str(i)
 
+            location = ["response"]
             # Load data and raise error if there's and error status
-            res = self.session.get(url, params=params)
-            res.raise_for_status()
+            res = self.load_data(url, options = options, location = location)
 
             # Parse results and append them to results list
-            result += res.json().get("response").get("docs")
+            result += res.get("docs")
 
             # Stop loading if all responses are already loaded
-            if res.json().get("response").get("meta").get("hits") <= i*10:
+            if res.get("meta").get("hits") <= i*10:
                 break
 
         # Return results
