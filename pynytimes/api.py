@@ -29,7 +29,7 @@ BASE_BEST_SELLERS_LIST = BASE_BOOKS + "lists/"
 
 class NYTAPI:
     """This class interacts with the Python code, it primarily blocks wrong user input"""
-    def __init__(self, key=None, https=True, session = requests.Session(), backoff=True, user_agent=None):
+    def __init__(self, key=None, https=True, session = requests.Session(), backoff=True, user_agent=None, parse_dates=False):
         self.key = key
         
         # Add session to class so connection can be reused
@@ -64,7 +64,7 @@ class NYTAPI:
         if self.key is None:
             raise ValueError("API key is not set, get an API-key from https://developer.nytimes.com.")
 
-    def load_data(self, url, options=None, location=None):
+    def _load_data(self, url, options=None, location=None):
         """This function loads the data for the wrapper for most API use cases"""
         # Set API key in query parameters
         params = { "api-key": self.key }
@@ -105,7 +105,7 @@ class NYTAPI:
         url = self.protocol + BASE_TOP_STORIES + section + ".json"
         
         try:
-            result = self.load_data(url)
+            result = self._load_data(url)
         except RuntimeError:
             raise ValueError("Invalid section name")
 
@@ -124,7 +124,7 @@ class NYTAPI:
 
         # Load the data
         url = self.protocol + BASE_MOST_POPULAR + "viewed/" + str(days) + ".json"
-        return self.load_data(url)
+        return self._load_data(url)
 
     def most_shared(self, days = 1, method=None):
         """Load most shared articles"""
@@ -149,7 +149,7 @@ class NYTAPI:
             url += BASE_MOST_POPULAR + "shared/" + str(days) + "/" + method + ".json"
         
         # Load and return the data
-        return self.load_data(url)
+        return self._load_data(url)
 
     def book_reviews(self, author=None, isbn=None, title=None):
         """Load book reviews"""
@@ -173,13 +173,13 @@ class NYTAPI:
 
         # Set URL, load and return data
         url = self.protocol + BASE_BOOK_REVIEWS
-        return self.load_data(url, options=options)
+        return self._load_data(url, options=options)
 
     def best_sellers_lists(self):
         """Load all the best seller lists"""
         # Set URL, load and return data
         url = self.protocol + BASE_BEST_SELLERS_LISTS
-        return self.load_data(url)
+        return self._load_data(url)
 
     def best_sellers_list(self, date=None, name=None):
         """Load a best seller list"""
@@ -205,7 +205,7 @@ class NYTAPI:
         # Set location in JSON of results, load and return data
         location = ["results", "books"]
         try:
-            result = self.load_data(url, location=location)
+            result = self._load_data(url, location=location)
         except RuntimeError:
             raise ValueError("Best sellers list name is invalid")
 
@@ -263,7 +263,7 @@ class NYTAPI:
         elif not isinstance(options.get("critics_pick", False), bool):
             raise TypeError("Critics Pick needs to be a bool")
 
-        # Load data from API, this doesn't uses the load_data function because it works slightly differently
+        # Load data from API, this doesn't uses the _load_data function because it works slightly differently
 
         # Set API key in query params
         params = {"api-key": self.key}
@@ -313,13 +313,13 @@ class NYTAPI:
         url = self.protocol + BASE_META_DATA
 
         # Load and return the data
-        return self.load_data(url, options=options)
+        return self._load_data(url, options=options)
 
     def section_list(self):
         """Load all sections"""
         # Set URL, load and return the data
         url = self.protocol + BASE_SECTION_LIST
-        return self.load_data(url)
+        return self._load_data(url)
 
     def latest_articles(self, source = "all", section = "all"):
         """Load the latest articles"""
@@ -332,7 +332,7 @@ class NYTAPI:
         # Set URL, load and return data
         url = self.protocol + BASE_LATEST_ARTICLES + source + "/" + section + ".json"
         try:
-            result = self.load_data(url)
+            result = self._load_data(url)
         except RuntimeError:
             raise ValueError("Section is not a valid option")
         return result
@@ -363,7 +363,7 @@ class NYTAPI:
 
         # Set URL, load and return data
         url = self.protocol + BASE_TAGS
-        return self.load_data(url, options=options, location=[])[1]
+        return self._load_data(url, options=options, location=[])[1]
 
     def archive_metadata(self, date):
         """Load all the metadata from one month"""
@@ -376,7 +376,7 @@ class NYTAPI:
 
         # Set URL, load and return data
         url = self.protocol + BASE_ARCHIVE_METADATA + _date + ".json"
-        return self.load_data(url, location=["response", "docs"])
+        return self._load_data(url, location=["response", "docs"])
 
     @staticmethod
     def _article_search_search_options_helper(options):
