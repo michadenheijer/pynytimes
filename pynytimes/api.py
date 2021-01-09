@@ -29,11 +29,15 @@ BASE_BEST_SELLERS_LIST = BASE_BOOKS + "lists/"
 
 class NYTAPI:
     """This class interacts with the Python code, it primarily blocks wrong user input"""
-    def __init__(self, key=None, https=True, session = requests.Session(), backoff=True, user_agent=None, parse_dates=False):
+    def __init__(self, key=None, https=True, session = requests.Session(), backoff=True, user_agent=None, parse_dates=True):
+        # Set API key
         self.key = key
         
         # Add session to class so connection can be reused
         self.session = session
+
+        # Optionally parse dates
+        self.parse_dates = parse_dates
 
         # Define protocol to be used
         if https:
@@ -61,6 +65,7 @@ class NYTAPI:
         
         self.session.headers.update({"User-Agent": user_agent})
 
+        # Raise Error if API key is not given
         if self.key is None:
             raise ValueError("API key is not set, get an API-key from https://developer.nytimes.com.")
 
@@ -95,6 +100,36 @@ class NYTAPI:
 
         return results
 
+    @staticmethod
+    def _parse_date(date_string, date_type):
+        """Parse the date into datetime.datetime object"""
+        if date_type == "rfc3339":
+            return datetime.datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%S%z")
+        elif date_type == "date-only":
+            return datetime.datetime.strptime(date_string, "%Y-%m-%d").date()
+        elif date_type == "date-time":
+            return datetime.datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
+
+    def _parse_dates(self, articles, date_type, locations=[]):
+        """Parse dates to datetime"""
+        # Don't parse if parse_dates is False
+        if self.parse_dates is False:
+            return articles
+        
+        # Create parsed_articles list
+        parsed_articles = []
+
+        # For every article parse date_string into datetime.datetime
+        for article in articles:
+            parsed_article = article
+            for location in locations:
+                print(location)
+                parsed_article[location] = self._parse_date(parsed_article[location], date_type)
+            parsed_articles.append(article)
+
+        return parsed_articles
+
+
     def top_stories(self, section=None):
         """Load the top stories"""
         # Set default section
@@ -106,10 +141,16 @@ class NYTAPI:
         
         try:
             result = self._load_data(url)
+        
+        # If 404 error throw invalid section name error
         except RuntimeError:
             raise ValueError("Invalid section name")
 
-        return result
+        # Parse dates from string to datetime.datetime
+        date_locations = ["updated_date", "created_date", "published_date"]
+        parsed_result = self._parse_dates(result, "rfc3339", date_locations)
+
+        return parsed_result
 
     def most_viewed(self, days=None):
         """Load most viewed articles"""
@@ -124,7 +165,12 @@ class NYTAPI:
 
         # Load the data
         url = self.protocol + BASE_MOST_POPULAR + "viewed/" + str(days) + ".json"
-        return self._load_data(url)
+        result = self._load_data(url)
+
+        parsed_date_result = self._parse_dates(result, "date-only", ["published_date"])
+        parsed_result = self._parse_dates(parsed_date_result, "date-time", ["updated"])
+
+        return parsed_result
 
     def most_shared(self, days = 1, method=None):
         """Load most shared articles"""
@@ -148,8 +194,14 @@ class NYTAPI:
         else:
             url += BASE_MOST_POPULAR + "shared/" + str(days) + "/" + method + ".json"
         
-        # Load and return the data
-        return self._load_data(url)
+        # Load the data
+        result = self._load_data(url)
+
+        # Parse the date_strings into datetime.datetime
+        parsed_date_result = self._parse_dates(result, "date-only", ["published_date"])
+        parsed_result = self._parse_dates(parsed_date_result, "date-time", ["updated"])
+
+        return parsed_result
 
     def book_reviews(self, author=None, isbn=None, title=None):
         """Load book reviews"""
@@ -173,13 +225,20 @@ class NYTAPI:
 
         # Set URL, load and return data
         url = self.protocol + BASE_BOOK_REVIEWS
-        return self._load_data(url, options=options)
+        result = self._load_data(url, options=options)
+
+        parsed_result = self._parse_dates(result, "date-only", ["publication_dt"])
+        return parsed_result
 
     def best_sellers_lists(self):
         """Load all the best seller lists"""
         # Set URL, load and return data
         url = self.protocol + BASE_BEST_SELLERS_LISTS
-        return self._load_data(url)
+
+        result = self._load_data(url)
+
+        parsed_result = self._parse_dates(result, "date-only", ["oldest_published_date", "newest_published_date"])
+        return parsed_result
 
     def best_sellers_list(self, date=None, name=None):
         """Load a best seller list"""
