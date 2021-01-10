@@ -6,15 +6,13 @@ Use all (actually most) New York Times APIs, get all the data you need from the 
 
 ## Installation
 
-There are multiple options to install and ugprade pynytimes, but the easiest is by just installing it using ```pip``` (or ```pip3```).
+There are multiple options to install and ugprade pynytimes, but the easiest is by just installing it using ```pip``` (or ```pip3```). *You can also optionally install ```orjson``` for faster json parsing.*
 
 ### Linux and Mac
 
 ```bash
 pip install --upgrade pynytimes
 ```
-
-*You can also optionally install ```orjson``` for faster json parsing.*
 
 ### Windows
 
@@ -60,7 +58,7 @@ nyt = NYTAPI("Your API key", https=False)
 | ```session```    | A requests session that you'd like the wrapper to use                 | ```requests.sessions.Session``` | False    |
 | ```backoff```    | Enable [exponential backoff](https://en.wikipedia.org/wiki/Exponential_backoff) | ```bool```            | False    |
 | ```user_agent``` | The user agent that the client uses                                   | ```str```                       | False    |
-
+| ```parse_dates```| Optionally disable the automatic parsing of dates (usually this is enabled) | ```bool```                | False    |
 
 ### Supported APIs
 
