@@ -124,3 +124,6 @@ dmypy.json
 
 # Visual Studio Code
 .vscode/
+
+#Local testing
+test.py
