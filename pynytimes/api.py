@@ -2,6 +2,7 @@
 import datetime
 import math
 import time
+import re
 import warnings
 
 import requests
@@ -103,12 +104,23 @@ class NYTAPI:
     @staticmethod
     def _parse_date(date_string, date_type):
         """Parse the date into datetime.datetime object"""
-        if date_type == "rfc3339":
+        # If date_string is None return None
+        if date_string is None:
+            return None
+
+        # Parse rfc3339 dates from string
+        elif date_type == "rfc3339":
             return datetime.datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%S%z")
+
+        # Parse date only strings
         elif date_type == "date-only":
-            return datetime.datetime.strptime(date_string, "%Y-%m-%d").date()
+            if re.match(r"^(\d){4}-00-00$", date_string):
+                    return datetime.datetime.strptime(date_string, "%Y-00-00").date()
+            else:
+                    return datetime.datetime.strptime(date_string, "%Y-%m-%d").date()
+                    
         elif date_type == "date-time":
-            return datetime.datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
+                return datetime.datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
 
     def _parse_dates(self, articles, date_type, locations=[]):
         """Parse dates to datetime"""
@@ -123,7 +135,6 @@ class NYTAPI:
         for article in articles:
             parsed_article = article
             for location in locations:
-                print(location)
                 parsed_article[location] = self._parse_date(parsed_article[location], date_type)
             parsed_articles.append(article)
 
@@ -362,8 +373,11 @@ class NYTAPI:
             if res_parsed.get("has_more") is False:
                 break
 
-        # Return the results
-        return results
+        # Parse and return the results
+        parsed_date_results = self._parse_dates(results, "date-only", ["publication_date", "opening_date"])
+        parsed_results = self._parse_dates(parsed_date_results, "date-time", ["date_updated"])
+
+        return parsed_results
 
     def article_metadata(self, url):
         """Load the metadata from an article"""
@@ -371,8 +385,11 @@ class NYTAPI:
         options = { "url": url }
         url = self.protocol + BASE_META_DATA
 
-        # Load and return the data
-        return self._load_data(url, options=options)
+        # Load, parse and return the data
+        result = self._load_data(url, options=options)
+        date_locations = ["updated_date", "created_date", "published_date", "first_published_date"]
+        parsed_result = self._parse_dates(result, "rfc3339", date_locations)
+        return parsed_result
 
     def section_list(self):
         """Load all sections"""
@@ -390,14 +407,19 @@ class NYTAPI:
 
         # Set URL, load and return data
         url = self.protocol + BASE_LATEST_ARTICLES + source + "/" + section + ".json"
+        
         try:
             result = self._load_data(url)
         except RuntimeError:
             raise ValueError("Section is not a valid option")
-        return result
+
+        date_locations = ["updated_date", "created_date", "published_date", "first_published_date"]
+        parsed_result = self._parse_dates(result, "rfc3339", date_locations)
+        return parsed_result
 
     def tag_query(self, query, filter_option=None, filter_options=None, max_results=None):
         """Load TimesTags, currently the API seems to be broken"""
+        warnings.warn("This API seems to be broken, it is still included to not break support.")
         # Add filter options
         _filter_options = ""
         if filter_options is not None:
@@ -426,6 +448,10 @@ class NYTAPI:
 
     def archive_metadata(self, date):
         """Load all the metadata from one month"""
+        # Also accept datetime.date, convert it to datetime.datetime
+        if isinstance(date, datetime.date):
+            date = datetime.datetime(date.year, date.month, date.day)
+
         # Raise Error if date is not defined
         if not isinstance(date, datetime.datetime):
             raise TypeError("Date has to be datetime")
@@ -435,7 +461,10 @@ class NYTAPI:
 
         # Set URL, load and return data
         url = self.protocol + BASE_ARCHIVE_METADATA + _date + ".json"
-        return self._load_data(url, location=["response", "docs"])
+
+        result = self._load_data(url, location=["response", "docs"])
+        parsed_result = self._parse_dates(result, "rfc3339", ["pub_date"])
+        return parsed_result
 
     @staticmethod
     def _article_search_search_options_helper(options):
@@ -572,5 +601,6 @@ class NYTAPI:
             if res.json().get("response").get("meta").get("hits") <= i*10:
                 break
 
-        # Return results
-        return result
+        # Parse and return results
+        parsed_result = self._parse_dates(result, "rfc3339", ["pub_date"])
+        return parsed_result
