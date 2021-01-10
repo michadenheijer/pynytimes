@@ -110,6 +110,8 @@ class NYTAPI:
 
         # Parse rfc3339 dates from string
         elif date_type == "rfc3339":
+            if date_string[-3] == ":":
+                date_string = date_string[:-3] + date_string[-2:]
             return datetime.datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%S%z")
 
         # Parse date only strings
