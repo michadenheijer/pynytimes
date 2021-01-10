@@ -23,7 +23,9 @@ setuptools.setup(
     include_package_data = True,
     url = about_module["__url__"],
     license = about_module["__license__"],
-    install_requires = ["requests==2.25.1"],
+    install_requires = [
+        "requests==2.25.1"
+    ],
     classifiers = [
         "License :: OSI Approved :: MIT License",
         "Development Status :: 5 - Production/Stable",
