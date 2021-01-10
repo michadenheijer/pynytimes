@@ -373,7 +373,7 @@ class NYTAPI:
             params["offset"] = str(offset)
 
             # Load the data from the API and raise if there's an Error
-            res = self.load_data(url, options = params, location = [])
+            res = self._load_data(url, options = params, location = [])
 
             results += res.get("results")
 
@@ -594,7 +594,7 @@ class NYTAPI:
 
             location = ["response"]
             # Load data and raise error if there's and error status
-            res = self.load_data(url, options = options, location = location)
+            res = self._load_data(url, options = options, location = location)
 
             # Parse results and append them to results list
             result += res.get("docs")
