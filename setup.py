@@ -11,7 +11,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name = about_module["__title__"],
+    name = "pynytimes",
     version = about_module["__version__"],
     description = about_module["__description__"],
     long_description = long_description,
