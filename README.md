@@ -42,7 +42,7 @@ from pynytimes import NYTAPI
 Then you can simply add your API key (get your API key from [The New York Times Dev Portal](https://developer.nytimes.com/)):
 
 ```python
-nyt = NYTAPI("Your API key")
+nyt = NYTAPI("Your API key", parse_dates=True)
 ```
 
 **Optionally you can also set to use ```http``` instead of ```https```.**
@@ -58,7 +58,7 @@ nyt = NYTAPI("Your API key", https=False)
 | ```session```    | A requests session that you'd like the wrapper to use                 | ```requests.sessions.Session``` | False    |
 | ```backoff```    | Enable [exponential backoff](https://en.wikipedia.org/wiki/Exponential_backoff) | ```bool```            | False    |
 | ```user_agent``` | The user agent that the client uses                                   | ```str```                       | False    |
-| ```parse_dates```| Optionally disable the automatic parsing of dates (usually this is enabled) | ```bool```                | False    |
+| ```parse_dates```| Optionally disable the automatic parsing of dates (usually this is disabled) | ```bool```                | False    |
 
 ### Supported APIs
 

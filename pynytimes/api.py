@@ -35,7 +35,7 @@ BASE_BEST_SELLERS_LIST = BASE_BOOKS + "lists/"
 
 class NYTAPI:
     """This class interacts with the Python code, it primarily blocks wrong user input"""
-    def __init__(self, key=None, https=True, session = requests.Session(), backoff=True, user_agent=None, parse_dates=True):
+    def __init__(self, key=None, https=True, session = requests.Session(), backoff=True, user_agent=None, parse_dates=False):
         # Set API key
         self.key = key
         
@@ -126,9 +126,9 @@ class NYTAPI:
         # Parse date only strings
         elif date_type == "date-only":
             if re.match(r"^(\d){4}-00-00$", date_string):
-                    return datetime.datetime.strptime(date_string, "%Y-00-00").date()
+                return datetime.datetime.strptime(date_string, "%Y-00-00").date()
             else:
-                    return datetime.datetime.strptime(date_string, "%Y-%m-%d").date()
+                return datetime.datetime.strptime(date_string, "%Y-%m-%d").date()
                     
         elif date_type == "date-time":
                 return datetime.datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
