@@ -1,84 +1,129 @@
+import datetime
+import unittest
+
+import os
 from pynytimes import NYTAPI
 
-import datetime
-import os
-
-begin = datetime.datetime.now()
-
 API_KEY = os.environ["NewYorkTimesAPIKey"]
-nyt = NYTAPI(API_KEY)
-httpNYT = NYTAPI(API_KEY, https = False)
 
-nyt.top_stories(section="science")
+class TestNewYorkTimes(unittest.TestCase):
+    def setUp(self):
+        self.nyt = NYTAPI(API_KEY, parse_dates=True)
 
-nyt.most_viewed(days=30)
+    def tearDown(self):
+        self.nyt.close()
 
-nyt.most_shared(
-    days = 30,
-    method = "email"
-)
+    def test_top_stories(self):
+        top_stories = self.nyt.top_stories()
+        self.assertIsInstance(top_stories, list)
+        self.assertIsInstance(top_stories[0], dict)
 
-nyt.book_reviews(
-    author = "Michelle Obama"
-)
+    def test_top_stories_section(self):
+        top_stories_section = self.nyt.top_stories(section="world")
+        self.assertIsInstance(top_stories_section, list)
+        self.assertIsInstance(top_stories_section[0], dict)
 
-nyt.best_sellers_lists()
+    def test_top_stories_wrong_section(self):
+        with self.assertRaises(ValueError):
+            self.nyt.top_stories("abcdfsda")
 
-nyt.best_sellers_list(
-    date = datetime.datetime(2019, 1, 1),
-    name = "hardcover-fiction"
-)
+        with self.assertRaises(TypeError):
+            self.nyt.top_stories(section=123)
 
-nyt.movie_reviews(
-    keyword = "FBI",
-    options = {
-        "order": "by-opening-date"
-    }
-)
+    def test_most_viewed(self):
+        most_viewed = self.nyt.most_viewed()
+        self.assertIsInstance(most_viewed, list)
+        for most in most_viewed:
+            self.assertIsInstance(most, dict)
+            self.assertIsInstance(most["media"], list)
 
-nyt.article_metadata(
-    url = "https://www.nytimes.com/2019/10/20/world/middleeast/erdogan-turkey-nuclear-weapons-trump.html"
-)
+    def test_most_viewed_invalid_days(self):
+        with self.assertRaises(ValueError):
+            self.nyt.most_viewed(days=2)
 
-## Remove tests for tags because the API doesnt work.
-try:
-    nyt.tag_query(
-        "Pentagon",
-        max_results = 20
-    )
-except:
-    print("There is still an error with the Times Tags, it appears to be server related")
+        with self.assertRaises(TypeError):
+            self.nyt.most_viewed(days="1")
 
+    def test_most_shared(self):
+        most_shared = self.nyt.most_shared()
+        self.assertIsInstance(most_shared, list)
+        for most in most_shared:
+            self.assertIsInstance(most, dict)
+            self.assertIsInstance(most["published_date"], datetime.date)
+            self.assertIsInstance(most["updated"], datetime.datetime)
+            self.assertIsInstance(most["media"], list)
 
-nyt.archive_metadata(
-    date = datetime.datetime(2019, 1, 1)
-)
+    def test_most_shared_invalid(self):
+        with self.assertRaises(ValueError):
+            self.nyt.most_shared(method="twitter")
 
-nyt.article_search(
-    query = "Trump",
-    results = 20,
-    dates = {
-        "begin": datetime.datetime(2019, 1, 1),
-        "end": datetime.datetime(2019, 2, 1)
-    },
-    options = {
-        "sort": "oldest",
-        "source": [
-            "The New York Times",
-            "AP"
-        ],
-        "news_desk": [
-            "Politics"
-        ],
-        "type_of_material": [
-            "News Analysis"
-        ]
-    }
-)
+        with self.assertRaises(ValueError):
+            self.nyt.most_shared(days=2)
 
-httpNYT.section_list()
+        with self.assertRaises(TypeError):
+            self.nyt.most_shared(days="2")
 
-httpNYT.latest_articles()
+    def test_book_reviews(self):
+        book_reviews = self.nyt.book_reviews(author="Barack Obama")
+        self.assertIsInstance(book_reviews, list)
+        for book_review in book_reviews:
+            self.assertIsInstance(book_review, dict)
 
-end = datetime.datetime.now()
-print(end - begin)
+    def test_book_reviews_invalid(self):
+        with self.assertRaises(ValueError):
+            self.nyt.book_reviews()
+
+        with self.assertRaises(ValueError):
+            self.nyt.book_reviews(isbn=213789, author="author")
+
+        with self.assertRaises(ValueError):
+            self.nyt.book_reviews(isbn=213789)
+
+    def test_best_sellers_lists(self):
+        best_sellers_lists = self.nyt.best_sellers_lists()
+        self.assertIsInstance(best_sellers_lists, list)
+
+    def test_best_seller_list(self):
+        best_seller_list = self.nyt.best_sellers_list(date = datetime.datetime(2019, 1, 1), name = "hardcover-fiction")
+        self.assertIsInstance(best_seller_list, list)
+        
+    def test_best_seller_list_invalid(self):
+        with self.assertRaises(ValueError):
+            self.nyt.best_sellers_list(name="not a name")
+
+        with self.assertRaises(TypeError):
+            self.nyt.best_sellers_list(date="123")
+
+    def test_movie_reviews(self):
+        movie_reviews = self.nyt.movie_reviews()
+        self.assertIsInstance(movie_reviews, list)
+        
+        for movie_review in movie_reviews:
+            self.assertIsInstance(movie_review, dict)
+
+    def test_movie_reviews_invalid(self):
+        with self.assertRaises(TypeError):
+            self.nyt.movie_reviews(keyword=123)
+
+    def test_article_metadata(self):
+        article_metadata = self.nyt.article_metadata("https://www.nytimes.com/live/2021/02/10/us/impeachment-trial/prosecutors-begin-arguments-against-trump-saying-he-became-the-inciter-in-chief-of-a-dangerous-insurrection")
+        self.assertIsInstance(article_metadata, list)
+        for article in article_metadata:
+            self.assertIsInstance(article, dict)
+
+    def test_article_metadata_invalid(self):
+        with self.assertRaises(TypeError):
+            self.nyt.article_metadata()
+
+        with self.assertRaises(TypeError):
+            self.nyt.article_metadata(123)
+
+        with self.assertRaises(ValueError):
+            self.nyt.article_metadata("text")
+
+    ## Still need to add the following tests:
+    ## archive_metadata, article_search,
+    ## section_list, latest_articles
+
+if __name__ == '__main__':
+    unittest.main()
