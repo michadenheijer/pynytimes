@@ -462,6 +462,12 @@ class NYTAPI:
 
     def latest_articles(self, source = "all", section = "all"):
         """Load the latest articles"""
+        if not isinstance(source, str):
+            raise TypeError("Source needs to be str")
+
+        if not isinstance(section, str):
+            raise TypeError("Section needs to be str")
+
         # Check if sections options is valid
         source_options = ["all", "nyt", "inyt"]
 
@@ -575,14 +581,20 @@ class NYTAPI:
         # Return the options
         return options
 
-    def article_search(self, query=None, dates=None, options=None, results=None):
+    def article_search(self, query=None, dates={}, options={}, results=None):
         """Load articles from search"""
-        # Set options and dates if undefined
-        if options is None:
-            options = {}
+        # Raise error if invalid parameters
+        if not isinstance(query, (str, type(None))):
+            raise TypeError("Query needs to be None or str")
 
-        if dates is None:
-            dates = {}
+        if not isinstance(dates, dict):
+            raise TypeError("Dates needs to be a dict")
+
+        if not isinstance(options, dict):
+            raise TypeError("Options needs to be a dict")
+
+        if not isinstance(results, (int, type(None))):
+            raise TypeError("Results needs to be None or int")
 
         # Get dates if defined
         begin_date = dates.get("begin")

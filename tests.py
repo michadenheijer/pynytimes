@@ -121,9 +121,51 @@ class TestNewYorkTimes(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.nyt.article_metadata("text")
 
-    ## Still need to add the following tests:
-    ## archive_metadata, article_search,
-    ## section_list, latest_articles
+    def test_archive_metadata(self):
+        archive_metadata = self.nyt.archive_metadata(date=datetime.date.today())
+        self.assertIsInstance(archive_metadata, list)
+        for metadata in archive_metadata:
+            self.assertIsInstance(metadata, dict)
+
+
+    def test_archive_metadata_invalid(self):
+        with self.assertRaises(TypeError):
+            self.nyt.archive_metadata("string")
+
+        with self.assertRaises(TypeError):
+            self.nyt.archive_metadata(123)
+
+    def test_article_search(self):
+        search = self.nyt.article_search("Joe Biden", results=80)
+        self.assertIsInstance(search, list)
+        self.assertEqual(80, len(search))
+        for article in search:
+            self.assertIsInstance(article, dict)
+
+    def test_article_search_invalid(self):
+        with self.assertRaises(TypeError):
+            self.nyt.article_search(123)
+
+        with self.assertRaises(TypeError):
+            self.nyt.article_search("query", datetime.date.today())
+
+    def test_section_list(self):
+        section_list = self.nyt.section_list()
+        self.assertIsInstance(section_list, list)
+        for section in section_list:
+            self.assertIsInstance(section, dict)
+
+    def test_latest_articles(self):
+        latest_articles = self.nyt.latest_articles()
+        self.assertIsInstance(latest_articles, list)
+        
+        for article in latest_articles:
+            self.assertIsInstance(article, dict)
+
+    def test_latest_articles_invalid(self):
+        with self.assertRaises(TypeError):
+            self.nyt.latest_articles(source=123)
+
 
 if __name__ == '__main__':
     unittest.main()
