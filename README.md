@@ -1,6 +1,6 @@
 # pynytimes
 
-[<img src="https://raw.githubusercontent.com/michadenheijer/pynytimes/main/.github/poweredby_nytimes.png" height="20px">](https://developer.nytimes.com/) [![Build Status](https://travis-ci.com/michadenheijer/pynytimes.svg?token=8nhCHVYqgufX65p8PRDx&branch=main)](https://travis-ci.com/michadenheijer/pynytimes) [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pynytimes)](https://pypi.org/project/pynytimes/) [![PyPI](https://img.shields.io/pypi/v/pynytimes)](https://pypi.org/project/pynytimes/)
+[<img src="https://raw.githubusercontent.com/michadenheijer/pynytimes/main/.github/poweredby_nytimes.png" height="20px">](https://developer.nytimes.com/) [![Build Status](https://travis-ci.com/michadenheijer/pynytimes.svg?token=8nhCHVYqgufX65p8PRDx&branch=main)](https://travis-ci.com/michadenheijer/pynytimes) [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pynytimes)](https://pypi.org/project/pynytimes/) [![PyPI](https://img.shields.io/pypi/v/pynytimes)](https://pypi.org/project/pynytimes/) [![Downloads](https://pepy.tech/badge/pynytimes)](https://pepy.tech/project/pynytimes)
 
 Use all (actually most) New York Times APIs, get all the data you need from the Times!
 
@@ -51,14 +51,14 @@ nyt = NYTAPI("Your API key", https=False)
 ```
 
 
-| Variables        | Description                                                           | Data type                       | Required |
-|------------------|-----------------------------------------------------------------------|---------------------------------|----------|
-| ```key```        | The API key from [The New York Times](https://developer.nytimes.com/) | ```str```                       | True     |
-| ```https```      | Whether you'd want requests over https                                | ```bool```                      | False    |
-| ```session```    | A requests session that you'd like the wrapper to use                 | ```requests.sessions.Session``` | False    |
-| ```backoff```    | Enable [exponential backoff](https://en.wikipedia.org/wiki/Exponential_backoff) | ```bool```            | False    |
-| ```user_agent``` | The user agent that the client uses                                   | ```str```                       | False    |
-| ```parse_dates```| Optionally disable the automatic parsing of dates (usually this is disabled) | ```bool```                | False    |
+| Variables        | Description                                                           | Data type                       | Required | Default                   |
+|------------------|-----------------------------------------------------------------------|---------------------------------|----------|---------------------------|
+| ```key```        | The API key from [The New York Times](https://developer.nytimes.com/) | ```str```                       | True     | ```None```                |
+| ```https```      | Use [HTTPS](https://en.wikipedia.org/wiki/HTTPS)                      | ```bool```                      | False    | ```True```                |
+| ```session```    | Optionally set your own ```request.session```                         | ```requests.sessions.Session``` | False    | ```requests.Session()```  |
+| ```backoff```    | Enable [exponential backoff](https://en.wikipedia.org/wiki/Exponential_backoff) | ```bool```            | False    | ```True```                |
+| ```user_agent``` | Set the [User Agent](https://en.wikipedia.org/wiki/User_agent)        | ```str```                       | False    | ```pynytimes/[version]``` |
+| ```parse_dates```| Enable the parsing of dates into ```datetime.datetime``` or ```datetime.date``` objects | ```bool```    | False    | ```False```               |
 
 ### Supported APIs
 
@@ -88,11 +88,11 @@ top_science_stories = nyt.top_stories(section = "science")
 ```
 
 
-| Variables       | Description                             | Data type       | Required |
+| Variables       | Description                             | Data type       | Required | 
 |-----------------|-----------------------------------------|-----------------|----------|
 | ```section```   | Get Top Stories from a specific section | ```str```       | False    |
 
-The possible sections are: arts, automobiles, books, business, fashion, food, health, home, insider, magazine, movies, national, nyregion, obituaries, opinion, politics, realestate, science, sports, sundayreview, technology, theater, tmagazine, travel, upshot, and world.
+The possible sections are: ```arts```, ```automobiles```, ```books```, ```business```, ```fashion```, ```food```, ```health```, ```home```, ```insider```, ```magazine```, ```movies```, ```national```, ```nyregion```, ```obituaries```, ```opinion```, ```politics```, ```realestate```, ```science```, ```sports```, ```sundayreview```, ```technology```, ```theater```, ```tmagazine```, ```travel```, ```upshot```, and ```world```.
 
 
 ### Most viewed articles
@@ -108,9 +108,9 @@ most_viewed = nyt.most_viewed(days = 30)
 ```
 
 
-| Variables       | Description                                                              | Data type       | Required |
-|-----------------|--------------------------------------------------------------------------|-----------------|----------|
-| ```days```      | Get most viewed articles over the last ```1```, ```7``` or ```30``` days | ```int```       | False    |
+| Variables       | Description                                                              | Data type       | Required | Default |
+|-----------------|--------------------------------------------------------------------------|-----------------|----------|---------|
+| ```days```      | Get most viewed articles over the last ```1```, ```7``` or ```30``` days | ```int```       | False    | ```1``` |
 
 
 ### Most shared articles
@@ -120,7 +120,7 @@ Not only can you request the most viewed articles from the New York Times API, y
 ```python
 most_shared = nyt.most_shared()
 
-# Get most emaild articles of the last day
+# Get most emailed articles of the last day
 most_shared = myt.most_shared(
     days = 1,
     method = "email"
@@ -140,10 +140,10 @@ most_shared = nyt.most_shared(
 ```
 
 
-| Variables       | Description                                                              | Data type       | Required |
-|-----------------|--------------------------------------------------------------------------|-----------------|----------|
-| ```days```      | Get most viewed articles over the last ```1```, ```7``` or ```30``` days | ```int```       | False    |
-| ```method```    | Method of sharing (```email``` or ```facebook```)                        | ```str```       | False    |
+| Variables       | Description                                                              | Data type       | Required | Default       |
+|-----------------|--------------------------------------------------------------------------|-----------------|----------|---------------|
+| ```days```      | Get most viewed articles over the last ```1```, ```7``` or ```30``` days | ```int```       | False    | ```1```       |
+| ```method```    | Method of sharing (```email``` or ```facebook```)                        | ```str```       | False    | ```"email"``` |
 
 
 
@@ -295,10 +295,10 @@ books = nyt.best_sellers_list(
 )
 ```
 
-| Variables   | Description               | Data type               | Required |
-|-------------|---------------------------|-------------------------|----------|
-| ```name```  | Name of best sellers list | ```str```               | False    |
-| ```date```  | Date of best sellers list | ```datetime.datetime``` | False    |
+| Variables   | Description               | Data type               | Required | Default                                   |
+|-------------|---------------------------|-------------------------|----------|-------------------------------------------|
+| ```name```  | Name of best sellers list | ```str```               | False    | ```"combined-print-and-e-book-fiction"``` |
+| ```date```  | Date of best sellers list | ```datetime.datetime``` | False    | Today                                     |
 
 ### Article metadata
 
@@ -325,10 +325,10 @@ latest = nyt.latest_articles(
 )
 ```
 
-| Variables     | Description                                              | Data type  | Required |
-|---------------|----------------------------------------------------------|------------|----------|
-| ```source```  | Source of article (```all```, ```nyt``` and ```inyt```)  | ```str```  | False    |
-| ```section``` | Section of articles                                      | ```str```  | False    |
+| Variables     | Description                                              | Data type  | Required | Default     |
+|---------------|----------------------------------------------------------|------------|----------|-------------|
+| ```source```  | Source of article (```all```, ```nyt``` and ```inyt```)  | ```str```  | False    | ```"all"``` |
+| ```section``` | Section of articles                                      | ```str```  | False    |             | 
 
 You can find all possible sections using:
 ```python
@@ -346,11 +346,11 @@ tags = nyt.tag_query(
 )
 ```
 
-| Variables            | Description                | Data type  | Required |
-|----------------------|----------------------------|------------|----------|
-| ```query```          | Tags you're looking for    | ```str```  | True     |
-| ```max_results```    | Maximum results you'd like | ```int```  | False    |
-| ```filter_options``` | Filter options             | ```list``` | False    |
+| Variables            | Description                | Data type  | Required | Default  |
+|----------------------|----------------------------|------------|----------|----------|
+| ```query```          | Tags you're looking for    | ```str```  | True     |          |
+| ```max_results```    | Maximum results you'd like | ```int```  | False    | ```20``` |
+| ```filter_options``` | Filter options             | ```list``` | False    |          |
 
 ### Archive metadata
 
@@ -367,6 +367,14 @@ data = nyt.archive_metadata(
 | Variables  | Description                       | Data type               | Required |
 |------------|-----------------------------------|-------------------------|----------|
 | ```date``` | Date of month of all the metadata | ```datetime.datetime``` | True     |
+
+### Close session
+
+Optionally you close the ```requests.Session()``` connection with the New York Times server.
+
+```python
+nyt.close()
+```
 
 ## License
 
