@@ -90,6 +90,8 @@ class NYTAPI:
             raise ValueError("Invalid API Key")
         elif res.status_code == 404:
             raise RuntimeError("Error 404: This page is not available")
+        elif res.status_code == 400:
+            raise ValueError("Error 400: Invalid input")
         res.raise_for_status()
 
         if orjson is None:
@@ -158,6 +160,10 @@ class NYTAPI:
         if section is None:
             section = "home"
 
+        # Raise error if section is not a str
+        if not isinstance(section, str):
+            raise TypeError("Section can only be a str")
+
         # Set the URL the data can be loaded from, and load the data
         url = BASE_TOP_STORIES + section + ".json"
         
@@ -181,6 +187,10 @@ class NYTAPI:
         if days is None:
             days = 1
 
+        # Raise an Exception if days is not a int
+        if not isinstance(days, int):
+            raise TypeError("You can only enter an int")
+
         # Raise an Exception if number of days is invalid
         if days not in days_options:
             raise ValueError("You can only select 1, 7 or 30 days")
@@ -194,12 +204,21 @@ class NYTAPI:
 
         return parsed_result
 
-    def most_shared(self, days = 1, method=None):
+    def most_shared(self, days = 1, method="email"):
         """Load most shared articles"""
         # Check if options are valid
-        method_options = [None, "email", "facebook"]
+        method_options = ["email", "facebook"]
         days_options = [1, 7, 30]
 
+        # Raise error if method isn't a str
+        if not isinstance(method, str):
+            raise TypeError("Method needs to be str")
+
+        # Raise error if days isn't an int
+        if not isinstance(days, int):
+            raise TypeError("Days needs to be int")
+
+        # Raise error if days, or method aren't in options
         if method not in method_options:
             raise ValueError("Shared option does not exist")
 
@@ -234,15 +253,21 @@ class NYTAPI:
         if int(isbn is not None) + int(title is not None) + int(author is not None) != 1:
             raise ValueError("You can only define one of the following: ISBN, author or title.")
 
-        # Set request options params
+        # Set request options params and raise error if author is not a str, isbn is not a str or int, or title is not a str
         options = {}
         if author is not None:
+            if not isinstance(author, str):
+                raise TypeError("Author needs to be str")
             options["author"] = author
 
         elif isbn is not None:
+            if not isinstance(isbn, (int, str)):
+                raise TypeError("ISBN needs to be int or str")
             options["isbn"] = str(isbn)
 
         elif title is not None:
+            if not isinstance(title, str):
+                raise TypeError("Title needs to be str")
             options["title"] = title
 
         # Set URL, load and return data
@@ -301,6 +326,26 @@ class NYTAPI:
         if dates is None:
             dates = {}
 
+        # Raise error if keyword is not a string or NoneType
+        if not isinstance(keyword, (str, type(None))):
+            raise TypeError("Keyword needs to be str")
+
+        #Raise error if options or date is not a dict
+        if not isinstance(options, dict):
+            raise TypeError("Options needs to be dict")
+
+        if not isinstance(dates, dict):
+            raise TypeError("Dates needs to be dict")
+
+        # Raise error if dates in date is not a datetime.date or datetime.datetime object
+        for date in dates.items():
+            if not isinstance(date[1], (datetime.datetime, datetime.date)):
+                raise TypeError("Date items need to be datetime.date or datetime.datetime")
+
+            # Convert datetime.date to datetime.datetime
+            if isinstance(date[1], (datetime.date)):
+                dates[date[0]] = datetime.datetime(date[1].year, date[1].month, date[1].day)
+
         if options.get("max_results") is None:
             options["max_results"] = 20
 
@@ -311,8 +356,11 @@ class NYTAPI:
         options["publication_date_end"] = dates.get("publication_date_end")
 
         # Raise error if invalid option
+        if not isinstance(options.get("order"), (str, type(None))):
+            raise TypeError("Order needs to be a string")
+
         if options.get("order") not in [None, "by-opening-date", "by-publication-date", "by-title"]:
-            raise Exception("Order is not a valid option")
+            raise ValueError("Order is not a valid option")
 
         # Define a date if neccecary and convert all data to valid data for API request
         if options.get("opening_date_end") is not None \
@@ -344,8 +392,6 @@ class NYTAPI:
         elif not isinstance(options.get("critics_pick", False), bool):
             raise TypeError("Critics Pick needs to be a bool")
 
-        # Load data from API, this doesn't uses the _load_data function because it works slightly differently
-
         # Set API key in query params
         params = {}
 
@@ -354,11 +400,11 @@ class NYTAPI:
             params["query"] = keyword
 
         # Set API request params if defined
-        params["critics-pick"] = options.get("critics")
+        params["critics-pick"] = _critics_pick
         params["reviewer"] = options.get("reviewer")
         params["order"] = options.get("order")
-        params["opening-date"] = options.get("opening")
-        params["publication-date"] = options.get("publication")
+        params["opening-date"] = _opening_dates
+        params["publication-date"] = _publication_dates
 
         # Set URL request data
         url = BASE_MOVIE_REVIEWS
@@ -389,12 +435,21 @@ class NYTAPI:
 
     def article_metadata(self, url):
         """Load the metadata from an article"""
+        # Raise error if url is not an str
+        if not isinstance(url, str):
+            raise TypeError("URL needs to be str")
+
         # Set metadata in requests params and define URL
         options = { "url": url }
         url = BASE_META_DATA
 
         # Load, parse and return the data
         result = self._load_data(url, options=options)
+
+        # Check if result is valid
+        if result[0].get("published_date") == "0000-12-31T19:03:58-04:56":
+            raise ValueError("Invalid URL, the API cannot parse metadata from live articles")
+
         date_locations = ["updated_date", "created_date", "published_date", "first_published_date"]
         parsed_result = self._parse_dates(result, "rfc3339", date_locations)
         return parsed_result
@@ -407,6 +462,12 @@ class NYTAPI:
 
     def latest_articles(self, source = "all", section = "all"):
         """Load the latest articles"""
+        if not isinstance(source, str):
+            raise TypeError("Source needs to be str")
+
+        if not isinstance(section, str):
+            raise TypeError("Section needs to be str")
+
         # Check if sections options is valid
         source_options = ["all", "nyt", "inyt"]
 
@@ -520,14 +581,20 @@ class NYTAPI:
         # Return the options
         return options
 
-    def article_search(self, query=None, dates=None, options=None, results=None):
+    def article_search(self, query=None, dates={}, options={}, results=None):
         """Load articles from search"""
-        # Set options and dates if undefined
-        if options is None:
-            options = {}
+        # Raise error if invalid parameters
+        if not isinstance(query, (str, type(None))):
+            raise TypeError("Query needs to be None or str")
 
-        if dates is None:
-            dates = {}
+        if not isinstance(dates, dict):
+            raise TypeError("Dates needs to be a dict")
+
+        if not isinstance(options, dict):
+            raise TypeError("Options needs to be a dict")
+
+        if not isinstance(results, (int, type(None))):
+            raise TypeError("Results needs to be None or int")
 
         # Get dates if defined
         begin_date = dates.get("begin")
@@ -606,3 +673,7 @@ class NYTAPI:
         # Parse and return results
         parsed_result = self._parse_dates(result, "rfc3339", ["pub_date"])
         return parsed_result
+
+    # Allow the option to close the session
+    def close(self):
+        self.session.close()
