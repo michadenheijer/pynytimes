@@ -368,6 +368,14 @@ data = nyt.archive_metadata(
 |------------|-----------------------------------|-------------------------|----------|
 | ```date``` | Date of month of all the metadata | ```datetime.datetime``` | True     |
 
+### Close session
+
+Optionally you close the ```requests.Session()``` connection with the New York Times server.
+
+```python
+nyt.close()
+```
+
 ## License
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
