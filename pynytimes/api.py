@@ -116,6 +116,8 @@ class NYTAPI:
     @staticmethod
     def _parse_date(date_string, date_type):
         """Parse the date into datetime.datetime object"""
+        date = datetime.datetime()
+
         # If date_string is None return None
         if date_string is None:
             return None
@@ -124,17 +126,19 @@ class NYTAPI:
         elif date_type == "rfc3339":
             if date_string[-3] == ":":
                 date_string = date_string[:-3] + date_string[-2:]
-            return datetime.datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%S%z")
+                date = datetime.datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%S%z")
 
         # Parse date only strings
         elif date_type == "date-only":
             if re.match(r"^(\d){4}-00-00$", date_string):
-                return datetime.datetime.strptime(date_string, "%Y-00-00").date()
+                date =  datetime.datetime.strptime(date_string, "%Y-00-00").date()
             else:
-                return datetime.datetime.strptime(date_string, "%Y-%m-%d").date()
+                date = datetime.datetime.strptime(date_string, "%Y-%m-%d").date()
                     
         elif date_type == "date-time":
-                return datetime.datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
+            date = datetime.datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
+
+        return date
 
     def _parse_dates(self, articles, date_type, locations=[]):
         """Parse dates to datetime"""
