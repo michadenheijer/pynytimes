@@ -1,6 +1,6 @@
 # pynytimes
 
-[<img src="https://raw.githubusercontent.com/michadenheijer/pynytimes/main/.github/poweredby_nytimes.png" height="20px">](https://developer.nytimes.com/) [![Build Status](https://travis-ci.com/michadenheijer/pynytimes.svg?token=8nhCHVYqgufX65p8PRDx&branch=main)](https://travis-ci.com/michadenheijer/pynytimes) [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pynytimes)](https://pypi.org/project/pynytimes/) [![PyPI](https://img.shields.io/pypi/v/pynytimes)](https://pypi.org/project/pynytimes/) [![Downloads](https://pepy.tech/badge/pynytimes)](https://pepy.tech/project/pynytimes)
+[<img src="https://raw.githubusercontent.com/michadenheijer/pynytimes/main/.github/poweredby_nytimes.png" height="20px">](https://developer.nytimes.com/) [![Build Status](https://travis-ci.com/michadenheijer/pynytimes.svg?token=8nhCHVYqgufX65p8PRDx&branch=main)](https://travis-ci.com/michadenheijer/pynytimes) [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pynytimes)](https://pypi.org/project/pynytimes/) [![Maintainability](https://api.codeclimate.com/v1/badges/7a5ad012587ba707271c/maintainability)](https://codeclimate.com/github/michadenheijer/pynytimes/maintainability) [![Downloads](https://pepy.tech/badge/pynytimes)](https://pepy.tech/project/pynytimes)
 
 Use all (actually most) New York Times APIs, get all the data you need from the Times!
 

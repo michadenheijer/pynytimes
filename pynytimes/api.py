@@ -14,8 +14,9 @@ import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
-# Import version from __init__
+# Import version from __init__, import helpers from helpers
 from .__version__ import __version__
+from .helpers import raise_instance
 
 # Define all URLs that are needed
 BASE_URL = "api.nytimes.com"
@@ -161,8 +162,7 @@ class NYTAPI:
             section = "home"
 
         # Raise error if section is not a str
-        if not isinstance(section, str):
-            raise TypeError("Section can only be a str")
+        raise_instance(section, "section", str)
 
         # Set the URL the data can be loaded from, and load the data
         url = BASE_TOP_STORIES + section + ".json"
@@ -188,8 +188,7 @@ class NYTAPI:
             days = 1
 
         # Raise an Exception if days is not a int
-        if not isinstance(days, int):
-            raise TypeError("You can only enter an int")
+        raise_instance(days, "days", int)
 
         # Raise an Exception if number of days is invalid
         if days not in days_options:
@@ -211,12 +210,10 @@ class NYTAPI:
         days_options = [1, 7, 30]
 
         # Raise error if method isn't a str
-        if not isinstance(method, str):
-            raise TypeError("Method needs to be str")
+        raise_instance(method, "method", str)
 
         # Raise error if days isn't an int
-        if not isinstance(days, int):
-            raise TypeError("Days needs to be int")
+        raise_instance(days, "days", int)
 
         # Raise error if days, or method aren't in options
         if method not in method_options:
@@ -256,18 +253,15 @@ class NYTAPI:
         # Set request options params and raise error if author is not a str, isbn is not a str or int, or title is not a str
         options = {}
         if author is not None:
-            if not isinstance(author, str):
-                raise TypeError("Author needs to be str")
+            raise_instance(author, "author", str)
             options["author"] = author
 
         elif isbn is not None:
-            if not isinstance(isbn, (int, str)):
-                raise TypeError("ISBN needs to be int or str")
+            raise_instance(isbn, "isbn", (int, str))
             options["isbn"] = str(isbn)
 
         elif title is not None:
-            if not isinstance(title, str):
-                raise TypeError("Title needs to be str")
+            raise_instance(title, "title", str)
             options["title"] = title
 
         # Set URL, load and return data
@@ -294,11 +288,9 @@ class NYTAPI:
             _date = "current"
 
         # Raise error if date is not a datetime.datetime object
-        elif not isinstance(date, datetime.datetime):
-            raise TypeError("Date has to be a datetime object")
-
         # Set date if defined
         else:
+            raise_instance(date, "date", datetime.datetime)
             _date = date.strftime("%Y-%m-%d")
 
         # Set best seller list if not defined
@@ -327,20 +319,15 @@ class NYTAPI:
             dates = {}
 
         # Raise error if keyword is not a string or NoneType
-        if not isinstance(keyword, (str, type(None))):
-            raise TypeError("Keyword needs to be str")
+        raise_instance(keyword, "keyword", (str, type(None)))
 
         #Raise error if options or date is not a dict
-        if not isinstance(options, dict):
-            raise TypeError("Options needs to be dict")
-
-        if not isinstance(dates, dict):
-            raise TypeError("Dates needs to be dict")
+        raise_instance(options, "options", dict)
+        raise_instance(dates, "dates", dict)
 
         # Raise error if dates in date is not a datetime.date or datetime.datetime object
         for date in dates.items():
-            if not isinstance(date[1], (datetime.datetime, datetime.date)):
-                raise TypeError("Date items need to be datetime.date or datetime.datetime")
+            raise_instance(date[1], "date", (datetime.datetime, datetime.date))
 
             # Convert datetime.date to datetime.datetime
             if isinstance(date[1], (datetime.date)):
@@ -356,8 +343,7 @@ class NYTAPI:
         options["publication_date_end"] = dates.get("publication_date_end")
 
         # Raise error if invalid option
-        if not isinstance(options.get("order"), (str, type(None))):
-            raise TypeError("Order needs to be a string")
+        raise_instance(options.get("order"), "order", (str, type(None)))
 
         if options.get("order") not in [None, "by-opening-date", "by-publication-date", "by-title"]:
             raise ValueError("Order is not a valid option")
@@ -387,10 +373,10 @@ class NYTAPI:
         if options.get("publication_date_end") is not None:
             _publication_dates += options.get("opening_date_end").strftime("%Y-%m-%d")
 
+        raise_instance(options.get("critics_pick", False), "critics_pick", bool)
+
         if options.get("critics_pick") is True:
             _critics_pick = "Y"
-        elif not isinstance(options.get("critics_pick", False), bool):
-            raise TypeError("Critics Pick needs to be a bool")
 
         # Set API key in query params
         params = {}
@@ -436,8 +422,7 @@ class NYTAPI:
     def article_metadata(self, url):
         """Load the metadata from an article"""
         # Raise error if url is not an str
-        if not isinstance(url, str):
-            raise TypeError("URL needs to be str")
+        raise_instance(url, "url", str)
 
         # Set metadata in requests params and define URL
         options = { "url": url }
@@ -462,11 +447,8 @@ class NYTAPI:
 
     def latest_articles(self, source = "all", section = "all"):
         """Load the latest articles"""
-        if not isinstance(source, str):
-            raise TypeError("Source needs to be str")
-
-        if not isinstance(section, str):
-            raise TypeError("Section needs to be str")
+        raise_instance(source, "source", str)
+        raise_instance(section, "section", str)
 
         # Check if sections options is valid
         source_options = ["all", "nyt", "inyt"]
@@ -521,8 +503,7 @@ class NYTAPI:
             date = datetime.datetime(date.year, date.month, date.day)
 
         # Raise Error if date is not defined
-        if not isinstance(date, datetime.datetime):
-            raise TypeError("Date has to be datetime")
+        raise_instance(date, "date", datetime.datetime)
 
         # Get date as is needed in request
         _date = date.strftime("%Y/%-m")
@@ -584,17 +565,10 @@ class NYTAPI:
     def article_search(self, query=None, dates={}, options={}, results=None):
         """Load articles from search"""
         # Raise error if invalid parameters
-        if not isinstance(query, (str, type(None))):
-            raise TypeError("Query needs to be None or str")
-
-        if not isinstance(dates, dict):
-            raise TypeError("Dates needs to be a dict")
-
-        if not isinstance(options, dict):
-            raise TypeError("Options needs to be a dict")
-
-        if not isinstance(results, (int, type(None))):
-            raise TypeError("Results needs to be None or int")
+        raise_instance(query, "query", (str, type(None)))
+        raise_instance(dates, "dates", dict)
+        raise_instance(options, "options", dict)
+        raise_instance(results, "results", (int, type(None)))
 
         # Get dates if defined
         begin_date = dates.get("begin")
@@ -632,15 +606,11 @@ class NYTAPI:
 
         # Raise error if dates aren't datetime.datetime objects
         if begin_date is not None:
-            if not isinstance(begin_date, datetime.datetime):
-                raise TypeError("Begin date has to be datetime")
-
+            raise_instance(begin_date, "begin_date", datetime.datetime)
             _begin_date = begin_date.strftime("%Y%m%d")
 
         if end_date is not None:
-            if not isinstance(end_date, datetime.datetime):
-                raise TypeError("End date has to be datetime")
-
+            raise_instance(end_date, "end_date", datetime.datetime)
             _end_date = end_date.strftime("%Y%m%d")
 
         # Set query if defined
