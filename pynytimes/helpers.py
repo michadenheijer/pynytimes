@@ -2,7 +2,7 @@ def raise_instance(variable, variable_name, types):
     if not isinstance(variable, types):
         readable_types = ""
         
-        if isinstance(type, tuple):
+        if isinstance(types, tuple):
             for i, _type in enumerate(list(types)):
                 if i != 0:
                     readable_types += ", "
