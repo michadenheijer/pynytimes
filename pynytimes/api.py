@@ -116,7 +116,7 @@ class NYTAPI:
     @staticmethod
     def _parse_date(date_string, date_type):
         """Parse the date into datetime.datetime object"""
-        date = datetime.datetime()
+        date = datetime.datetime.now()
 
         # If date_string is None return None
         if date_string is None:
