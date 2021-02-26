@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 import re
 
 try:
@@ -52,19 +52,22 @@ def parse_date(date_string, date_type):
 
     # Parse rfc3339 dates from string
     elif date_type == "rfc3339":
+        # Fix for Python 3.6, can be removed when support is dropped
         if date_string[-3] == ":":
             date_string = date_string[:-3] + date_string[-2:]
         
-        date = datetime.datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%S%z")
+        date = datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%S%z")
 
     # Parse date only strings
     elif date_type == "date-only":
-        if re.match(r"^(\d){4}-00-00$", date_string):
-            date =  datetime.datetime.strptime(date_string, "%Y-00-00").date()
+        year_only = re.match(r"^(\d){4}-00-00$", date_string)
+        
+        if year_only:
+            date =  datetime.strptime(date_string, "%Y-00-00").date()
         else:
-            date = datetime.datetime.strptime(date_string, "%Y-%m-%d").date()
+            date = datetime.strptime(date_string, "%Y-%m-%d").date()
                     
     elif date_type == "date-time":
-        date = datetime.datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
+        date = datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
 
     return date
