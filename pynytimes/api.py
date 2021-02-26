@@ -1,14 +1,7 @@
 """The wrapper is here"""
 import datetime
 import math
-import time
-import re
 import warnings
-
-try:
-    import orjson
-except ImportError:
-    orjson = None
 
 import requests
 from requests.adapters import HTTPAdapter
@@ -16,7 +9,7 @@ from requests.packages.urllib3.util.retry import Retry
 
 # Import version from __init__, import helpers from helpers
 from .__version__ import __version__
-from .helpers import raise_instance
+from .helpers import raise_instance, parse_json, raise_for_status, parse_date
 
 # Define all URLs that are needed
 BASE_URL = "api.nytimes.com"
@@ -87,18 +80,9 @@ class NYTAPI:
 
         # Load the data from the API, raise error if there's an invalid status code
         res = self.session.get(self.protocol + url, params=params, timeout=(4, 10))
-        if res.status_code == 401:
-            raise ValueError("Invalid API Key")
-        elif res.status_code == 404:
-            raise RuntimeError("Error 404: This page is not available")
-        elif res.status_code == 400:
-            raise ValueError("Error 400: Invalid input")
-        res.raise_for_status()
+        raise_for_status(res)
 
-        if orjson is None:
-            parsed_res = res.json()
-        else:
-            parsed_res = orjson.loads(res.content)
+        parsed_res = parse_json(res)
 
         # Get the data from the usual results location
         if location is None:
@@ -113,33 +97,6 @@ class NYTAPI:
 
         return results
 
-    @staticmethod
-    def _parse_date(date_string, date_type):
-        """Parse the date into datetime.datetime object"""
-        date = datetime.datetime()
-
-        # If date_string is None return None
-        if date_string is None:
-            return None
-
-        # Parse rfc3339 dates from string
-        elif date_type == "rfc3339":
-            if date_string[-3] == ":":
-                date_string = date_string[:-3] + date_string[-2:]
-                date = datetime.datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%S%z")
-
-        # Parse date only strings
-        elif date_type == "date-only":
-            if re.match(r"^(\d){4}-00-00$", date_string):
-                date =  datetime.datetime.strptime(date_string, "%Y-00-00").date()
-            else:
-                date = datetime.datetime.strptime(date_string, "%Y-%m-%d").date()
-                    
-        elif date_type == "date-time":
-            date = datetime.datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
-
-        return date
-
     def _parse_dates(self, articles, date_type, locations=[]):
         """Parse dates to datetime"""
         # Don't parse if parse_dates is False
@@ -153,7 +110,7 @@ class NYTAPI:
         for article in articles:
             parsed_article = article
             for location in locations:
-                parsed_article[location] = self._parse_date(parsed_article[location], date_type)
+                parsed_article[location] = parse_date(parsed_article[location], date_type)
             parsed_articles.append(article)
 
         return parsed_articles
