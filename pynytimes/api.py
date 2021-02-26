@@ -5,7 +5,7 @@ import warnings
 
 import requests
 from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.retry import Retry
+from urllib3.util.retry import Retry
 
 # Import version from __init__, import helpers from helpers
 from .__version__ import __version__
@@ -29,10 +29,17 @@ BASE_BEST_SELLERS_LIST = BASE_BOOKS + "lists/"
 
 class NYTAPI:
     """This class interacts with the Python code, it primarily blocks wrong user input"""
-    def __init__(self, key=None, https=True, session = requests.Session(), backoff=True, user_agent=None, parse_dates=False):
+    def __init__(self,
+                 key=None,
+                 https=True,
+                 session=requests.Session(),
+                 backoff=True,
+                 user_agent=None,
+                 parse_dates=False):
+
         # Set API key
         self.key = key
-        
+
         # Add session to class so connection can be reused
         self.session = session
 
@@ -48,13 +55,13 @@ class NYTAPI:
         # Set strategy to prevent HTTP 429 (Too Many Requests) errors
         if backoff:
             backoff_strategy = Retry(
-                total = 10,
-                backoff_factor = 1,
-                status_forcelist = [429, 509]
+                total=10,
+                backoff_factor=1,
+                status_forcelist=[429, 509]
             )
 
             adapter = HTTPAdapter(
-                max_retries = backoff_strategy
+                max_retries=backoff_strategy
             )
 
             self.session.mount(self.protocol + "api.nytimes.com/", adapter)
@@ -62,17 +69,17 @@ class NYTAPI:
         # Set header to show that this wrapper is used
         if user_agent is None:
             user_agent = "pynytimes/" + __version__
-        
+
         self.session.headers.update({"User-Agent": user_agent})
 
         # Raise Error if API key is not given
         if self.key is None:
-            raise ValueError("API key is not set, get an API-key from https://developer.nytimes.com.")
+            raise ValueError("key is not set, get an API key from https://developer.nytimes.com.")
 
     def _load_data(self, url, options=None, location=None):
         """This function loads the data for the wrapper for most API use cases"""
         # Set API key in query parameters
-        params = { "api-key": self.key }
+        params = {"api-key": self.key}
 
         # Add options to query parameters
         if options is not None:
@@ -97,12 +104,12 @@ class NYTAPI:
 
         return results
 
-    def _parse_dates(self, articles, date_type, locations=[]):
+    def _parse_dates(self, articles, date_type, locations=None):
         """Parse dates to datetime"""
         # Don't parse if parse_dates is False
         if self.parse_dates is False:
             return articles
-        
+
         # Create parsed_articles list
         parsed_articles = []
 
@@ -127,10 +134,10 @@ class NYTAPI:
 
         # Set the URL the data can be loaded from, and load the data
         url = BASE_TOP_STORIES + section + ".json"
-        
+
         try:
             result = self._load_data(url)
-        
+
         # If 404 error throw invalid section name error
         except RuntimeError:
             raise ValueError("Invalid section name")
@@ -164,7 +171,7 @@ class NYTAPI:
 
         return parsed_result
 
-    def most_shared(self, days = 1, method="email"):
+    def most_shared(self, days=1, method="email"):
         """Load most shared articles"""
         # Check if options are valid
         method_options = ["email", "facebook"]
@@ -187,12 +194,12 @@ class NYTAPI:
         url = BASE_MOST_POPULAR
 
         if method is None:
-            url +=  "shared/" + str(days) + ".json"
+            url += "shared/" + str(days) + ".json"
         elif method == "email":
             url += "emailed/" + str(days) + ".json"
         else:
             url += "shared/" + str(days) + "/" + method + ".json"
-        
+
         # Load the data
         result = self._load_data(url)
 
@@ -211,8 +218,10 @@ class NYTAPI:
         if int(isbn is not None) + int(title is not None) + int(author is not None) != 1:
             raise ValueError("You can only define one of the following: ISBN, author or title.")
 
-        # Set request options params and raise error if author is not a str, isbn is not a str or int, or title is not a str
+        # Set request options params and raise error if author is not a str,
+        # isbn is not a str or int, or title is not a str
         options = {}
+
         if author is not None:
             raise_instance(author, "author", str)
             options["author"] = author
@@ -239,7 +248,8 @@ class NYTAPI:
 
         result = self._load_data(url)
 
-        parsed_result = self._parse_dates(result, "date-only", ["oldest_published_date", "newest_published_date"])
+        location = ["oldest_published_date", "newest_published_date"]
+        parsed_result = self._parse_dates(result, "date-only", location)
         return parsed_result
 
     def best_sellers_list(self, date=None, name=None):
@@ -260,7 +270,7 @@ class NYTAPI:
 
         # Set URL and include data
         url = BASE_BEST_SELLERS_LIST + _date + "/" + name + ".json"
-        
+
         # Set location in JSON of results, load and return data
         location = ["results", "books"]
         try:
@@ -366,7 +376,7 @@ class NYTAPI:
             params["offset"] = str(offset)
 
             # Load the data from the API and raise if there's an Error
-            res = self._load_data(url, options = params, location = [])
+            res = self._load_data(url, options=params, location=[])
 
             results += res.get("results")
 
@@ -375,7 +385,8 @@ class NYTAPI:
                 break
 
         # Parse and return the results
-        parsed_date_results = self._parse_dates(results, "date-only", ["publication_date", "opening_date"])
+        locations = ["publication_date", "opening_date"]
+        parsed_date_results = self._parse_dates(results, "date-only", locations)
         parsed_results = self._parse_dates(parsed_date_results, "date-time", ["date_updated"])
 
         return parsed_results
@@ -386,7 +397,7 @@ class NYTAPI:
         raise_instance(url, "url", str)
 
         # Set metadata in requests params and define URL
-        options = { "url": url }
+        options = {"url": url}
         url = BASE_META_DATA
 
         # Load, parse and return the data
@@ -406,7 +417,7 @@ class NYTAPI:
         url = BASE_SECTION_LIST
         return self._load_data(url)
 
-    def latest_articles(self, source = "all", section = "all"):
+    def latest_articles(self, source="all", section="all"):
         """Load the latest articles"""
         raise_instance(source, "source", str)
         raise_instance(section, "section", str)
@@ -483,7 +494,11 @@ class NYTAPI:
         fq = options.get("fq")
 
         # Set query options that are currently supported
-        current_filter_support = ["source", "news_desk", "section_name", "glocation", "type_of_material"]
+        current_filter_support = ["source",
+                                  "news_desk",
+                                  "section_name",
+                                  "glocation",
+                                  "type_of_material"]
 
         # Run for every filter
         for _filter in current_filter_support:
@@ -519,7 +534,7 @@ class NYTAPI:
         # If filter query was defined set fq
         if fq is not None:
             options["fq"] = fq
-        
+
         # Return the options
         return options
 
@@ -592,7 +607,7 @@ class NYTAPI:
 
             location = ["response"]
             # Load data and raise error if there's and error status
-            res = self._load_data(url, options = options, location = location)
+            res = self._load_data(url, options=options, location=location)
 
             # Parse results and append them to results list
             result += res.get("docs")
