@@ -27,6 +27,8 @@ jobs:
   
   allow_failures:
     - python: "nightly"
+    - os: osx
+    - os: windows
   
   fast_finish: true
 
@@ -36,4 +38,4 @@ install:
 
 script:
   - export NewYorkTimesAPIKey=$NewYorkTimesAPIKey
-  - python3 tests.py
+  - python3 tests.py || python tests.py
