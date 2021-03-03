@@ -1,11 +1,31 @@
 language: python
 
-python:
-  - "3.6"
-  - "3.7"
-  - "3.8"
-  - "3.9"
-  - "pypy3"
+jobs:
+  include:
+    - name: "Python 3.6 (Linux)"
+      python: 3.6
+    - name: "Python 3.7 (Linux)"
+      python: 3.7
+    - name: "Python 3.8 (Linux)"
+      python: 3.8
+    - name: "Python 3.9 (Linux)"
+      python: 3.9
+    - name: "Python Nightly (Linux)"
+      python: "nightly"
+    - name: "PyPy 3.6 (Linux)"
+      python: "pypy3"
+    - name: "Python 3.8 (MacOS)"
+      os: osx
+      osx_image: xcode12.2
+      language: shell
+    - name: "Python 3.8 (Windows)"
+      os: windows
+      language: shell
+      before_install:
+        - choco install python3 --version 3.8.7
+  allow_failures:
+    - python: "nightly"
+
 
 install:
   - pip install .
