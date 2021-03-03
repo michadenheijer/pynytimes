@@ -18,9 +18,6 @@ jobs:
       os: osx
       osx_image: xcode12.2
       language: shell
-      before_install:
-        - alias python="python3"
-        - alias pip="pip3"
     - name: "Python 3.8 (Windows)"
       os: windows
       language: shell
@@ -35,8 +32,8 @@ jobs:
 
 
 install:
-  - pip install .
+  - pip3 install .
 
 script:
   - export NewYorkTimesAPIKey=$NewYorkTimesAPIKey
-  - python tests.py
+  - python3 tests.py
