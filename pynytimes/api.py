@@ -1,9 +1,9 @@
 """The wrapper is here"""
+
+import warnings
 import datetime
 import math
-import time
 import re
-import warnings
 
 try:
     import orjson
@@ -12,7 +12,7 @@ except ImportError:
 
 import requests
 from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.retry import Retry
+from urllib3.util.retry import Retry
 
 # Import version from __init__
 from .__version__ import __version__
@@ -525,7 +525,9 @@ class NYTAPI:
             raise TypeError("Date has to be datetime")
 
         # Get date as is needed in request
-        _date = date.strftime("%Y/%-m")
+        year = date.year
+        month = date.month
+        _date = f"{year}/{month}"
 
         # Set URL, load and return data
         url = BASE_ARCHIVE_METADATA + _date + ".json"
