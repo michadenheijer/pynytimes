@@ -18,13 +18,20 @@ jobs:
       os: osx
       osx_image: xcode12.2
       language: shell
+      before_install:
+        - alias python="python3"
+        - alias pip="pip3"
     - name: "Python 3.8 (Windows)"
       os: windows
       language: shell
       before_install:
         - choco install python3 --version 3.8.7
+      env: PATH=/c/Python38:/c/Python38/Scripts:$PATH
+  
   allow_failures:
     - python: "nightly"
+  
+  fast_finish: true
 
 
 install:
