@@ -1,4 +1,5 @@
 """The wrapper is here"""
+from typing import Union
 
 import warnings
 import datetime
@@ -35,7 +36,13 @@ BASE_BEST_SELLERS_LIST = BASE_BOOKS + "lists/"
 
 class NYTAPI:
     """This class interacts with the Python code, it primarily blocks wrong user input"""
-    def __init__(self, key=None, https=True, session = requests.Session(), backoff=True, user_agent=None, parse_dates=False):
+    def __init__(self, 
+                 key:str=None, 
+                 https:bool=True, 
+                 session:requests.Session=requests.Session(), 
+                 backoff:bool=True, 
+                 user_agent:str=None, 
+                 parse_dates:bool=False) -> None:
         # Set API key
         self.key = key
         
@@ -75,7 +82,7 @@ class NYTAPI:
         if self.key is None:
             raise ValueError("API key is not set, get an API-key from https://developer.nytimes.com.")
 
-    def _load_data(self, url, options=None, location=None):
+    def _load_data(self, url:str, options:dict=None, location:list=None) -> list:
         """This function loads the data for the wrapper for most API use cases"""
         # Set API key in query parameters
         params = { "api-key": self.key }
@@ -113,7 +120,7 @@ class NYTAPI:
         return results
 
     @staticmethod
-    def _parse_date(date_string, date_type):
+    def _parse_date(date_string:str, date_type:str) -> Union[datetime.datetime, datetime.date]:
         """Parse the date into datetime.datetime object"""
         # If date_string is None return None
         if date_string is None:
@@ -135,7 +142,7 @@ class NYTAPI:
         elif date_type == "date-time":
                 return datetime.datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
 
-    def _parse_dates(self, articles, date_type, locations=[]):
+    def _parse_dates(self, articles:list, date_type:str, locations:list=[]) -> list:
         """Parse dates to datetime"""
         # Don't parse if parse_dates is False
         if self.parse_dates is False:
@@ -154,12 +161,8 @@ class NYTAPI:
         return parsed_articles
 
 
-    def top_stories(self, section=None):
+    def top_stories(self, section:str="home") -> list:
         """Load the top stories"""
-        # Set default section
-        if section is None:
-            section = "home"
-
         # Raise error if section is not a str
         if not isinstance(section, str):
             raise TypeError("Section can only be a str")
@@ -180,12 +183,9 @@ class NYTAPI:
 
         return parsed_result
 
-    def most_viewed(self, days=None):
+    def most_viewed(self, days:int=1) -> list:
         """Load most viewed articles"""
-        # Set amount of days for top stories
         days_options = [1, 7, 30]
-        if days is None:
-            days = 1
 
         # Raise an Exception if days is not a int
         if not isinstance(days, int):
@@ -204,7 +204,7 @@ class NYTAPI:
 
         return parsed_result
 
-    def most_shared(self, days = 1, method="email"):
+    def most_shared(self, days:int=1, method:str="email") -> list:
         """Load most shared articles"""
         # Check if options are valid
         method_options = ["email", "facebook"]
@@ -244,7 +244,7 @@ class NYTAPI:
 
         return parsed_result
 
-    def book_reviews(self, author=None, isbn=None, title=None):
+    def book_reviews(self, author:str=None, isbn:Union[str, int]=None, title:str=None) -> list:
         """Load book reviews"""
         # Check if request is valid
         if author and isbn and title is None:
@@ -277,7 +277,7 @@ class NYTAPI:
         parsed_result = self._parse_dates(result, "date-only", ["publication_dt"])
         return parsed_result
 
-    def best_sellers_lists(self):
+    def best_sellers_lists(self) -> list:
         """Load all the best seller lists"""
         # Set URL, load and return data
         url = BASE_BEST_SELLERS_LISTS
@@ -287,8 +287,12 @@ class NYTAPI:
         parsed_result = self._parse_dates(result, "date-only", ["oldest_published_date", "newest_published_date"])
         return parsed_result
 
-    def best_sellers_list(self, date=None, name=None):
+    def best_sellers_list(self, date:Union[datetime.date, datetime.datetime]=None, name:str="combined-print-and-e-book-fiction") -> list:
         """Load a best seller list"""
+        # Convert datetime.date into datetime.datetime
+        if isinstance(date, datetime.date):
+            date = datetime.datetime(date.year, date.month, date.day)
+
         # Set valid date
         if date is None:
             _date = "current"
@@ -300,10 +304,6 @@ class NYTAPI:
         # Set date if defined
         else:
             _date = date.strftime("%Y-%m-%d")
-
-        # Set best seller list if not defined
-        if name is None:
-            name = "combined-print-and-e-book-fiction"
 
         # Set URL and include data
         url = BASE_BEST_SELLERS_LIST + _date + "/" + name + ".json"
@@ -317,7 +317,7 @@ class NYTAPI:
 
         return result
 
-    def movie_reviews(self, keyword=None, options=None, dates=None):
+    def movie_reviews(self, keyword:str=None, options:dict=None, dates:dict=None) -> list:
         """Load movie reviews"""
         # Set options and dates if not defined
         if options is None:
@@ -433,7 +433,7 @@ class NYTAPI:
 
         return parsed_results
 
-    def article_metadata(self, url):
+    def article_metadata(self, url:str) -> list:
         """Load the metadata from an article"""
         # Raise error if url is not an str
         if not isinstance(url, str):
@@ -454,13 +454,13 @@ class NYTAPI:
         parsed_result = self._parse_dates(result, "rfc3339", date_locations)
         return parsed_result
 
-    def section_list(self):
+    def section_list(self) -> list:
         """Load all sections"""
         # Set URL, load and return the data
         url = BASE_SECTION_LIST
         return self._load_data(url)
 
-    def latest_articles(self, source = "all", section = "all"):
+    def latest_articles(self, source:str="all", section:str="all") -> list:
         """Load the latest articles"""
         if not isinstance(source, str):
             raise TypeError("Source needs to be str")
@@ -485,7 +485,7 @@ class NYTAPI:
         parsed_result = self._parse_dates(result, "rfc3339", date_locations)
         return parsed_result
 
-    def tag_query(self, query, filter_option=None, filter_options=None, max_results=None):
+    def tag_query(self, query:str, filter_option:dict=None, filter_options:str=None, max_results:int=None) -> list:
         """Load TimesTags, currently the API seems to be broken"""
         warnings.warn("This API seems to be broken, it is still included to not break support.")
         # Add filter options
@@ -514,7 +514,7 @@ class NYTAPI:
         url = BASE_TAGS
         return self._load_data(url, options=options, location=[])[1]
 
-    def archive_metadata(self, date):
+    def archive_metadata(self, date:Union[datetime.datetime, datetime.date]) -> list:
         """Load all the metadata from one month"""
         # Also accept datetime.date, convert it to datetime.datetime
         if isinstance(date, datetime.date):
@@ -537,7 +537,7 @@ class NYTAPI:
         return parsed_result
 
     @staticmethod
-    def _article_search_search_options_helper(options):
+    def _article_search_search_options_helper(options:dict) -> list:
         """"Help to create all fq queries"""
         # Get options already defined in fq (filter query)
         fq = options.get("fq")
@@ -583,7 +583,7 @@ class NYTAPI:
         # Return the options
         return options
 
-    def article_search(self, query=None, dates={}, options={}, results=None):
+    def article_search(self, query:str=None, dates:dict={}, options:dict={}, results:int=10) -> list:
         """Load articles from search"""
         # Raise error if invalid parameters
         if not isinstance(query, (str, type(None))):
@@ -614,10 +614,6 @@ class NYTAPI:
         # Set dates
         _begin_date = None
         _end_date = None
-
-        # Show default amount of results if undefined
-        if results is None:
-            results = 10
 
         # Show warnings when a lot of results are requested
         if results >= 100:
@@ -677,5 +673,5 @@ class NYTAPI:
         return parsed_result
 
     # Allow the option to close the session
-    def close(self):
+    def close(self) -> None:
         self.session.close()
