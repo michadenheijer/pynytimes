@@ -10,7 +10,7 @@ jobs:
       python: 3.8
     - name: "Python 3.9 (Linux)"
       python: 3.9
-    - name: "Python Nightly (Linux)"
+    - name: "Python nightly (Linux)"
       python: "nightly"
     - name: "PyPy 3.6 (Linux)"
       python: "pypy3"
