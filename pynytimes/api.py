@@ -487,6 +487,13 @@ class NYTAPI:
 
     def tag_query(self, query, filter_option=None, filter_options=None, max_results=None):
         """Load TimesTags"""
+        # Raise error for TypeError
+        if not isinstance(query, str):
+            raise TypeError("Query needs to be str")
+
+        if not isinstance(max_results, (type(None), int)):
+            raise TypeError("Max results needs to be int")
+
         # Add filter options
         _filter_options = ""
         if filter_options is not None:
