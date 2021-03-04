@@ -24,7 +24,7 @@ BASE_MOST_POPULAR = BASE_URL + "/svc/mostpopular/v2/"
 BASE_BOOKS = BASE_URL + "/svc/books/v3/"
 BASE_MOVIE_REVIEWS = BASE_URL + "/svc/movies/v2/reviews/search.json"
 BASE_META_DATA = BASE_URL + "/svc/news/v3/content.json"
-BASE_TAGS = BASE_URL + "/svc/suggest/v1/timestags.json"
+BASE_TAGS = BASE_URL + "/svc/semantic/v2/concept/suggest"
 BASE_ARCHIVE_METADATA = BASE_URL + "/svc/archive/v1/"
 BASE_ARTICLE_SEARCH = BASE_URL + "/svc/search/v2/articlesearch.json"
 BASE_LATEST_ARTICLES = BASE_URL + "/svc/news/v3/content/"
@@ -486,8 +486,7 @@ class NYTAPI:
         return parsed_result
 
     def tag_query(self, query, filter_option=None, filter_options=None, max_results=None):
-        """Load TimesTags, currently the API seems to be broken"""
-        warnings.warn("This API seems to be broken, it is still included to not break support.")
+        """Load TimesTags"""
         # Add filter options
         _filter_options = ""
         if filter_options is not None:
