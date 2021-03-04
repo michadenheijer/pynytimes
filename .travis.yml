@@ -24,12 +24,15 @@ jobs:
       before_install:
         - choco install python3 --version 3.9.2
       env: PATH=/c/Python39:/c/Python39/Scripts:$PATH
+
+  include:
+    - if: branch!=main
+      python: 3.9
+    - if: env(TRAVIS_EVENT_TYPE) = cron
+      python: 3.9
   
   allow_failures:
-    - python: "pypy3"
     - python: "nightly"
-    - os: osx
-    - os: windows
   
   fast_finish: true
 
