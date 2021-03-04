@@ -18,7 +18,7 @@ setuptools.setup(
     long_description_content_type = "text/markdown",
     author = about_module["__author__"],
     author_email = about_module["__author_email__"],
-    python_requires = ">=3.6, <3.10",
+    python_requires = ">=3.6, <4",
     packages = setuptools.find_packages(),
     include_package_data = True,
     url = about_module["__url__"],
