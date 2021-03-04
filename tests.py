@@ -166,6 +166,18 @@ class TestNewYorkTimes(unittest.TestCase):
         with self.assertRaises(TypeError):
             self.nyt.latest_articles(source=123)
 
+    def test_tag_query(self):
+        tags = self.nyt.tag_query("Obama", max_results=2)
+        self.assertIsInstance(tags, list)
+        self.assertIs(2, len(tags))
+
+    def test_tag_query_invalid(self):
+        with self.assertRaises(TypeError):
+            self.nyt.tag_query(123)
+
+        with self.assertRaises(TypeError):
+            self.nyt.tag_query("Obama", max_results="2")
+
 
 if __name__ == '__main__':
     unittest.main()

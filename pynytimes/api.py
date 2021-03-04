@@ -25,7 +25,7 @@ BASE_MOST_POPULAR = BASE_URL + "/svc/mostpopular/v2/"
 BASE_BOOKS = BASE_URL + "/svc/books/v3/"
 BASE_MOVIE_REVIEWS = BASE_URL + "/svc/movies/v2/reviews/search.json"
 BASE_META_DATA = BASE_URL + "/svc/news/v3/content.json"
-BASE_TAGS = BASE_URL + "/svc/suggest/v1/timestags.json"
+BASE_TAGS = BASE_URL + "/svc/semantic/v2/concept/suggest"
 BASE_ARCHIVE_METADATA = BASE_URL + "/svc/archive/v1/"
 BASE_ARTICLE_SEARCH = BASE_URL + "/svc/search/v2/articlesearch.json"
 BASE_LATEST_ARTICLES = BASE_URL + "/svc/news/v3/content/"
@@ -572,9 +572,14 @@ class NYTAPI:
                   filter_option: Optional[dict] = None,
                   filter_options: Optional[str] = None,
                   max_results: Optional[int] = None) -> List[str]:
-        """Load TimesTags, currently the API seems to be broken"""
-        warnings.warn(
-            "This API seems to be broken, it is still included to not break support.")
+        """Load TimesTags"""
+        # Raise error for TypeError
+        if not isinstance(query, str):
+            raise TypeError("Query needs to be str")
+
+        if not isinstance(max_results, (type(None), int)):
+            raise TypeError("Max results needs to be int")
+
         # Add filter options
         _filter_options = ""
         if filter_options is not None:
