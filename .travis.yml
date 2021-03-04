@@ -1,15 +1,45 @@
 language: python
 
-python:
-  - "3.6"
-  - "3.7"
-  - "3.8"
-  - "3.9"
-  - "pypy3"
+jobs:
+  include:
+    - name: "Python 3.6 (Linux)"
+      python: 3.6
+    - name: "Python 3.7 (Linux)"
+      python: 3.7
+    - name: "Python 3.8 (Linux)"
+      python: 3.8
+    - name: "Python 3.9 (Linux)"
+      python: 3.9
+    - name: "Python nightly (Linux)"
+      python: "nightly"
+    - name: "PyPy 3.6 (Linux)"
+      python: "pypy3"
+    - name: "Python 3.8 (MacOS)"
+      os: osx
+      osx_image: xcode12.2
+      language: shell
+    - name: "Python 3.9 (Windows)"
+      os: windows
+      language: shell
+      before_install:
+        - choco install python3 --version 3.9.2
+      env: PATH=/c/Python39:/c/Python39/Scripts:$PATH
+
+  include:
+    - if: branch!=main
+      python: 3.9
+    - if: env(TRAVIS_EVENT_TYPE) = cron
+      python: 3.9
+  
+  allow_failures:
+    - python: "nightly"
+  
+  fast_finish: true
+
 
 install:
-  - pip install .
+  - pip3 install .
 
 script:
   - export NewYorkTimesAPIKey=$NewYorkTimesAPIKey
-  - python tests.py
+  - python3 tests.py || python tests.py
