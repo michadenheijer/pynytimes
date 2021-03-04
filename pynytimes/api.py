@@ -571,7 +571,7 @@ class NYTAPI:
                   query: str,
                   filter_option: Optional[dict] = None,
                   filter_options: Optional[str] = None,
-                  max_results: Optional[int] = None) -> List[dict]:
+                  max_results: Optional[int] = None) -> List[str]:
         """Load TimesTags, currently the API seems to be broken"""
         warnings.warn(
             "This API seems to be broken, it is still included to not break support.")
