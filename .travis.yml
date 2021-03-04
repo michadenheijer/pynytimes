@@ -23,7 +23,7 @@ jobs:
       before_install:
         - choco install python3 --version 3.9.2
       env: PATH=/c/Python39:/c/Python39/Scripts:$PATH
-  
+
   allow_failures:
     - python: "nightly"
   
