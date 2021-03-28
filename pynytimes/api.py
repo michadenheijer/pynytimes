@@ -1,4 +1,5 @@
 """The wrapper is here"""
+from typing import Union, Optional, List
 
 import warnings
 import datetime
@@ -33,12 +34,21 @@ BASE_BOOK_REVIEWS = BASE_BOOKS + "reviews.json"
 BASE_BEST_SELLERS_LISTS = BASE_BOOKS + "lists/names.json"
 BASE_BEST_SELLERS_LIST = BASE_BOOKS + "lists/"
 
+
 class NYTAPI:
-    """This class interacts with the Python code, it primarily blocks wrong user input"""
-    def __init__(self, key=None, https=True, session = requests.Session(), backoff=True, user_agent=None, parse_dates=False):
+    """New York Times API Class. Interacts with user."""
+    # pylint: disable=too-many-arguments
+
+    def __init__(self,
+                 key: Optional[str] = None,
+                 https: bool = True,
+                 session: requests.Session = requests.Session(),
+                 backoff: bool = True,
+                 user_agent: Optional[str] = None,
+                 parse_dates: bool = False) -> None:
         # Set API key
         self.key = key
-        
+
         # Add session to class so connection can be reused
         self.session = session
 
@@ -54,13 +64,13 @@ class NYTAPI:
         # Set strategy to prevent HTTP 429 (Too Many Requests) errors
         if backoff:
             backoff_strategy = Retry(
-                total = 10,
-                backoff_factor = 1,
-                status_forcelist = [429, 509]
+                total=10,
+                backoff_factor=1,
+                status_forcelist=[429, 509]
             )
 
             adapter = HTTPAdapter(
-                max_retries = backoff_strategy
+                max_retries=backoff_strategy
             )
 
             self.session.mount(self.protocol + "api.nytimes.com/", adapter)
@@ -68,30 +78,43 @@ class NYTAPI:
         # Set header to show that this wrapper is used
         if user_agent is None:
             user_agent = "pynytimes/" + __version__
-        
+
         self.session.headers.update({"User-Agent": user_agent})
 
         # Raise Error if API key is not given
         if self.key is None:
-            raise ValueError("API key is not set, get an API-key from https://developer.nytimes.com.")
+            raise ValueError(
+                "API key is not set, get an API-key from https://developer.nytimes.com.")
 
-    def _load_data(self, url, options=None, location=None):
+    def _load_data(self,
+                   url: str,
+                   options: Optional[dict] = None,
+                   location: Optional[list] = None) -> List[dict]:
         """This function loads the data for the wrapper for most API use cases"""
         # Set API key in query parameters
-        params = { "api-key": self.key }
+        params = {"api-key": self.key}
 
         # Add options to query parameters
         if options is not None:
             params.update(options)
 
-        # Load the data from the API, raise error if there's an invalid status code
-        res = self.session.get(self.protocol + url, params=params, timeout=(4, 10))
+        # Load the data from the API, raise error if there's an invalid status
+        # code
+        timeout = (4, 10)
+        res = self.session.get(
+            self.protocol + url,
+            params=params,
+            timeout=timeout)
+
         if res.status_code == 401:
             raise ValueError("Invalid API Key")
-        elif res.status_code == 404:
+
+        if res.status_code == 404:
             raise RuntimeError("Error 404: This page is not available")
-        elif res.status_code == 400:
+
+        if res.status_code == 400:
             raise ValueError("Error 400: Invalid input")
+
         res.raise_for_status()
 
         if orjson is None:
@@ -113,34 +136,50 @@ class NYTAPI:
         return results
 
     @staticmethod
-    def _parse_date(date_string, date_type):
+    def _parse_date(date_string: str,
+                    date_type: str) -> Union[datetime.datetime,
+                                             datetime.date,
+                                             None]:
         """Parse the date into datetime.datetime object"""
         # If date_string is None return None
         if date_string is None:
             return None
 
         # Parse rfc3339 dates from string
-        elif date_type == "rfc3339":
+        if date_type == "rfc3339":
             if date_string[-3] == ":":
                 date_string = date_string[:-3] + date_string[-2:]
-            return datetime.datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%S%z")
+
+            return datetime.datetime.strptime(
+                date_string, "%Y-%m-%dT%H:%M:%S%z")
 
         # Parse date only strings
-        elif date_type == "date-only":
+        if date_type == "date-only":
             if re.match(r"^(\d){4}-00-00$", date_string):
-                return datetime.datetime.strptime(date_string, "%Y-00-00").date()
-            else:
-                return datetime.datetime.strptime(date_string, "%Y-%m-%d").date()
-                    
-        elif date_type == "date-time":
-                return datetime.datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
+                return datetime.datetime.strptime(
+                    date_string, "%Y-00-00").date()
 
-    def _parse_dates(self, articles, date_type, locations=[]):
+            return datetime.datetime.strptime(date_string, "%Y-%m-%d").date()
+
+        if date_type == "date-time":
+            return datetime.datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
+
+        return None
+
+    def _parse_dates(self,
+                     articles: list,
+                     date_type: str,
+                     locations: Optional[list] = None) -> List[Union[datetime.datetime,
+                                                                     datetime.date]]:
         """Parse dates to datetime"""
+        # Create list locations is None
+        if locations is None:
+            locations = []
+
         # Don't parse if parse_dates is False
         if self.parse_dates is False:
             return articles
-        
+
         # Create parsed_articles list
         parsed_articles = []
 
@@ -148,28 +187,25 @@ class NYTAPI:
         for article in articles:
             parsed_article = article
             for location in locations:
-                parsed_article[location] = self._parse_date(parsed_article[location], date_type)
+                parsed_article[location] = self._parse_date(
+                    parsed_article[location], date_type)
             parsed_articles.append(article)
 
         return parsed_articles
 
-
-    def top_stories(self, section=None):
+    def top_stories(self,
+                    section: str = "home") -> List[dict]:
         """Load the top stories"""
-        # Set default section
-        if section is None:
-            section = "home"
-
         # Raise error if section is not a str
         if not isinstance(section, str):
             raise TypeError("Section can only be a str")
 
         # Set the URL the data can be loaded from, and load the data
         url = BASE_TOP_STORIES + section + ".json"
-        
+
         try:
             result = self._load_data(url)
-        
+
         # If 404 error throw invalid section name error
         except RuntimeError:
             raise ValueError("Invalid section name")
@@ -180,12 +216,10 @@ class NYTAPI:
 
         return parsed_result
 
-    def most_viewed(self, days=None):
+    def most_viewed(self,
+                    days: int = 1) -> List[dict]:
         """Load most viewed articles"""
-        # Set amount of days for top stories
         days_options = [1, 7, 30]
-        if days is None:
-            days = 1
 
         # Raise an Exception if days is not a int
         if not isinstance(days, int):
@@ -199,12 +233,16 @@ class NYTAPI:
         url = BASE_MOST_POPULAR + "viewed/" + str(days) + ".json"
         result = self._load_data(url)
 
-        parsed_date_result = self._parse_dates(result, "date-only", ["published_date"])
-        parsed_result = self._parse_dates(parsed_date_result, "date-time", ["updated"])
+        parsed_date_result = self._parse_dates(
+            result, "date-only", ["published_date"])
+        parsed_result = self._parse_dates(
+            parsed_date_result, "date-time", ["updated"])
 
         return parsed_result
 
-    def most_shared(self, days = 1, method="email"):
+    def most_shared(self,
+                    days: int = 1,
+                    method: str = "email") -> List[dict]:
         """Load most shared articles"""
         # Check if options are valid
         method_options = ["email", "facebook"]
@@ -229,31 +267,39 @@ class NYTAPI:
         url = BASE_MOST_POPULAR
 
         if method is None:
-            url +=  "shared/" + str(days) + ".json"
+            url += "shared/" + str(days) + ".json"
         elif method == "email":
             url += "emailed/" + str(days) + ".json"
         else:
             url += "shared/" + str(days) + "/" + method + ".json"
-        
+
         # Load the data
         result = self._load_data(url)
 
         # Parse the date_strings into datetime.datetime
-        parsed_date_result = self._parse_dates(result, "date-only", ["published_date"])
-        parsed_result = self._parse_dates(parsed_date_result, "date-time", ["updated"])
+        parsed_date_result = self._parse_dates(
+            result, "date-only", ["published_date"])
+        parsed_result = self._parse_dates(
+            parsed_date_result, "date-time", ["updated"])
 
         return parsed_result
 
-    def book_reviews(self, author=None, isbn=None, title=None):
+    def book_reviews(self,
+                     author: Optional[str] = None,
+                     isbn: Union[str, int, None] = None,
+                     title: Optional[str] = None) -> List[dict]:
         """Load book reviews"""
         # Check if request is valid
         if author and isbn and title is None:
             raise ValueError("Not all fields in reviews can be empty")
 
-        if int(isbn is not None) + int(title is not None) + int(author is not None) != 1:
-            raise ValueError("You can only define one of the following: ISBN, author or title.")
+        if int(isbn is not None) + int(title is not None) + \
+                int(author is not None) != 1:
+            raise ValueError(
+                "You can only define one of the following: ISBN, author or title.")
 
-        # Set request options params and raise error if author is not a str, isbn is not a str or int, or title is not a str
+        # Set request options params and raise error if author is not a str,
+        # isbn is not a str or int, or title is not a str
         options = {}
         if author is not None:
             if not isinstance(author, str):
@@ -274,21 +320,29 @@ class NYTAPI:
         url = BASE_BOOK_REVIEWS
         result = self._load_data(url, options=options)
 
-        parsed_result = self._parse_dates(result, "date-only", ["publication_dt"])
+        parsed_result = self._parse_dates(
+            result, "date-only", ["publication_dt"])
         return parsed_result
 
-    def best_sellers_lists(self):
+    def best_sellers_lists(self) -> List[dict]:
         """Load all the best seller lists"""
         # Set URL, load and return data
         url = BASE_BEST_SELLERS_LISTS
 
         result = self._load_data(url)
 
-        parsed_result = self._parse_dates(result, "date-only", ["oldest_published_date", "newest_published_date"])
+        parsed_result = self._parse_dates(
+            result, "date-only", ["oldest_published_date", "newest_published_date"])
         return parsed_result
 
-    def best_sellers_list(self, date=None, name=None):
+    def best_sellers_list(self,
+                          date: Union[datetime.date, datetime.datetime, None] = None,
+                          name: str = "combined-print-and-e-book-fiction") -> List[dict]:
         """Load a best seller list"""
+        # Convert datetime.date into datetime.datetime
+        if isinstance(date, datetime.date):
+            date = datetime.datetime(date.year, date.month, date.day)
+
         # Set valid date
         if date is None:
             _date = "current"
@@ -301,13 +355,9 @@ class NYTAPI:
         else:
             _date = date.strftime("%Y-%m-%d")
 
-        # Set best seller list if not defined
-        if name is None:
-            name = "combined-print-and-e-book-fiction"
-
         # Set URL and include data
         url = BASE_BEST_SELLERS_LIST + _date + "/" + name + ".json"
-        
+
         # Set location in JSON of results, load and return data
         location = ["results", "books"]
         try:
@@ -317,7 +367,10 @@ class NYTAPI:
 
         return result
 
-    def movie_reviews(self, keyword=None, options=None, dates=None):
+    def movie_reviews(self,
+                      keyword: Optional[str] = None,
+                      options: Optional[dict] = None,
+                      dates: Optional[dict] = None) -> List[dict]:
         """Load movie reviews"""
         # Set options and dates if not defined
         if options is None:
@@ -330,21 +383,24 @@ class NYTAPI:
         if not isinstance(keyword, (str, type(None))):
             raise TypeError("Keyword needs to be str")
 
-        #Raise error if options or date is not a dict
+        # Raise error if options or date is not a dict
         if not isinstance(options, dict):
             raise TypeError("Options needs to be dict")
 
         if not isinstance(dates, dict):
             raise TypeError("Dates needs to be dict")
 
-        # Raise error if dates in date is not a datetime.date or datetime.datetime object
+        # Raise error if dates in date is not a datetime.date or
+        # datetime.datetime object
         for date in dates.items():
             if not isinstance(date[1], (datetime.datetime, datetime.date)):
-                raise TypeError("Date items need to be datetime.date or datetime.datetime")
+                raise TypeError(
+                    "Date items need to be datetime.date or datetime.datetime")
 
             # Convert datetime.date to datetime.datetime
-            if isinstance(date[1], (datetime.date)):
-                dates[date[0]] = datetime.datetime(date[1].year, date[1].month, date[1].day)
+            if isinstance(date[1], datetime.date):
+                dates[date[0]] = datetime.datetime(
+                    date[1].year, date[1].month, date[1].day)
 
         if options.get("max_results") is None:
             options["max_results"] = 20
@@ -359,16 +415,23 @@ class NYTAPI:
         if not isinstance(options.get("order"), (str, type(None))):
             raise TypeError("Order needs to be a string")
 
-        if options.get("order") not in [None, "by-opening-date", "by-publication-date", "by-title"]:
+        order_options = [
+            None,
+            "by-opening-date",
+            "by-publication-date",
+            "by-title"]
+
+        if options.get("order") not in order_options:
             raise ValueError("Order is not a valid option")
 
-        # Define a date if neccecary and convert all data to valid data for API request
+        # Define a date if neccecary and convert all data to valid data for API
+        # request
         if options.get("opening_date_end") is not None \
-        and options.get("opening_date_start") is None:
+                and options.get("opening_date_start") is None:
             options["opening_date_start"] = datetime.datetime(1900, 1, 1)
 
         if options.get("publication_date_end") is not None \
-        and options.get("opening_date_start") is None:
+                and options.get("opening_date_start") is None:
             options["opening_date_start"] = datetime.datetime(1900, 1, 1)
 
         _opening_dates = None
@@ -376,16 +439,21 @@ class NYTAPI:
         _critics_pick = None
 
         if options.get("opening_date_start") is not None:
-            _opening_dates = options.get("opening_date_start").strftime("%Y-%m-%d") + ";"
+            _opening_dates = options["opening_date_start"].strftime(
+                "%Y-%m-%d")
+            _opening_dates += ";"
 
         if options.get("opening_date_end") is not None:
-            _opening_dates += options.get("opening_date_end").strftime("%Y-%m-%d")
+            _opening_dates += options["opening_date_end"].strftime("%Y-%m-%d")
 
         if options.get("publication_date_start") is not None:
-            _publication_dates = options.get("opening_date_start").strftime("%Y-%m-%d") + ";"
+            _publication_dates = options["opening_date_start"].strftime(
+                "%Y-%m-%d")
+            _publication_dates += ";"
 
         if options.get("publication_date_end") is not None:
-            _publication_dates += options.get("opening_date_end").strftime("%Y-%m-%d")
+            _publication_dates += options["opening_date_end"].strftime(
+                "%Y-%m-%d")
 
         if options.get("critics_pick") is True:
             _critics_pick = "Y"
@@ -413,13 +481,13 @@ class NYTAPI:
         results = []
 
         # Keep loading data until amount of results is received
-        for i in range(math.ceil(options["max_results"]/20)):
+        for i in range(math.ceil(options["max_results"] / 20)):
             # Set offset for second request
-            offset = i*20
+            offset = i * 20
             params["offset"] = str(offset)
 
             # Load the data from the API and raise if there's an Error
-            res = self._load_data(url, options = params, location = [])
+            res = self._load_data(url, options=params, location=[])
 
             results += res.get("results")
 
@@ -428,19 +496,22 @@ class NYTAPI:
                 break
 
         # Parse and return the results
-        parsed_date_results = self._parse_dates(results, "date-only", ["publication_date", "opening_date"])
-        parsed_results = self._parse_dates(parsed_date_results, "date-time", ["date_updated"])
+        parsed_date_results = self._parse_dates(
+            results, "date-only", ["publication_date", "opening_date"])
+        parsed_results = self._parse_dates(
+            parsed_date_results, "date-time", ["date_updated"])
 
         return parsed_results
 
-    def article_metadata(self, url):
+    def article_metadata(self,
+                         url: str) -> List[dict]:
         """Load the metadata from an article"""
         # Raise error if url is not an str
         if not isinstance(url, str):
             raise TypeError("URL needs to be str")
 
         # Set metadata in requests params and define URL
-        options = { "url": url }
+        options = {"url": url}
         url = BASE_META_DATA
 
         # Load, parse and return the data
@@ -448,19 +519,26 @@ class NYTAPI:
 
         # Check if result is valid
         if result[0].get("published_date") == "0000-12-31T19:03:58-04:56":
-            raise ValueError("Invalid URL, the API cannot parse metadata from live articles")
+            raise ValueError(
+                "Invalid URL, the API cannot parse metadata from live articles")
 
-        date_locations = ["updated_date", "created_date", "published_date", "first_published_date"]
+        date_locations = [
+            "updated_date",
+            "created_date",
+            "published_date",
+            "first_published_date"]
         parsed_result = self._parse_dates(result, "rfc3339", date_locations)
         return parsed_result
 
-    def section_list(self):
+    def section_list(self) -> List[dict]:
         """Load all sections"""
         # Set URL, load and return the data
         url = BASE_SECTION_LIST
         return self._load_data(url)
 
-    def latest_articles(self, source = "all", section = "all"):
+    def latest_articles(self,
+                        source: str = "all",
+                        section: str = "all") -> List[dict]:
         """Load the latest articles"""
         if not isinstance(source, str):
             raise TypeError("Source needs to be str")
@@ -481,11 +559,19 @@ class NYTAPI:
         except RuntimeError:
             raise ValueError("Section is not a valid option")
 
-        date_locations = ["updated_date", "created_date", "published_date", "first_published_date"]
+        date_locations = [
+            "updated_date",
+            "created_date",
+            "published_date",
+            "first_published_date"]
         parsed_result = self._parse_dates(result, "rfc3339", date_locations)
         return parsed_result
 
-    def tag_query(self, query, filter_option=None, filter_options=None, max_results=None):
+    def tag_query(self,
+                  query: str,
+                  filter_option: Optional[dict] = None,
+                  filter_options: Optional[str] = None,
+                  max_results: Optional[int] = None) -> List[str]:
         """Load TimesTags"""
         # Raise error for TypeError
         if not isinstance(query, str):
@@ -520,7 +606,9 @@ class NYTAPI:
         url = BASE_TAGS
         return self._load_data(url, options=options, location=[])[1]
 
-    def archive_metadata(self, date):
+    def archive_metadata(self,
+                         date: Union[datetime.datetime,
+                                     datetime.date]) -> List[dict]:
         """Load all the metadata from one month"""
         # Also accept datetime.date, convert it to datetime.datetime
         if isinstance(date, datetime.date):
@@ -543,13 +631,19 @@ class NYTAPI:
         return parsed_result
 
     @staticmethod
-    def _article_search_search_options_helper(options):
+    def _article_search_search_options_helper(options: dict) -> dict:
         """"Help to create all fq queries"""
+        # pylint: disable=invalid-name
         # Get options already defined in fq (filter query)
         fq = options.get("fq")
 
         # Set query options that are currently supported
-        current_filter_support = ["source", "news_desk", "section_name", "glocation", "type_of_material"]
+        current_filter_support = [
+            "source",
+            "news_desk",
+            "section_name",
+            "glocation",
+            "type_of_material"]
 
         # Run for every filter
         for _filter in current_filter_support:
@@ -585,12 +679,23 @@ class NYTAPI:
         # If filter query was defined set fq
         if fq is not None:
             options["fq"] = fq
-        
+
         # Return the options
         return options
 
-    def article_search(self, query=None, dates={}, options={}, results=None):
+    def article_search(self,
+                       query: Optional[str] = None,
+                       dates: Optional[dict] = None,
+                       options: Optional[dict] = None,
+                       results: int = 10) -> List[dict]:
         """Load articles from search"""
+        # Set if None
+        if dates is None:
+            dates = {}
+
+        if options is None:
+            options = {}
+
         # Raise error if invalid parameters
         if not isinstance(query, (str, type(None))):
             raise TypeError("Query needs to be None or str")
@@ -620,10 +725,6 @@ class NYTAPI:
         # Set dates
         _begin_date = None
         _end_date = None
-
-        # Show default amount of results if undefined
-        if results is None:
-            results = 10
 
         # Show warnings when a lot of results are requested
         if results >= 100:
@@ -663,19 +764,19 @@ class NYTAPI:
 
         # Set result list and add request as much data as needed
         result = []
-        for i in range(math.ceil(results/10)):
+        for i in range(math.ceil(results / 10)):
             # Set page
             options["page"] = str(i)
 
             location = ["response"]
             # Load data and raise error if there's and error status
-            res = self._load_data(url, options = options, location = location)
+            res = self._load_data(url, options=options, location=location)
 
             # Parse results and append them to results list
             result += res.get("docs")
 
             # Stop loading if all responses are already loaded
-            if res.get("meta").get("hits") <= i*10:
+            if res.get("meta").get("hits") <= i * 10:
                 break
 
         # Parse and return results
@@ -683,5 +784,6 @@ class NYTAPI:
         return parsed_result
 
     # Allow the option to close the session
-    def close(self):
+    def close(self) -> None:
+        """Close session"""
         self.session.close()

@@ -1,3 +1,4 @@
+"""Version data for the pynytimes library"""
 __title__ = "pynytimes"
 __description__ = "A Python wrapper for (most) New York Times APIs"
 __url__ = "https://github.com/michadenheijer/pynytimes"
