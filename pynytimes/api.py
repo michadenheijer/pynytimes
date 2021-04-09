@@ -85,6 +85,9 @@ class NYTAPI:
         if self.key is None:
             raise ValueError(
                 "API key is not set, get an API-key from https://developer.nytimes.com.")
+    
+    def __enter__(self) -> None:
+        return self
 
     def _load_data(self,
                    url: str,
@@ -787,3 +790,12 @@ class NYTAPI:
     def close(self) -> None:
         """Close session"""
         self.session.close()
+
+    # Close session before delete
+    def __del__(self) -> None:
+        """Close session on deletion"""
+        self.close()
+
+    def __exit__(self, *args) -> None:
+        """Close session on exit"""
+        self.close()
