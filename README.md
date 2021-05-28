@@ -45,11 +45,7 @@ Then you can simply add your API key (get your API key from [The New York Times 
 nyt = NYTAPI("Your API key", parse_dates=True)
 ```
 
-**Optionally you can also set to use ```http``` instead of ```https```.**
-```python
-nyt = NYTAPI("Your API key", https=False)
-```
-
+**Make sure that if you commit your code to GitHub you [don't accidentially commit your API key](https://towardsdatascience.com/how-to-hide-your-api-keys-in-python-fb2e1a61b0a0).**
 
 | Variables        | Description                                                           | Data type                       | Required | Default                   |
 |------------------|-----------------------------------------------------------------------|---------------------------------|----------|---------------------------|
@@ -188,10 +184,10 @@ articles = nyt.article_search(
 
 #### ```dates```
 
-| Variables       | Description                                        | Data type               | Required |
-|-----------------|----------------------------------------------------|-------------------------|----------|
-| ```begin```     | Results should be published at or after this date  | ```datetime.datetime``` | False    |
-| ```end```       | Results should be published at or before this date | ```datetime.datetime``` | False    |
+| Variables       | Description                                        | Data type                                      | Required |
+|-----------------|----------------------------------------------------|------------------------------------------------|----------|
+| ```begin```     | Results should be published at or after this date  | ```datetime.datetime``` or ```datetime.date``` | False    |
+| ```end```       | Results should be published at or before this date | ```datetime.datetime``` or ```datetime.date``` | False    |
 
 #### ````options````
 
