@@ -1,8 +1,11 @@
 from pynytimes import NYTAPI
 
-# Make sure to turn parse dates on so that the dates
+# Make sure to set parse dates to True so that the dates
 # are parsed into datetime.datetime or datetime.date objects
-nyt = NYTAPI("API Key", parse_dates=True)
+nyt = NYTAPI(
+    key="Your API Key",  # Get your API Key at https://developer.nytimes.com
+    parse_dates=True,
+)
 
 # Get top stories
 top_stories = nyt.top_stories()
