@@ -374,6 +374,6 @@ nyt.close()
 
 ## License
 
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fmichadenheijer%2Fpynytimes.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fmichadenheijer%2Fpynytimes?ref=badge_large)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **Disclaimer**: *This project is not made by anyone from the New York Times, nor is it affiliated with The New York Times Company.*
