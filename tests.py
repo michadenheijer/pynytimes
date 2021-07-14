@@ -6,12 +6,17 @@ from pynytimes import NYTAPI
 
 API_KEY = os.environ["NewYorkTimesAPIKey"]
 
+
 class TestNewYorkTimes(unittest.TestCase):
     def setUp(self):
         self.nyt = NYTAPI(API_KEY, parse_dates=True)
 
     def tearDown(self):
         self.nyt.close()
+
+    def test_empty_api_key(self):
+        with self.assertRaises(ValueError):
+            NYTAPI()
 
     def test_top_stories(self):
         top_stories = self.nyt.top_stories()
@@ -84,9 +89,11 @@ class TestNewYorkTimes(unittest.TestCase):
         self.assertIsInstance(best_sellers_lists, list)
 
     def test_best_seller_list(self):
-        best_seller_list = self.nyt.best_sellers_list(date = datetime.datetime(2019, 1, 1), name = "hardcover-fiction")
+        best_seller_list = self.nyt.best_sellers_list(
+            date=datetime.datetime(2019, 1, 1), name="hardcover-fiction"
+        )
         self.assertIsInstance(best_seller_list, list)
-        
+
     def test_best_seller_list_invalid(self):
         with self.assertRaises(ValueError):
             self.nyt.best_sellers_list(name="not a name")
@@ -97,7 +104,7 @@ class TestNewYorkTimes(unittest.TestCase):
     def test_movie_reviews(self):
         movie_reviews = self.nyt.movie_reviews()
         self.assertIsInstance(movie_reviews, list)
-        
+
         for movie_review in movie_reviews:
             self.assertIsInstance(movie_review, dict)
 
@@ -106,7 +113,9 @@ class TestNewYorkTimes(unittest.TestCase):
             self.nyt.movie_reviews(keyword=123)
 
     def test_article_metadata(self):
-        article_metadata = self.nyt.article_metadata("https://www.nytimes.com/live/2021/02/10/us/impeachment-trial/prosecutors-begin-arguments-against-trump-saying-he-became-the-inciter-in-chief-of-a-dangerous-insurrection")
+        article_metadata = self.nyt.article_metadata(
+            "https://www.nytimes.com/live/2021/02/10/us/impeachment-trial/prosecutors-begin-arguments-against-trump-saying-he-became-the-inciter-in-chief-of-a-dangerous-insurrection"
+        )
         self.assertIsInstance(article_metadata, list)
         for article in article_metadata:
             self.assertIsInstance(article, dict)
@@ -126,7 +135,6 @@ class TestNewYorkTimes(unittest.TestCase):
         self.assertIsInstance(archive_metadata, list)
         for metadata in archive_metadata:
             self.assertIsInstance(metadata, dict)
-
 
     def test_archive_metadata_invalid(self):
         with self.assertRaises(TypeError):
@@ -158,7 +166,7 @@ class TestNewYorkTimes(unittest.TestCase):
     def test_latest_articles(self):
         latest_articles = self.nyt.latest_articles()
         self.assertIsInstance(latest_articles, list)
-        
+
         for article in latest_articles:
             self.assertIsInstance(article, dict)
 
@@ -179,5 +187,5 @@ class TestNewYorkTimes(unittest.TestCase):
             self.nyt.tag_query("Obama", max_results="2")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
