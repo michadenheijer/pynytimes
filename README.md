@@ -372,6 +372,15 @@ Optionally you close the ```requests.Session()``` connection with the New York T
 nyt.close()
 ```
 
+### ```with``` usage
+
+If you want to auto close the connection then usage using the ```with``` statement is supported.
+
+```python
+with NYTAPI("Your API Key", parse_dates=True) as nyt:
+    nyt.most_viewed()
+```
+
 ## License
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
