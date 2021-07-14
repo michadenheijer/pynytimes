@@ -1,13 +1,13 @@
 """The wrapper is here"""
+# Import typings dependencies
+from __future__ import annotations
+from typing import Any, Union, Optional
+
 # Import standard Python dependencies
 import warnings
 import datetime
 import math
 import re
-
-# Import typings dependencies
-from __future__ import annotations
-from typing import Any, Union, Optional
 
 # Import other dependencies
 from requests import Session
