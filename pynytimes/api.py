@@ -661,7 +661,7 @@ class NYTAPI:
 
     @staticmethod
     def _article_search_search_options_helper(options: dict) -> dict:
-        """"Help to create all fq queries"""
+        """ "Help to create all fq queries"""
         # pylint: disable=invalid-name
         # Get options already defined in fq (filter query)
         fq = options.get("fq")
@@ -828,7 +828,8 @@ class NYTAPI:
     # Allow the option to close the session
     def close(self) -> None:
         """Close session"""
-        self.session.close()
+        if self.session:
+            self.session.close()
 
     # Close session before delete
     def __del__(self) -> None:
