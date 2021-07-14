@@ -54,30 +54,46 @@ class NYTAPI:
         user_agent: Optional[str] = None,
         parse_dates: bool = False,
     ) -> NYTAPI:
-        # Raise Error if API key is not given
+        # Raise Error if API key is not given, or wrong type
         if key is None:
             raise ValueError(
                 "API key is not set, get an API-key from https://developer.nytimes.com."
             )
 
+        if not isinstance(key, str):
+            raise TypeError("API key needs to be str")
+
         # Set API key
         self.key: str = key
 
-        # Add session to class so connection can be reused
+        # Check if session is Session, add session to class so connection can be reused
         if session is None:
             session = Session()
+
+        if not isinstance(session, Session):
+            raise TypeError("Session needs to be a Session object")
+
         self.session = session
 
-        # Optionally parse dates
+        # Check if parse_dates is bool, if correct set parse_dates
+        if not isinstance(parse_dates, bool):
+            raise TypeError("parse_dates needs to be bool")
+
         self.parse_dates = parse_dates
 
         # Define protocol to be used
+        if not isinstance(https, bool):
+            raise TypeError("https needs to be bool")
+
         if https:
             self.protocol = "https://"
         else:
             self.protocol = "http://"
 
         # Set strategy to prevent HTTP 429 (Too Many Requests) errors
+        if not isinstance(backoff, bool):
+            raise TypeError("backoff needs to be bool")
+
         if backoff:
             backoff_strategy = Retry(
                 total=10, backoff_factor=1, status_forcelist=[429, 509]
@@ -90,6 +106,9 @@ class NYTAPI:
         # Set header to show that this wrapper is used
         if user_agent is None:
             user_agent = "pynytimes/" + __version__
+
+        if not isinstance(user_agent, str):
+            raise TypeError("user_agent needs to be str")
 
         self.session.headers.update({"User-Agent": user_agent})
 
@@ -112,14 +131,17 @@ class NYTAPI:
         timeout = (4, 10)
         res = self.session.get(self.protocol + url, params=params, timeout=timeout)
 
-        if res.status_code == 401:
-            raise ValueError("Invalid API Key")
-
-        if res.status_code == 404:
-            raise RuntimeError("Error 404: This page is not available")
-
         if res.status_code == 400:
             raise ValueError("Error 400: Invalid input")
+
+        if res.status_code == 401:
+            raise ValueError("Error 401: Invalid API Key")
+
+        if res.status_code == 403:
+            raise RuntimeError("Error 403: You don't have access to this page")
+
+        if res.status_code == 404:
+            raise RuntimeError("Error 404: This page does not exist")
 
         res.raise_for_status()
 
@@ -151,8 +173,9 @@ class NYTAPI:
         if date_string is None:
             return None
 
-        # Parse rfc3339 dates from string
+        # Parse rfc3339 dates from str
         if date_type == "rfc3339":
+            # This if statement is to make it compatible with Python 3.6
             if date_string[-3] == ":":
                 date_string = date_string[:-3] + date_string[-2:]
 
