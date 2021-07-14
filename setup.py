@@ -24,7 +24,7 @@ setuptools.setup(
     url = about_module["__url__"],
     license = about_module["__license__"],
     install_requires = [
-        "requests==2.25.1",
+        "requests==2.26.0",
         "urllib3"
     ],
     classifiers = [
