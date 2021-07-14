@@ -1,19 +1,24 @@
 """The wrapper is here"""
-from typing import NoReturn, Union, Optional, List
+# Import typings dependencies
+from __future__ import annotations
+from typing import Any, Union, Optional
 
+# Import standard Python dependencies
 import warnings
 import datetime
 import math
 import re
 
+# Import other dependencies
+from requests import Session
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+
+# Try importing orjson, if not available just ignore
 try:
     import orjson
 except ImportError:
     orjson = None
-
-import requests
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
 
 # Import version from __init__
 from .__version__ import __version__
@@ -44,15 +49,23 @@ class NYTAPI:
         self,
         key: Optional[str] = None,
         https: bool = True,
-        session: requests.Session = requests.Session(),
+        session: Optional[Session] = None,
         backoff: bool = True,
         user_agent: Optional[str] = None,
         parse_dates: bool = False,
-    ) -> None:
+    ) -> NYTAPI:
+        # Raise Error if API key is not given
+        if key is None:
+            raise ValueError(
+                "API key is not set, get an API-key from https://developer.nytimes.com."
+            )
+
         # Set API key
-        self.key = key
+        self.key: str = key
 
         # Add session to class so connection can be reused
+        if session is None:
+            session = Session()
         self.session = session
 
         # Optionally parse dates
@@ -80,18 +93,12 @@ class NYTAPI:
 
         self.session.headers.update({"User-Agent": user_agent})
 
-        # Raise Error if API key is not given
-        if self.key is None:
-            raise ValueError(
-                "API key is not set, get an API-key from https://developer.nytimes.com."
-            )
-
-    def __enter__(self) -> None:
+    def __enter__(self) -> NYTAPI:
         return self
 
     def _load_data(
         self, url: str, options: Optional[dict] = None, location: Optional[list] = None
-    ) -> List[dict]:
+    ) -> list[dict[str, Any]]:
         """This function loads the data for the wrapper for most API use cases"""
         # Set API key in query parameters
         params = {"api-key": self.key}
@@ -117,11 +124,12 @@ class NYTAPI:
         res.raise_for_status()
 
         if orjson is None:
-            parsed_res = res.json()
+            parsed_res: dict[str, Any] = res.json()
         else:
-            parsed_res = orjson.loads(res.content)
+            parsed_res: dict[str, Any] = orjson.loads(res.content)
 
         # Get the data from the usual results location
+        results: dict[str, Any]
         if location is None:
             results = parsed_res.get("results")
 
@@ -164,7 +172,7 @@ class NYTAPI:
 
     def _parse_dates(
         self, articles: list, date_type: str, locations: Optional[list] = None
-    ) -> List[Union[datetime.datetime, datetime.date]]:
+    ) -> list[dict[str, Any]]:
         """Parse dates to datetime"""
         # Create list locations is None
         if locations is None:
@@ -188,7 +196,7 @@ class NYTAPI:
 
         return parsed_articles
 
-    def top_stories(self, section: str = "home") -> List[dict]:
+    def top_stories(self, section: str = "home") -> list[dict[str, Any]]:
         """Load the top stories"""
         # Raise error if section is not a str
         if not isinstance(section, str):
@@ -210,7 +218,7 @@ class NYTAPI:
 
         return parsed_result
 
-    def most_viewed(self, days: int = 1) -> List[dict]:
+    def most_viewed(self, days: int = 1) -> list[dict[str, Any]]:
         """Load most viewed articles"""
         days_options = [1, 7, 30]
 
@@ -231,7 +239,7 @@ class NYTAPI:
 
         return parsed_result
 
-    def most_shared(self, days: int = 1, method: str = "email") -> List[dict]:
+    def most_shared(self, days: int = 1, method: str = "email") -> list[dict[str, Any]]:
         """Load most shared articles"""
         # Check if options are valid
         method_options = ["email", "facebook"]
@@ -276,7 +284,7 @@ class NYTAPI:
         author: Optional[str] = None,
         isbn: Union[str, int, None] = None,
         title: Optional[str] = None,
-    ) -> List[dict]:
+    ) -> list[dict[str, Any]]:
         """Load book reviews"""
         # Check if request is valid
         if author and isbn and title is None:
@@ -315,7 +323,7 @@ class NYTAPI:
         parsed_result = self._parse_dates(result, "date-only", ["publication_dt"])
         return parsed_result
 
-    def best_sellers_lists(self) -> List[dict]:
+    def best_sellers_lists(self) -> list[dict[str, Any]]:
         """Load all the best seller lists"""
         # Set URL, load and return data
         url = BASE_BEST_SELLERS_LISTS
@@ -331,7 +339,7 @@ class NYTAPI:
         self,
         date: Union[datetime.date, datetime.datetime, None] = None,
         name: str = "combined-print-and-e-book-fiction",
-    ) -> List[dict]:
+    ) -> list[dict[str, Any]]:
         """Load a best seller list"""
         # Convert datetime.date into datetime.datetime
         if isinstance(date, datetime.date):
@@ -366,7 +374,7 @@ class NYTAPI:
         keyword: Optional[str] = None,
         options: Optional[dict] = None,
         dates: Optional[dict] = None,
-    ) -> List[dict]:
+    ) -> list[dict[str, Any]]:
         """Load movie reviews"""
         # Set options and dates if not defined
         if options is None:
@@ -500,7 +508,7 @@ class NYTAPI:
 
         return parsed_results
 
-    def article_metadata(self, url: str) -> List[dict]:
+    def article_metadata(self, url: str) -> list[dict[str, Any]]:
         """Load the metadata from an article"""
         # Raise error if url is not an str
         if not isinstance(url, str):
@@ -528,13 +536,15 @@ class NYTAPI:
         parsed_result = self._parse_dates(result, "rfc3339", date_locations)
         return parsed_result
 
-    def section_list(self) -> List[dict]:
+    def section_list(self) -> list[dict[str, Any]]:
         """Load all sections"""
         # Set URL, load and return the data
         url = BASE_SECTION_LIST
         return self._load_data(url)
 
-    def latest_articles(self, source: str = "all", section: str = "all") -> List[dict]:
+    def latest_articles(
+        self, source: str = "all", section: str = "all"
+    ) -> list[dict[str, Any]]:
         """Load the latest articles"""
         if not isinstance(source, str):
             raise TypeError("Source needs to be str")
@@ -570,7 +580,7 @@ class NYTAPI:
         filter_option: Optional[dict] = None,
         filter_options: Optional[str] = None,
         max_results: Optional[int] = None,
-    ) -> List[str]:
+    ) -> list[str]:
         """Load TimesTags"""
         # Raise error for TypeError
         if not isinstance(query, str):
@@ -604,7 +614,7 @@ class NYTAPI:
 
     def archive_metadata(
         self, date: Union[datetime.datetime, datetime.date]
-    ) -> List[dict]:
+    ) -> list[dict[str, Any]]:
         """Load all the metadata from one month"""
         # Also accept datetime.date, convert it to datetime.datetime
         if isinstance(date, datetime.date):
@@ -686,7 +696,7 @@ class NYTAPI:
         dates: Optional[dict] = None,
         options: Optional[dict] = None,
         results: int = 10,
-    ) -> List[dict]:
+    ) -> list[dict[str, Any]]:
         """Load articles from search"""
         # Set if None
         if dates is None:
