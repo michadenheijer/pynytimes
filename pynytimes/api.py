@@ -117,7 +117,7 @@ class NYTAPI:
     def _get_from_location(
         parsed_res: dict[str, Any],
         location: Optional[list[str]],
-    ):
+    ) -> list[dict[str, Any]]:
         # Get the data from the usual results location
         results: dict[str, Any]
         if location is None:
@@ -138,7 +138,7 @@ class NYTAPI:
         url: str,
         options: Optional[dict[str, Any]] = None,
         location: Optional[list[str]] = None,
-    ) -> list[dict[str, Any]]:
+    ) -> Union[list[dict[str, Any]], dict[str, Any]]:
         """This function loads the data for the wrapper for most API use cases"""
         # Set API key in query parameters
         params = {"api-key": self.key}
@@ -415,6 +415,49 @@ class NYTAPI:
 
         return result
 
+    @staticmethod
+    def _movie_reviews_dates_helper(
+        dates: Optional[dict[str, Union[datetime.date, datetime.datetime]]],
+    ):
+        params = {}
+
+        # Define a date if neccecary and convert all data to valid data for API
+        # request
+        if (
+            dates.get("opening_date_end") is not None
+            and dates.get("opening_date_start") is None
+        ):
+            dates["opening_date_start"] = datetime.datetime(1900, 1, 1)
+
+        if (
+            dates.get("publication_date_end") is not None
+            and dates.get("opening_date_start") is None
+        ):
+            dates["opening_date_start"] = datetime.datetime(1900, 1, 1)
+
+        # Insert the dates in the options dictionary
+        _opening_dates = None
+        _publication_dates = None
+
+        if dates.get("opening_date_start") is not None:
+            _opening_dates = dates["opening_date_start"].strftime("%Y-%m-%d")
+            _opening_dates += ";"
+
+        if dates.get("opening_date_end") is not None:
+            _opening_dates += dates["opening_date_end"].strftime("%Y-%m-%d")
+
+        if dates.get("publication_date_start") is not None:
+            _publication_dates = dates["opening_date_start"].strftime("%Y-%m-%d")
+            _publication_dates += ";"
+
+        if dates.get("publication_date_end") is not None:
+            _publication_dates += dates["opening_date_end"].strftime("%Y-%m-%d")
+
+        params["opening-date"] = _opening_dates
+        params["publication-date"] = _publication_dates
+
+        return params
+
     def movie_reviews(
         self,
         keyword: Optional[str] = None,
@@ -450,22 +493,11 @@ class NYTAPI:
 
             # Convert datetime.date to datetime.datetime
             if isinstance(date[1], datetime.date):
-                dates[date[0]] = datetime.datetime(
-                    date[1].year, date[1].month, date[1].day
-                )
-
-        if options.get("max_results") is None:
-            options["max_results"] = 20
-
-        # Set request options if defined
-        options["opening_date_start"] = dates.get("opening_date_start")
-        options["opening_date_end"] = dates.get("opening_date_end")
-        options["publication_date_start"] = dates.get("publication_date_start")
-        options["publication_date_end"] = dates.get("publication_date_end")
+                dates[date[0]] = datetime.datetime.combine(date[1], datetime.time.min)
 
         # Raise error if invalid option
         if not isinstance(options.get("order"), (str, type(None))):
-            raise TypeError("Order needs to be a string")
+            raise TypeError("Order needs to be a str or None")
 
         order_options = [
             None,
@@ -477,45 +509,16 @@ class NYTAPI:
         if options.get("order") not in order_options:
             raise ValueError("Order is not a valid option")
 
-        # Define a date if neccecary and convert all data to valid data for API
-        # request
-        if (
-            options.get("opening_date_end") is not None
-            and options.get("opening_date_start") is None
-        ):
-            options["opening_date_start"] = datetime.datetime(1900, 1, 1)
-
-        if (
-            options.get("publication_date_end") is not None
-            and options.get("opening_date_start") is None
-        ):
-            options["opening_date_start"] = datetime.datetime(1900, 1, 1)
-
-        _opening_dates = None
-        _publication_dates = None
+        # Check if critics_pick is bool
         _critics_pick = None
-
-        if options.get("opening_date_start") is not None:
-            _opening_dates = options["opening_date_start"].strftime("%Y-%m-%d")
-            _opening_dates += ";"
-
-        if options.get("opening_date_end") is not None:
-            _opening_dates += options["opening_date_end"].strftime("%Y-%m-%d")
-
-        if options.get("publication_date_start") is not None:
-            _publication_dates = options["opening_date_start"].strftime("%Y-%m-%d")
-            _publication_dates += ";"
-
-        if options.get("publication_date_end") is not None:
-            _publication_dates += options["opening_date_end"].strftime("%Y-%m-%d")
+        if not isinstance(options.get("critics_pick", False), bool):
+            raise TypeError("Critics Pick needs to be a bool")
 
         if options.get("critics_pick") is True:
             _critics_pick = "Y"
-        elif not isinstance(options.get("critics_pick", False), bool):
-            raise TypeError("Critics Pick needs to be a bool")
 
-        # Set API key in query params
-        params = {}
+        # Parse the dates into the request params
+        params = self._movie_reviews_dates_helper(dates)
 
         # Set keyword if defined
         if keyword is not None:
@@ -525,8 +528,6 @@ class NYTAPI:
         params["critics-pick"] = _critics_pick
         params["reviewer"] = options.get("reviewer")
         params["order"] = options.get("order")
-        params["opening-date"] = _opening_dates
-        params["publication-date"] = _publication_dates
 
         # Set URL request data
         url = BASE_MOVIE_REVIEWS
@@ -535,13 +536,15 @@ class NYTAPI:
         results = []
 
         # Keep loading data until amount of results is received
-        for i in range(math.ceil(options["max_results"] / 20)):
+        # Set max_results if undefined
+        max_results = options.get("max_results", 20)
+        for i in range(math.ceil(max_results / 20)):
             # Set offset for second request
             offset = i * 20
             params["offset"] = str(offset)
 
             # Load the data from the API and raise if there's an Error
-            res = self._load_data(url, options=params, location=[])
+            res: dict[str, Any] = self._load_data(url, options=params, location=[])
 
             results += res.get("results")
 
