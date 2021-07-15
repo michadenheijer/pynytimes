@@ -14,12 +14,6 @@ from requests import Session
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-# Try importing orjson, if not available just ignore
-try:
-    import orjson
-except ImportError:
-    orjson = None
-
 # Import version from __init__
 from .__version__ import __version__
 
@@ -119,6 +113,10 @@ class NYTAPI:
     def __enter__(self) -> NYTAPI:
         return self
 
+    @staticmethod
+    def _get_from_location():
+        pass
+
     def _load_data(
         self,
         url: str,
@@ -156,10 +154,7 @@ class NYTAPI:
 
         res.raise_for_status()
 
-        if orjson is None:
-            parsed_res: dict[str, Any] = res.json()
-        else:
-            parsed_res: dict[str, Any] = orjson.loads(res.content)
+        parsed_res: dict[str, Any] = res.json()
 
         # Get the data from the usual results location
         results: dict[str, Any]
@@ -335,7 +330,7 @@ class NYTAPI:
         if author and isbn and title is None:
             raise ValueError("Not all fields in reviews can be empty")
 
-        values_defined: int = int(isbn is not None)
+        values_defined = int(isbn is not None)
         values_defined += int(title is not None)
         values_defined += int(author is not None)
 
