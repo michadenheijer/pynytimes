@@ -116,7 +116,10 @@ class NYTAPI:
         return self
 
     def _load_data(
-        self, url: str, options: Optional[dict] = None, location: Optional[list] = None
+        self,
+        url: str,
+        options: Optional[dict[str, Any]] = None,
+        location: Optional[list] = None,
     ) -> list[dict[str, Any]]:
         """This function loads the data for the wrapper for most API use cases"""
         # Set API key in query parameters
@@ -395,8 +398,8 @@ class NYTAPI:
     def movie_reviews(
         self,
         keyword: Optional[str] = None,
-        options: Optional[dict] = None,
-        dates: Optional[dict] = None,
+        options: Optional[dict[str, Any]] = None,
+        dates: Optional[dict[str, Union[datetime.date, datetime.datetime]]] = None,
     ) -> list[dict[str, Any]]:
         """Load movie reviews"""
         # Set options and dates if not defined
@@ -600,7 +603,7 @@ class NYTAPI:
     def tag_query(
         self,
         query: str,
-        filter_option: Optional[dict] = None,
+        filter_option: Optional[dict[str, Any]] = None,
         filter_options: Optional[str] = None,
         max_results: Optional[int] = None,
     ) -> list[str]:
@@ -660,7 +663,7 @@ class NYTAPI:
         return parsed_result
 
     @staticmethod
-    def _article_search_search_options_helper(options: dict) -> dict:
+    def _article_search_search_options_helper(options: dict[str, Any]) -> dict:
         """ "Help to create all fq queries"""
         # pylint: disable=invalid-name
         # Get options already defined in fq (filter query)
@@ -716,8 +719,8 @@ class NYTAPI:
     def article_search(
         self,
         query: Optional[str] = None,
-        dates: Optional[dict] = None,
-        options: Optional[dict] = None,
+        dates: Optional[dict[str, Union[datetime.date, datetime.datetime]]] = None,
+        options: Optional[dict[str, Any]] = None,
         results: int = 10,
     ) -> list[dict[str, Any]]:
         """Load articles from search"""
