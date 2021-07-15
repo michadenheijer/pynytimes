@@ -185,13 +185,10 @@ class NYTAPI:
         if date_string is None:
             return None
 
+        date: Union[datetime.datetime, datetime.date]
         # Parse rfc3339 dates from str
         if date_type == "rfc3339":
-            # This if statement is to make it compatible with Python 3.6
-            if date_string[-3] == ":":
-                date_string = date_string[:-3] + date_string[-2:]
-
-            return datetime.datetime.strptime(
+            date = datetime.datetime.strptime(
                 date_string,
                 "%Y-%m-%dT%H:%M:%S%z",
             )
@@ -199,14 +196,14 @@ class NYTAPI:
         # Parse date only strings
         if date_type == "date-only":
             if re.match(r"^(\d){4}-00-00$", date_string):
-                return datetime.datetime.strptime(date_string, "%Y-00-00").date()
+                date = datetime.datetime.strptime(date_string, "%Y-00-00").date()
 
-            return datetime.datetime.strptime(date_string, "%Y-%m-%d").date()
+            date = datetime.datetime.strptime(date_string, "%Y-%m-%d").date()
 
         if date_type == "date-time":
-            return datetime.datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
+            date = datetime.datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
 
-        return None
+        return date
 
     def _parse_dates(
         self, articles: list, date_type: str, locations: Optional[list] = None
