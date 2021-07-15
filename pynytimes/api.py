@@ -423,17 +423,19 @@ class NYTAPI:
 
         # Define a date if neccecary and convert all data to valid data for API
         # request
-        if (
+        undefined_opening_date = (
             dates.get("opening_date_end") is not None
             and dates.get("opening_date_start") is None
-        ):
+        )
+        if undefined_opening_date is True:
             dates["opening_date_start"] = datetime.datetime(1900, 1, 1)
 
-        if (
+        undefined_publication_date = (
             dates.get("publication_date_end") is not None
-            and dates.get("opening_date_start") is None
-        ):
-            dates["opening_date_start"] = datetime.datetime(1900, 1, 1)
+            and dates.get("publication_date_start") is None
+        )
+        if undefined_publication_date is True:
+            dates["publication_date_start"] = datetime.datetime(1900, 1, 1)
 
         # Insert the dates in the options dictionary
         _opening_dates = None
@@ -447,11 +449,11 @@ class NYTAPI:
             _opening_dates += dates["opening_date_end"].strftime("%Y-%m-%d")
 
         if dates.get("publication_date_start") is not None:
-            _publication_dates = dates["opening_date_start"].strftime("%Y-%m-%d")
+            _publication_dates = dates["publication_date_start"].strftime("%Y-%m-%d")
             _publication_dates += ";"
 
         if dates.get("publication_date_end") is not None:
-            _publication_dates += dates["opening_date_end"].strftime("%Y-%m-%d")
+            _publication_dates += dates["publication_date_end"].strftime("%Y-%m-%d")
 
         params["opening-date"] = _opening_dates
         params["publication-date"] = _publication_dates
@@ -544,7 +546,11 @@ class NYTAPI:
             params["offset"] = str(offset)
 
             # Load the data from the API and raise if there's an Error
-            res: dict[str, Any] = self._load_data(url, options=params, location=[])
+            res: dict[str, Any] = self._load_data(
+                url,
+                options=params,
+                location=[],
+            )
 
             results += res.get("results")
 
