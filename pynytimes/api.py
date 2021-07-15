@@ -47,7 +47,7 @@ class NYTAPI:
 
     def __init__(
         self,
-        key: Optional[str] = None,
+        key: str = None,
         https: bool = True,
         session: Optional[Session] = None,
         backoff: bool = True,
@@ -57,7 +57,8 @@ class NYTAPI:
         # Raise Error if API key is not given, or wrong type
         if key is None:
             raise ValueError(
-                "API key is not set, get an API-key from https://developer.nytimes.com."
+                "API key is not set, get an API-key from "
+                + "https://developer.nytimes.com."
             )
 
         if not isinstance(key, str):
@@ -66,7 +67,8 @@ class NYTAPI:
         # Set API key
         self.key: str = key
 
-        # Check if session is Session, add session to class so connection can be reused
+        # Check if session is Session, add session to class so connection
+        # can be reused
         if session is None:
             session = Session()
 
@@ -96,7 +98,9 @@ class NYTAPI:
 
         if backoff:
             backoff_strategy = Retry(
-                total=10, backoff_factor=1, status_forcelist=[429, 509]
+                total=10,
+                backoff_factor=1,
+                status_forcelist=[429, 509],
             )
 
             adapter = HTTPAdapter(max_retries=backoff_strategy)
@@ -132,7 +136,11 @@ class NYTAPI:
         # Load the data from the API, raise error if there's an invalid status
         # code
         timeout = (4, 10)
-        res = self.session.get(self.protocol + url, params=params, timeout=timeout)
+        res = self.session.get(
+            self.protocol + url,
+            params=params,
+            timeout=timeout,
+        )
 
         if res.status_code == 400:
             raise ValueError("Error 400: Invalid input")
@@ -158,8 +166,9 @@ class NYTAPI:
         if location is None:
             results = parsed_res.get("results")
 
-        # Sometimes the results are in a different location, this location can be defined in a list
-        # Load the data from that location
+        # Sometimes the results are in a different location,
+        # this location can be defined in a list
+        # Then load the data from that location
         else:
             results = parsed_res
             for loc in location:
@@ -182,7 +191,10 @@ class NYTAPI:
             if date_string[-3] == ":":
                 date_string = date_string[:-3] + date_string[-2:]
 
-            return datetime.datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%S%z")
+            return datetime.datetime.strptime(
+                date_string,
+                "%Y-%m-%dT%H:%M:%S%z",
+            )
 
         # Parse date only strings
         if date_type == "date-only":
@@ -260,8 +272,18 @@ class NYTAPI:
         url = BASE_MOST_POPULAR + "viewed/" + str(days) + ".json"
         result = self._load_data(url)
 
-        parsed_date_result = self._parse_dates(result, "date-only", ["published_date"])
-        parsed_result = self._parse_dates(parsed_date_result, "date-time", ["updated"])
+        # Parse the dates in the results
+        parsed_date_result = self._parse_dates(
+            result,
+            "date-only",
+            ["published_date"],
+        )
+
+        parsed_result = self._parse_dates(
+            parsed_date_result,
+            "date-time",
+            ["updated"],
+        )
 
         return parsed_result
 
@@ -357,7 +379,9 @@ class NYTAPI:
         result = self._load_data(url)
 
         parsed_result = self._parse_dates(
-            result, "date-only", ["oldest_published_date", "newest_published_date"]
+            result,
+            "date-only",
+            ["oldest_published_date", "newest_published_date"],
         )
         return parsed_result
 
@@ -447,7 +471,12 @@ class NYTAPI:
         if not isinstance(options.get("order"), (str, type(None))):
             raise TypeError("Order needs to be a string")
 
-        order_options = [None, "by-opening-date", "by-publication-date", "by-title"]
+        order_options = [
+            None,
+            "by-opening-date",
+            "by-publication-date",
+            "by-title",
+        ]
 
         if options.get("order") not in order_options:
             raise ValueError("Order is not a valid option")
