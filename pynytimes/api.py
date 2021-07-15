@@ -194,7 +194,9 @@ class NYTAPI:
         # Parse date only strings
         if date_type == "date-only":
             if re.match(r"^(\d){4}-00-00$", date_string):
-                date = datetime.datetime.strptime(date_string, "%Y-00-00").date()
+                date = datetime.datetime.strptime(
+                    date_string, "%Y-00-00"
+                ).date()
 
             date = datetime.datetime.strptime(date_string, "%Y-%m-%d").date()
 
@@ -282,7 +284,9 @@ class NYTAPI:
 
         return parsed_result
 
-    def most_shared(self, days: int = 1, method: str = "email") -> list[dict[str, Any]]:
+    def most_shared(
+        self, days: int = 1, method: str = "email"
+    ) -> list[dict[str, Any]]:
         """Load most shared articles"""
         # Check if options are valid
         method_options = ["email", "facebook"]
@@ -317,8 +321,12 @@ class NYTAPI:
         result = self._load_data(url)
 
         # Parse the date_strings into datetime.datetime
-        parsed_date_result = self._parse_dates(result, "date-only", ["published_date"])
-        parsed_result = self._parse_dates(parsed_date_result, "date-time", ["updated"])
+        parsed_date_result = self._parse_dates(
+            result, "date-only", ["published_date"]
+        )
+        parsed_result = self._parse_dates(
+            parsed_date_result, "date-time", ["updated"]
+        )
 
         return parsed_result
 
@@ -364,7 +372,9 @@ class NYTAPI:
         url = BASE_BOOK_REVIEWS
         result = self._load_data(url, options=options)
 
-        parsed_result = self._parse_dates(result, "date-only", ["publication_dt"])
+        parsed_result = self._parse_dates(
+            result, "date-only", ["publication_dt"]
+        )
         return parsed_result
 
     def best_sellers_lists(self) -> list[dict[str, Any]]:
@@ -449,11 +459,15 @@ class NYTAPI:
             _opening_dates += dates["opening_date_end"].strftime("%Y-%m-%d")
 
         if dates.get("publication_date_start") is not None:
-            _publication_dates = dates["publication_date_start"].strftime("%Y-%m-%d")
+            _publication_dates = dates["publication_date_start"].strftime(
+                "%Y-%m-%d"
+            )
             _publication_dates += ";"
 
         if dates.get("publication_date_end") is not None:
-            _publication_dates += dates["publication_date_end"].strftime("%Y-%m-%d")
+            _publication_dates += dates["publication_date_end"].strftime(
+                "%Y-%m-%d"
+            )
 
         params["opening-date"] = _opening_dates
         params["publication-date"] = _publication_dates
@@ -464,7 +478,9 @@ class NYTAPI:
         self,
         keyword: Optional[str] = None,
         options: Optional[dict[str, Any]] = None,
-        dates: Optional[dict[str, Union[datetime.date, datetime.datetime]]] = None,
+        dates: Optional[
+            dict[str, Union[datetime.date, datetime.datetime]]
+        ] = None,
     ) -> list[dict[str, Any]]:
         """Load movie reviews"""
         # Set options and dates if not defined
@@ -495,7 +511,9 @@ class NYTAPI:
 
             # Convert datetime.date to datetime.datetime
             if isinstance(date[1], datetime.date):
-                dates[date[0]] = datetime.datetime.combine(date[1], datetime.time.min)
+                dates[date[0]] = datetime.datetime.combine(
+                    date[1], datetime.time.min
+                )
 
         # Raise error if invalid option
         if not isinstance(options.get("order"), (str, type(None))):
@@ -753,7 +771,9 @@ class NYTAPI:
     def article_search(
         self,
         query: Optional[str] = None,
-        dates: Optional[dict[str, Union[datetime.date, datetime.datetime]]] = None,
+        dates: Optional[
+            dict[str, Union[datetime.date, datetime.datetime]]
+        ] = None,
         options: Optional[dict[str, Any]] = None,
         results: int = 10,
     ) -> list[dict[str, Any]]:
@@ -827,7 +847,9 @@ class NYTAPI:
                     end_date.year, end_date.month, end_date.day
                 )
             elif not isinstance(end_date, datetime.datetime):
-                raise TypeError("End date has to be datetime.datetime or datetime.date")
+                raise TypeError(
+                    "End date has to be datetime.datetime or datetime.date"
+                )
 
             _end_date = end_date.strftime("%Y%m%d")
 
