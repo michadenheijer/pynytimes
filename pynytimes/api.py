@@ -335,10 +335,11 @@ class NYTAPI:
         if author and isbn and title is None:
             raise ValueError("Not all fields in reviews can be empty")
 
-        if (
-            int(isbn is not None) + int(title is not None) + int(author is not None)
-            != 1
-        ):
+        values_defined: int = int(isbn is not None)
+        values_defined += int(title is not None)
+        values_defined += int(author is not None)
+
+        if values_defined != 1:
             raise ValueError(
                 "You can only define one of the following: ISBN, author or title."
             )
