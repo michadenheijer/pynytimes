@@ -114,14 +114,30 @@ class NYTAPI:
         return self
 
     @staticmethod
-    def _get_from_location():
-        pass
+    def _get_from_location(
+        parsed_res: dict[str, Any],
+        location: Optional[list[str]],
+    ):
+        # Get the data from the usual results location
+        results: dict[str, Any]
+        if location is None:
+            results = parsed_res.get("results")
+
+        # Sometimes the results are in a different location,
+        # this location can be defined in a list
+        # Then load the data from that location
+        else:
+            results = parsed_res
+            for loc in location:
+                results = results.get(loc)
+
+        return results
 
     def _load_data(
         self,
         url: str,
         options: Optional[dict[str, Any]] = None,
-        location: Optional[list] = None,
+        location: Optional[list[str]] = None,
     ) -> list[dict[str, Any]]:
         """This function loads the data for the wrapper for most API use cases"""
         # Set API key in query parameters
@@ -156,20 +172,7 @@ class NYTAPI:
 
         parsed_res: dict[str, Any] = res.json()
 
-        # Get the data from the usual results location
-        results: dict[str, Any]
-        if location is None:
-            results = parsed_res.get("results")
-
-        # Sometimes the results are in a different location,
-        # this location can be defined in a list
-        # Then load the data from that location
-        else:
-            results = parsed_res
-            for loc in location:
-                results = results.get(loc)
-
-        return results
+        return self._get_from_location(parsed_res, location)
 
     @staticmethod
     def _parse_date(
