@@ -10,6 +10,10 @@ import datetime
 NoneType: type = type(None)
 
 
+def _convert_date_to_datetime(input: datetime.date) -> datetime.datetime:
+    return datetime.datetime(input.year, input.month, input.day)
+
+
 def movie_reviews_check_input(
     keyword: Optional[str],
     options: Optional[dict[str, Any]],
@@ -60,10 +64,9 @@ def movie_reviews_parse_dates(
 ) -> dict:
     # Convert datetime.date to datetime.datetime
     for date in dates.items():
-        if isinstance(date[1], datetime.date):
-            dates[date[0]] = datetime.datetime.combine(
-                date[1], datetime.time.min
-            )
+        date_value = date[1]
+        if isinstance(date_value, datetime.date):
+            dates[date[0]] = _convert_date_to_datetime(date_value)
 
     params = {}
 

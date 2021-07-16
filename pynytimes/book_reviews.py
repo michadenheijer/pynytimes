@@ -1,7 +1,7 @@
 """Book Reviews helper functions"""
 # Import typings dependencies
 from __future__ import annotations
-from typing import Any, Optional, Union
+from typing import Optional, Union
 
 # Shorten type(None)
 NoneType: type = type(None)

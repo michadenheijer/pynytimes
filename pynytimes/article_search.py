@@ -66,6 +66,10 @@ def article_search_check_input(
         )
 
 
+def _convert_date_to_datetime(input: datetime.date) -> datetime.datetime:
+    return datetime.datetime(input.year, input.month, input.day)
+
+
 def article_search_parse_dates(
     dates: dict[str, Union[datetime.datetime, datetime.date, None]]
 ) -> tuple[Optional[str], Optional[str]]:
@@ -81,17 +85,13 @@ def article_search_parse_dates(
     # Raise error if dates aren't datetime.datetime objects
     if begin_date is not None:
         if isinstance(begin_date, datetime.date):
-            begin_date = datetime.datetime(
-                begin_date.year, begin_date.month, begin_date.day
-            )
+            begin_date = _convert_date_to_datetime(begin_date)
 
         begin_date_str = begin_date.strftime("%Y%m%d")
 
     if end_date is not None:
         if isinstance(end_date, datetime.date):
-            end_date = datetime.datetime(
-                end_date.year, end_date.month, end_date.day
-            )
+            end_date = _convert_date_to_datetime(end_date)
 
         end_date_str = end_date.strftime("%Y%m%d")
 
@@ -141,11 +141,10 @@ def article_search_parse_options(options: dict[str, Any]) -> dict:
         fq += f"{_filter}:({filter_input})"
 
         # Remove the filter from options
-        del options[_filter]
+        options.pop(_filter)
 
-    # If filter query was defined set fq
-    if fq is not None:
-        options["fq"] = fq
+    # Set fq in options
+    options["fq"] = fq
 
     # Return the options
     return options
