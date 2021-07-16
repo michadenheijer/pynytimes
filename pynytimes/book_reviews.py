@@ -17,6 +17,7 @@ def book_reviews_check_input(
     if author and isbn and title is None:
         raise ValueError("Not all fields in reviews can be empty")
 
+    # Check if only one of author, isbn, title is defined
     values_defined = int(isbn is not None)
     values_defined += int(title is not None)
     values_defined += int(author is not None)
@@ -27,11 +28,14 @@ def book_reviews_check_input(
         )
 
     # Raise TypeError if input is wrong type
-    if not isinstance(author, (str, NoneType)):
+    author_types = (str, NoneType)
+    if not isinstance(author, author_types):
         raise TypeError("Author needs to be str")
 
-    if not isinstance(isbn, (int, str, NoneType)):
+    isbn_types = (int, str, NoneType)
+    if not isinstance(isbn, isbn_types):
         raise TypeError("ISBN needs to be int or str")
 
-    if not isinstance(title, (str, NoneType)):
+    title_types = (str, NoneType)
+    if not isinstance(title, title_types):
         raise TypeError("Title needs to be str")

@@ -7,6 +7,8 @@ from typing import Any, Optional, Union
 import datetime
 import warnings
 
+NoneType = type(None)
+
 
 def article_search_check_input(
     query: Optional[str],
@@ -16,7 +18,7 @@ def article_search_check_input(
 ) -> None:
     """Check input of article_search"""
     # Check if types are correct
-    if not isinstance(query, (str, type(None))):
+    if not isinstance(query, (str, NoneType)):
         raise TypeError("Query needs to be None or str")
 
     if not isinstance(dates, dict):
@@ -25,7 +27,7 @@ def article_search_check_input(
     if not isinstance(options, dict):
         raise TypeError("Options needs to be a dict")
 
-    if not isinstance(results, (int, type(None))):
+    if not isinstance(results, (int, NoneType)):
         raise TypeError("Results needs to be None or int")
 
     # Get and check if sort option is valid
@@ -33,6 +35,21 @@ def article_search_check_input(
 
     if sort not in [None, "newest", "oldest", "relevance"]:
         raise ValueError("Sort option is not valid")
+
+    # Raise error if date is incorrect type
+    date_types = (datetime.datetime, datetime.date, NoneType)
+
+    begin_date = dates.get("begin_date")
+    if not isinstance(begin_date, date_types):
+        raise TypeError(
+            "Begin date needs to be datetime.datetime, datetime.date or None"
+        )
+
+    end_date = dates.get("end_date")
+    if not isinstance(end_date, date_types):
+        raise TypeError(
+            "End date needs to be datetime.datetime, datetime.date or None"
+        )
 
     # Show warnings when a lot of results are requested
     if results >= 100:
@@ -67,10 +84,6 @@ def article_search_parse_dates(
             begin_date = datetime.datetime(
                 begin_date.year, begin_date.month, begin_date.day
             )
-        elif not isinstance(begin_date, datetime.datetime):
-            raise TypeError(
-                "Begin date has to be datetime.datetime or datetime.date"
-            )
 
         begin_date_str = begin_date.strftime("%Y%m%d")
 
@@ -79,21 +92,28 @@ def article_search_parse_dates(
             end_date = datetime.datetime(
                 end_date.year, end_date.month, end_date.day
             )
-        elif not isinstance(end_date, datetime.datetime):
-            raise TypeError(
-                "End date has to be datetime.datetime or datetime.date"
-            )
 
         end_date_str = end_date.strftime("%Y%m%d")
 
     return (begin_date_str, end_date_str)
 
 
+def _filter_input(values: list) -> str:
+    input = ""
+    # Add all the data in the list to the filter
+    for i, value in enumerate(values):
+        input += f'"{value}"'
+        if i < len(values) - 1:
+            input += " "
+
+    return input
+
+
 def article_search_parse_options(options: dict[str, Any]) -> dict:
     """Help to create all fq queries"""
     # pylint: disable=invalid-name
     # Get options already defined in fq (filter query)
-    fq = options.get("fq")
+    fq = options.get("fq", "")
 
     # Set query options that are currently supported
     current_filter_support = [
@@ -112,23 +132,13 @@ def article_search_parse_options(options: dict[str, Any]) -> dict:
             continue
 
         # Check if filter query is already defined. If it is then add
-        # " AND " to the query, otherwise create fq
-        if isinstance(fq, str):
+        # " AND " to the query
+        if len(fq) != 0:
             fq += " AND "
-        else:
-            fq = ""
 
         # Add filter
-        fq += _filter + ":("
-
-        # Add all the data in the list to the filter
-        for i, value in enumerate(values):
-            fq += '"'
-            fq += value
-            fq += '"'
-            if i < len(values) - 1:
-                fq += " "
-        fq += ")"
+        filter_input = _filter_input(values)
+        fq += f"{_filter}:({filter_input})"
 
         # Remove the filter from options
         del options[_filter]

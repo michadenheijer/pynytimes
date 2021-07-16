@@ -28,8 +28,9 @@ def movie_reviews_check_input(
 
     # Loop through all items in dates and check if its a datetime.datetime
     # or a datetime.date object
-    for date in dates.items():
-        if not isinstance(date[1], (datetime.datetime, datetime.date)):
+    for date in dates.values():
+        date_types = (datetime.datetime, datetime.date)
+        if not isinstance(date, date_types):
             raise TypeError(
                 "Date items need to be datetime.date or datetime.datetime"
             )
