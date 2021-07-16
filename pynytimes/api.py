@@ -1,4 +1,4 @@
-"""The wrapper is here"""
+"""Main function of the wrapper"""
 # Import typings dependencies
 from __future__ import annotations
 from typing import Any, Union, Optional
@@ -11,11 +11,17 @@ import re
 
 # Import other dependencies
 from requests import Session
+import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 # Import version from __init__
 from .__version__ import __version__
+
+# Import own dependencies
+from .article_search import *
+from .book_reviews import *
+from .movie_reviews import *
 
 # Define all URLs that are needed
 BASE_URL = "api.nytimes.com"
@@ -63,7 +69,9 @@ class NYTAPI:
 
         # Check if session is Session, add session to class so connection
         # can be reused
+        self._local_session = False
         if session is None:
+            self._local_session = True
             session = Session()
 
         if not isinstance(session, Session):
@@ -337,35 +345,17 @@ class NYTAPI:
         title: Optional[str] = None,
     ) -> list[dict[str, Any]]:
         """Load book reviews"""
-        # Check if request is valid
-        if author and isbn and title is None:
-            raise ValueError("Not all fields in reviews can be empty")
+        # Check book review input
+        book_reviews_check_input(author, isbn, title)
 
-        values_defined = int(isbn is not None)
-        values_defined += int(title is not None)
-        values_defined += int(author is not None)
-
-        if values_defined != 1:
-            raise ValueError(
-                "You can only define one of the following: ISBN, author or title."
-            )
-
-        # Set request options params and raise error if author is not a str,
-        # isbn is not a str or int, or title is not a str
+        # Set request options params
         options = {}
+
         if author is not None:
-            if not isinstance(author, str):
-                raise TypeError("Author needs to be str")
             options["author"] = author
-
         elif isbn is not None:
-            if not isinstance(isbn, (int, str)):
-                raise TypeError("ISBN needs to be int or str")
             options["isbn"] = str(isbn)
-
         elif title is not None:
-            if not isinstance(title, str):
-                raise TypeError("Title needs to be str")
             options["title"] = title
 
         # Set URL, load and return data
@@ -425,55 +415,6 @@ class NYTAPI:
 
         return result
 
-    @staticmethod
-    def _movie_reviews_dates_helper(
-        dates: Optional[dict[str, Union[datetime.date, datetime.datetime]]],
-    ):
-        params = {}
-
-        # Define a date if neccecary and convert all data to valid data for API
-        # request
-        undefined_opening_date = (
-            dates.get("opening_date_end") is not None
-            and dates.get("opening_date_start") is None
-        )
-        if undefined_opening_date is True:
-            dates["opening_date_start"] = datetime.datetime(1900, 1, 1)
-
-        undefined_publication_date = (
-            dates.get("publication_date_end") is not None
-            and dates.get("publication_date_start") is None
-        )
-        if undefined_publication_date is True:
-            dates["publication_date_start"] = datetime.datetime(1900, 1, 1)
-
-        # Insert the dates in the options dictionary
-        _opening_dates = None
-        _publication_dates = None
-
-        if dates.get("opening_date_start") is not None:
-            _opening_dates = dates["opening_date_start"].strftime("%Y-%m-%d")
-            _opening_dates += ";"
-
-        if dates.get("opening_date_end") is not None:
-            _opening_dates += dates["opening_date_end"].strftime("%Y-%m-%d")
-
-        if dates.get("publication_date_start") is not None:
-            _publication_dates = dates["publication_date_start"].strftime(
-                "%Y-%m-%d"
-            )
-            _publication_dates += ";"
-
-        if dates.get("publication_date_end") is not None:
-            _publication_dates += dates["publication_date_end"].strftime(
-                "%Y-%m-%d"
-            )
-
-        params["opening-date"] = _opening_dates
-        params["publication-date"] = _publication_dates
-
-        return params
-
     def movie_reviews(
         self,
         keyword: Optional[str] = None,
@@ -490,62 +431,21 @@ class NYTAPI:
         if dates is None:
             dates = {}
 
-        # Raise error if keyword is not a string or NoneType
-        if not isinstance(keyword, (str, type(None))):
-            raise TypeError("Keyword needs to be str")
-
-        # Raise error if options or date is not a dict
-        if not isinstance(options, dict):
-            raise TypeError("Options needs to be dict")
-
-        if not isinstance(dates, dict):
-            raise TypeError("Dates needs to be dict")
-
-        # Raise error if dates in date is not a datetime.date or
-        # datetime.datetime object
-        for date in dates.items():
-            if not isinstance(date[1], (datetime.datetime, datetime.date)):
-                raise TypeError(
-                    "Date items need to be datetime.date or datetime.datetime"
-                )
-
-            # Convert datetime.date to datetime.datetime
-            if isinstance(date[1], datetime.date):
-                dates[date[0]] = datetime.datetime.combine(
-                    date[1], datetime.time.min
-                )
-
-        # Raise error if invalid option
-        if not isinstance(options.get("order"), (str, type(None))):
-            raise TypeError("Order needs to be a str or None")
-
-        order_options = [
-            None,
-            "by-opening-date",
-            "by-publication-date",
-            "by-title",
-        ]
-
-        if options.get("order") not in order_options:
-            raise ValueError("Order is not a valid option")
-
-        # Check if critics_pick is bool
-        _critics_pick = None
-        if not isinstance(options.get("critics_pick", False), bool):
-            raise TypeError("Critics Pick needs to be a bool")
-
-        if options.get("critics_pick") is True:
-            _critics_pick = "Y"
+        # Check input types and values
+        movie_reviews_check_input(keyword, options, dates)
 
         # Parse the dates into the request params
-        params = self._movie_reviews_dates_helper(dates)
+        params = movie_reviews_parse_dates(dates)
 
         # Set keyword if defined
         if keyword is not None:
             params["query"] = keyword
 
+        # Set critics pick to "Y" if true
+        if options.get("critics_pick") is True:
+            params["critics_pick"] = "Y"
+
         # Set API request params if defined
-        params["critics-pick"] = _critics_pick
         params["reviewer"] = options.get("reviewer")
         params["order"] = options.get("order")
 
@@ -558,7 +458,8 @@ class NYTAPI:
         # Keep loading data until amount of results is received
         # Set max_results if undefined
         max_results = options.get("max_results", 20)
-        for i in range(math.ceil(max_results / 20)):
+        requests_needed = math.ceil(max_results / 20)
+        for i in range(requests_needed):
             # Set offset for second request
             offset = i * 20
             params["offset"] = str(offset)
@@ -714,60 +615,6 @@ class NYTAPI:
         parsed_result = self._parse_dates(result, "rfc3339", ["pub_date"])
         return parsed_result
 
-    @staticmethod
-    def _article_search_search_options_helper(options: dict[str, Any]) -> dict:
-        """ "Help to create all fq queries"""
-        # pylint: disable=invalid-name
-        # Get options already defined in fq (filter query)
-        fq = options.get("fq")
-
-        # Set query options that are currently supported
-        current_filter_support = [
-            "source",
-            "news_desk",
-            "section_name",
-            "glocation",
-            "type_of_material",
-        ]
-
-        # Run for every filter
-        for _filter in current_filter_support:
-            # Get data for filter if it's not defined continue to next filter
-            values = options.get(_filter)
-            if values is None:
-                continue
-
-            # Check if filter query is already defined. If it is then add
-            # " AND " to the query, otherwise create fq
-            if isinstance(fq, str):
-                fq += " AND "
-            else:
-                fq = ""
-
-            # Add filter
-            fq += _filter + ":("
-
-            # Add all the data in the list to the filter
-            for i, value in enumerate(values):
-                fq += '"'
-                fq += value
-                fq += '"'
-
-                if i < len(values) - 1:
-                    fq += " "
-
-            fq += ")"
-
-            # Remove the filter from options
-            del options[_filter]
-
-        # If filter query was defined set fq
-        if fq is not None:
-            options["fq"] = fq
-
-        # Return the options
-        return options
-
     def article_search(
         self,
         query: Optional[str] = None,
@@ -785,81 +632,23 @@ class NYTAPI:
         if options is None:
             options = {}
 
-        # Raise error if invalid parameters
-        if not isinstance(query, (str, type(None))):
-            raise TypeError("Query needs to be None or str")
+        # Check if input is valid
+        article_search_check_input(query, dates, options, results)
 
-        if not isinstance(dates, dict):
-            raise TypeError("Dates needs to be a dict")
-
-        if not isinstance(options, dict):
-            raise TypeError("Options needs to be a dict")
-
-        if not isinstance(results, (int, type(None))):
-            raise TypeError("Results needs to be None or int")
-
-        # Get dates if defined
-        begin_date = dates.get("begin")
-        end_date = dates.get("end")
+        # Limit results loading to 2010
+        results = min(results, 2010)
 
         # Resolve filter options into fq
-        options = self._article_search_search_options_helper(options)
+        options = article_search_parse_options(options)
 
-        # Get and check if sort option is valid
-        sort = options.get("sort")
-
-        if sort not in [None, "newest", "oldest", "relevance"]:
-            raise ValueError("Sort option is not valid")
-
-        # Set dates
-        _begin_date = None
-        _end_date = None
-
-        # Show warnings when a lot of results are requested
-        if results >= 100:
-            warnings.warn(
-                "Asking for a lot of results, because of rate limits it can take a while."
-            )
-
-        # Set maximum amount of results
-        if results >= 2010:
-            results = 2010
-            warnings.warn(
-                "Asking for more results then the API can provide, loading maximum results."
-            )
-
-        # Raise error if dates aren't datetime.datetime objects
-        if begin_date is not None:
-            if isinstance(begin_date, datetime.date):
-                begin_date = datetime.datetime(
-                    begin_date.year, begin_date.month, begin_date.day
-                )
-            elif not isinstance(begin_date, datetime.datetime):
-                raise TypeError(
-                    "Begin date has to be datetime.datetime or datetime.date"
-                )
-
-            _begin_date = begin_date.strftime("%Y%m%d")
-
-        if end_date is not None:
-            if isinstance(end_date, datetime.date):
-                end_date = datetime.datetime(
-                    end_date.year, end_date.month, end_date.day
-                )
-            elif not isinstance(end_date, datetime.datetime):
-                raise TypeError(
-                    "End date has to be datetime.datetime or datetime.date"
-                )
-
-            _end_date = end_date.strftime("%Y%m%d")
+        # Parse dates into options
+        begin_date, end_date = article_search_parse_dates(dates)
+        options["begin_date"] = begin_date
+        options["end_date"] = end_date
 
         # Set query if defined
         if query is not None:
             options["q"] = query
-
-        # Set options params
-        options["begin_date"] = _begin_date
-        options["end_date"] = _end_date
 
         url = BASE_ARTICLE_SEARCH
 
@@ -877,7 +666,7 @@ class NYTAPI:
             result += res.get("docs")
 
             # Stop loading if all responses are already loaded
-            if res.get("meta").get("hits") <= i * 10:
+            if res.get("meta", {}).get("hits") <= i * 10:
                 break
 
         # Parse and return results
@@ -887,14 +676,17 @@ class NYTAPI:
     # Allow the option to close the session
     def close(self) -> None:
         """Close session"""
-        if self.session:
+        # Close session only if it exists
+        if hasattr(self, "session"):
             self.session.close()
 
     # Close session before delete
     def __del__(self) -> None:
         """Close session on deletion"""
-        self.close()
+        if getattr(self, "_local_session", False) is True:
+            self.close()
 
     def __exit__(self, *args) -> None:
         """Close session on exit"""
-        self.close()
+        if getattr(self, "_local_session", False) is True:
+            self.close()
