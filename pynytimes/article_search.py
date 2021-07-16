@@ -37,13 +37,15 @@ def article_search_check_input(
     # Show warnings when a lot of results are requested
     if results >= 100:
         warnings.warn(
-            "Asking for a lot of results, because of rate limits it can take a while."
+            "Asking for a lot of results, because of rate"
+            + " limits it can take a while."
         )
 
     # Show waring when above maximum amount of results
     if results >= 2010:
         warnings.warn(
-            "Asking for more results then the API can provide, loading maximum results."
+            "Asking for more results then the API can provide,"
+            + "loading maximum results."
         )
 
 

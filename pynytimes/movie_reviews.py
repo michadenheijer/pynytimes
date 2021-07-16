@@ -66,7 +66,8 @@ def movie_reviews_parse_dates(
 
     params = {}
 
-    # Define a date if neccecary and convert all data to valid data for API request
+    # Define a date if neccecary and convert all data to valid data
+    # for API request
     undefined_opening_date = (
         dates.get("opening_date_end") is not None
         and dates.get("opening_date_start") is None
