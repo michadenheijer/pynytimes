@@ -14,7 +14,7 @@ def _convert_date_to_datetime(input: datetime.date) -> datetime.datetime:
     return datetime.datetime(input.year, input.month, input.day)
 
 
-def movie_reviews_check_input(
+def _movie_reviews_check_types(
     keyword: Optional[str],
     options: Optional[dict[str, Any]],
     dates: Optional[dict[str, Union[datetime.date, datetime.datetime]]],
@@ -30,15 +30,12 @@ def movie_reviews_check_input(
     if not isinstance(dates, dict):
         raise TypeError("Dates needs to be dict")
 
-    # Loop through all items in dates and check if its a datetime.datetime
-    # or a datetime.date object
-    for date in dates.values():
-        date_types = (datetime.datetime, datetime.date)
-        if not isinstance(date, date_types):
-            raise TypeError(
-                "Date items need to be datetime.date or datetime.datetime"
-            )
+    # Raise error if critics pick is not a bool
+    if not isinstance(options.get("critics_pick", False), bool):
+        raise TypeError("Critics Pick needs to be a bool")
 
+
+def _check_order_option(options: dict):
     # Raise error if order is invalid type
     if not isinstance(options.get("order"), (str, NoneType)):
         raise TypeError("Order needs to be a str or None")
@@ -54,9 +51,26 @@ def movie_reviews_check_input(
     if options.get("order") not in order_options:
         raise ValueError("Order is not a valid option")
 
-    # Raise error if critics pick is not a bool
-    if not isinstance(options.get("critics_pick", False), bool):
-        raise TypeError("Critics Pick needs to be a bool")
+
+def movie_reviews_check_input(
+    keyword: Optional[str],
+    options: Optional[dict[str, Any]],
+    dates: Optional[dict[str, Union[datetime.date, datetime.datetime]]],
+):
+    _movie_reviews_check_types(keyword, options, dates)
+    assert isinstance(dates, dict)
+    assert isinstance(options, dict)
+
+    # Loop through all items in dates and check if its a datetime.datetime
+    # or a datetime.date object
+    for date in dates.values():
+        date_types = (datetime.datetime, datetime.date)
+        if not isinstance(date, date_types):
+            raise TypeError(
+                "Date items need to be datetime.date or datetime.datetime"
+            )
+
+    _check_order_option(options)
 
 
 def movie_reviews_parse_dates(

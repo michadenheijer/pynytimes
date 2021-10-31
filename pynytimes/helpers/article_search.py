@@ -10,47 +10,7 @@ import warnings
 NoneType = type(None)
 
 
-def article_search_check_input(
-    query: Optional[str],
-    dates: dict[str, Union[datetime.date, datetime.datetime, None]],
-    options: dict[str, Any],
-    results: int,
-) -> None:
-    """Check input of article_search"""
-    # Check if types are correct
-    if not isinstance(query, (str, NoneType)):
-        raise TypeError("Query needs to be None or str")
-
-    if not isinstance(dates, dict):
-        raise TypeError("Dates needs to be a dict")
-
-    if not isinstance(options, dict):
-        raise TypeError("Options needs to be a dict")
-
-    if not isinstance(results, (int, NoneType)):
-        raise TypeError("Results needs to be None or int")
-
-    # Get and check if sort option is valid
-    sort = options.get("sort")
-
-    if sort not in [None, "newest", "oldest", "relevance"]:
-        raise ValueError("Sort option is not valid")
-
-    # Raise error if date is incorrect type
-    date_types = (datetime.datetime, datetime.date, NoneType)
-
-    begin_date = dates.get("begin_date")
-    if not isinstance(begin_date, date_types):
-        raise TypeError(
-            "Begin date needs to be datetime.datetime, datetime.date or None"
-        )
-
-    end_date = dates.get("end_date")
-    if not isinstance(end_date, date_types):
-        raise TypeError(
-            "End date needs to be datetime.datetime, datetime.date or None"
-        )
-
+def _article_search_result_warnings(results: int):
     # Show warnings when a lot of results are requested
     if results >= 100:
         warnings.warn(
@@ -66,8 +26,78 @@ def article_search_check_input(
         )
 
 
+def _article_search_check_type(
+    query: Optional[str],
+    dates: dict[str, Union[datetime.date, datetime.datetime, None]],
+    options: dict[str, Any],
+    results: int,
+):
+    # Check if types are correct
+    if not isinstance(query, (str, NoneType)):
+        raise TypeError("Query needs to be None or str")
+
+    if not isinstance(dates, dict):
+        raise TypeError("Dates needs to be a dict")
+
+    if not isinstance(options, dict):
+        raise TypeError("Options needs to be a dict")
+
+    if not isinstance(results, (int, NoneType)):
+        raise TypeError("Results needs to be None or int")
+
+
+def _article_search_check_sort_options(options: dict[str, str]):
+    # Get and check if sort option is valid
+    sort = options.get("sort")
+
+    if sort not in [None, "newest", "oldest", "relevance"]:
+        raise ValueError("Sort option is not valid")
+
+
+def _article_search_check_date_types(dates: dict):
+    # Raise error if date is incorrect type
+    date_types = (datetime.datetime, datetime.date, NoneType)
+
+    begin_date = dates.get("begin_date")
+    if not isinstance(begin_date, date_types):
+        raise TypeError(
+            "Begin date needs to be datetime.datetime, datetime.date or None"
+        )
+
+    end_date = dates.get("end_date")
+    if not isinstance(end_date, date_types):
+        raise TypeError(
+            "End date needs to be datetime.datetime, datetime.date or None"
+        )
+
+
+def article_search_check_input(
+    query: Optional[str],
+    dates: dict[str, Union[datetime.date, datetime.datetime, None]],
+    options: dict[str, Any],
+    results: int,
+) -> None:
+    """Check input of article_search"""
+    _article_search_check_type(query, dates, options, results)
+    _article_search_check_sort_options(options)
+    _article_search_check_date_types(dates)
+    _article_search_result_warnings(results)
+
+
 def _convert_date_to_datetime(input: datetime.date) -> datetime.datetime:
     return datetime.datetime(input.year, input.month, input.day)
+
+
+def _convert_date_to_str(
+    date: Union[datetime.datetime, datetime.date, None]
+) -> Optional[str]:
+    if date is not None:
+        if isinstance(date, datetime.date):
+            date = _convert_date_to_datetime(date)
+
+        return date.strftime("%Y%m%d")
+
+    return None
 
 
 def article_search_parse_dates(
@@ -77,25 +107,7 @@ def article_search_parse_dates(
     # Get dates if defined
     begin_date = dates.get("begin")
     end_date = dates.get("end")
-
-    # Set dates
-    begin_date_str = None
-    end_date_str = None
-
-    # Raise error if dates aren't datetime.datetime objects
-    if begin_date is not None:
-        if isinstance(begin_date, datetime.date):
-            begin_date = _convert_date_to_datetime(begin_date)
-
-        begin_date_str = begin_date.strftime("%Y%m%d")
-
-    if end_date is not None:
-        if isinstance(end_date, datetime.date):
-            end_date = _convert_date_to_datetime(end_date)
-
-        end_date_str = end_date.strftime("%Y%m%d")
-
-    return (begin_date_str, end_date_str)
+    return (_convert_date_to_str(begin_date), _convert_date_to_str(end_date))
 
 
 def _filter_input(values: list) -> str:
