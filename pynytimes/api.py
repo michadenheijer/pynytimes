@@ -210,9 +210,7 @@ class NYTAPI:
 
             date = datetime.datetime.strptime(date_string, "%Y-%m-%d").date()
         elif date_type == "date-time":
-            date = datetime.datetime.strptime(
-                date_string, "%Y-%m-%d %H:%M:%S"
-            )
+            date = datetime.datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
 
         return date
 
@@ -255,9 +253,7 @@ class NYTAPI:
         url = BASE_TOP_STORIES + section + ".json"
 
         try:
-            result: list[dict[str, Any]] = self._load_data(
-                url
-            )  # type:ignore
+            result: list[dict[str, Any]] = self._load_data(url)  # type:ignore
         # If 404 error throw invalid section name error
         except RuntimeError:
             raise ValueError("Invalid section name")
@@ -267,9 +263,7 @@ class NYTAPI:
         parsed_result = self._parse_dates(result, "rfc3339", date_locations)
         return parsed_result
 
-    def most_viewed(
-        self, days: Literal[1, 7, 30] = 1
-    ) -> list[dict[str, Any]]:
+    def most_viewed(self, days: Literal[1, 7, 30] = 1) -> list[dict[str, Any]]:
         """Load most viewed articles"""
         days_options = [1, 7, 30]
 
@@ -535,9 +529,7 @@ class NYTAPI:
         # Set URL, load and return data
         url = BASE_LATEST_ARTICLES + source + "/" + section + ".json"
         try:
-            result: list[dict[str, Any]] = self._load_data(
-                url
-            )  # type:ignore
+            result: list[dict[str, Any]] = self._load_data(url)  # type:ignore
         except RuntimeError:
             raise ValueError("Section is not a valid option")
 
