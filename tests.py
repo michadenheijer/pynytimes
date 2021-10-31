@@ -45,7 +45,7 @@ class TestNewYorkTimes(unittest.TestCase):
 
     def test_most_viewed_invalid_days(self):
         with self.assertRaises(ValueError):
-            self.nyt.most_viewed(days=2)
+            self.nyt.most_viewed(2)
 
         with self.assertRaises(TypeError):
             self.nyt.most_viewed(days="1")

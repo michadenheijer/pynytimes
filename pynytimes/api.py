@@ -1,10 +1,9 @@
 """Main function of the wrapper"""
 # Import typings dependencies
 from __future__ import annotations
-from typing import Any, cast, Final, Literal, Optional, Union
+from typing import Any, Final, Literal, Optional, Union
 
 # Import standard Python dependencies
-import warnings
 import datetime
 import math
 import re
@@ -13,6 +12,11 @@ import re
 from requests import Session
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
+
+from pynytimes.helpers.most_shared import (
+    most_shared_check_days,
+    most_shared_check_method,
+)
 
 # Import version from __init__
 from .__version__ import __version__
@@ -36,9 +40,18 @@ BASE_BOOK_REVIEWS: Final = BASE_BOOKS + "reviews.json"
 BASE_BEST_SELLERS_LISTS: Final = BASE_BOOKS + "lists/names.json"
 BASE_BEST_SELLERS_LIST: Final = BASE_BOOKS + "lists/"
 
+TIMEOUT: Final = (10, 30)
+
 
 class NYTAPI:
     """New York Times API Class. Interacts with user."""
+
+    key: str
+    https: bool
+    session: Session
+    backoff: bool
+    user_agent: str
+    parse_dates: bool
 
     # pylint: disable=too-many-arguments
 
@@ -51,6 +64,14 @@ class NYTAPI:
         user_agent: Optional[str] = None,
         parse_dates: bool = False,
     ):
+        self._set_key(key)
+        self._set_session(session)
+        self._set_parse_dates(parse_dates)
+        self._set_protocol(https)
+        self._set_backoff(backoff)
+        self._set_user_agent(user_agent)
+
+    def _set_key(self, key: Optional[str]):
         # Raise Error if API key is not given, or wrong type
         if key is None:
             raise ValueError(
@@ -64,6 +85,7 @@ class NYTAPI:
         # Set API key
         self.key: str = key
 
+    def _set_session(self, session: Optional[Session]):
         # Check if session is Session, add session to class so connection
         # can be reused
         self._local_session = False
@@ -76,12 +98,14 @@ class NYTAPI:
 
         self.session = session
 
+    def _set_parse_dates(self, parse_dates: bool):
         # Check if parse_dates is bool, if correct set parse_dates
         if not isinstance(parse_dates, bool):
             raise TypeError("parse_dates needs to be bool")
 
         self.parse_dates = parse_dates
 
+    def _set_protocol(self, https: bool):
         # Define protocol to be used
         if not isinstance(https, bool):
             raise TypeError("https needs to be bool")
@@ -91,6 +115,7 @@ class NYTAPI:
         else:
             self.protocol = "http://"
 
+    def _set_backoff(self, backoff: bool):
         # Set strategy to prevent HTTP 429 (Too Many Requests) errors
         if not isinstance(backoff, bool):
             raise TypeError("backoff needs to be bool")
@@ -107,6 +132,7 @@ class NYTAPI:
 
             self.session.mount(self.protocol + "api.nytimes.com/", adapter)
 
+    def _set_user_agent(self, user_agent: Optional[str]):
         # Set header to show that this wrapper is used
         if user_agent is None:
             user_agent = "pynytimes/" + __version__
@@ -154,29 +180,14 @@ class NYTAPI:
 
         # Load the data from the API, raise error if there's an invalid status
         # code
-        timeout = (4, 10)
         res = self.session.get(
             self.protocol + url,
             params=params,
-            timeout=timeout,
+            timeout=TIMEOUT,
         )
 
-        if res.status_code == 400:
-            raise ValueError("Error 400: Invalid input")
-
-        if res.status_code == 401:
-            raise ValueError("Error 401: Invalid API Key")
-
-        if res.status_code == 403:
-            raise RuntimeError("Error 403: You don't have access to this page")
-
-        if res.status_code == 404:
-            raise RuntimeError("Error 404: This page does not exist")
-
-        res.raise_for_status()
-
+        raise_for_status(res)
         parsed_res: dict[str, Any] = res.json()
-
         return self._get_from_location(parsed_res, location)
 
     @staticmethod
@@ -190,14 +201,12 @@ class NYTAPI:
             return None
 
         date: Union[datetime.datetime, datetime.date]
-        # Parse rfc3339 dates from str
+
         if date_type == "rfc3339":
             date = datetime.datetime.strptime(
                 date_string,
                 "%Y-%m-%dT%H:%M:%S%z",
             )
-
-        # Parse date only strings
         elif date_type == "date-only":
             if re.match(r"^(\d){4}-00-00$", date_string):
                 date = datetime.datetime.strptime(
@@ -205,7 +214,6 @@ class NYTAPI:
                 ).date()
 
             date = datetime.datetime.strptime(date_string, "%Y-%m-%d").date()
-
         elif date_type == "date-time":
             date = datetime.datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
 
@@ -250,9 +258,7 @@ class NYTAPI:
         url = BASE_TOP_STORIES + section + ".json"
 
         try:
-            # FIXME I just don't know why it does this
             result: list[dict[str, Any]] = self._load_data(url)  # type:ignore
-
         # If 404 error throw invalid section name error
         except RuntimeError:
             raise ValueError("Invalid section name")
@@ -260,18 +266,17 @@ class NYTAPI:
         # Parse dates from string to datetime.datetime
         date_locations = ["updated_date", "created_date", "published_date"]
         parsed_result = self._parse_dates(result, "rfc3339", date_locations)
-
         return parsed_result
 
-    def most_viewed(self, days: int = 1) -> list[dict[str, Any]]:
+    def most_viewed(self, days: Literal[1, 7, 30] = 1) -> list[dict[str, Any]]:
         """Load most viewed articles"""
         days_options = [1, 7, 30]
 
-        # Raise an Exception if days is not a int
+        # Raise an TypeError if days is not a int
         if not isinstance(days, int):
             raise TypeError("You can only enter an int")
 
-        # Raise an Exception if number of days is invalid
+        # Raise an ValueError if number of days is invalid
         if days not in days_options:
             raise ValueError("You can only select 1, 7 or 30 days")
 
@@ -281,41 +286,22 @@ class NYTAPI:
 
         # Parse the dates in the results
         parsed_date_result = self._parse_dates(
-            result,
-            "date-only",
-            ["published_date"],
+            result, "date-only", ["published_date"]
         )
-
         parsed_result = self._parse_dates(
-            parsed_date_result,
-            "date-time",
-            ["updated"],
+            parsed_date_result, "date-time", ["updated"]
         )
 
         return parsed_result
 
     def most_shared(
-        self, days: int = 1, method: str = "email"
+        self,
+        days: Literal[1, 7, 30] = 1,
+        method: Literal["email", "facebook"] = "email",
     ) -> list[dict[str, Any]]:
         """Load most shared articles"""
-        # Check if options are valid
-        method_options = ["email", "facebook"]
-        days_options = [1, 7, 30]
-
-        # Raise error if method isn't a str
-        if not isinstance(method, str):
-            raise TypeError("Method needs to be str")
-
-        # Raise error if days isn't an int
-        if not isinstance(days, int):
-            raise TypeError("Days needs to be int")
-
-        # Raise error if days, or method aren't in options
-        if method not in method_options:
-            raise ValueError("Shared option does not exist")
-
-        if days not in days_options:
-            raise ValueError("You can only select 1, 7 or 30 days")
+        most_shared_check_days(days)
+        most_shared_check_method(method)
 
         # Set URL of data that needs to be loaded
         url = BASE_MOST_POPULAR
