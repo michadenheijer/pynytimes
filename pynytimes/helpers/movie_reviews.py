@@ -60,7 +60,7 @@ def movie_reviews_check_input(
 
 
 def movie_reviews_parse_dates(
-    dates: Optional[dict[str, Union[datetime.date, datetime.datetime]]]
+    dates: dict[str, Union[datetime.date, datetime.datetime]]
 ) -> dict:
     # Convert datetime.date to datetime.datetime
     for date in dates.items():
@@ -94,8 +94,8 @@ def movie_reviews_parse_dates(
         _opening_dates = dates["opening_date_start"].strftime("%Y-%m-%d")
         _opening_dates += ";"
 
-    if dates.get("opening_date_end") is not None:
-        _opening_dates += dates["opening_date_end"].strftime("%Y-%m-%d")
+        if dates.get("opening_date_end") is not None:
+            _opening_dates += dates["opening_date_end"].strftime("%Y-%m-%d")
 
     if dates.get("publication_date_start") is not None:
         _publication_dates = dates["publication_date_start"].strftime(
@@ -103,10 +103,10 @@ def movie_reviews_parse_dates(
         )
         _publication_dates += ";"
 
-    if dates.get("publication_date_end") is not None:
-        _publication_dates += dates["publication_date_end"].strftime(
-            "%Y-%m-%d"
-        )
+        if dates.get("publication_date_end") is not None:
+            _publication_dates += dates["publication_date_end"].strftime(
+                "%Y-%m-%d"
+            )
 
     params["opening-date"] = _opening_dates
     params["publication-date"] = _publication_dates

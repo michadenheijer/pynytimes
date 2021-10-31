@@ -12,7 +12,7 @@ NoneType = type(None)
 
 def article_search_check_input(
     query: Optional[str],
-    dates: dict[str, Union[datetime.date, datetime.datetime]],
+    dates: dict[str, Union[datetime.date, datetime.datetime, None]],
     options: dict[str, Any],
     results: int,
 ) -> None:

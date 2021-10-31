@@ -1,7 +1,7 @@
 """Main function of the wrapper"""
 # Import typings dependencies
 from __future__ import annotations
-from typing import Any, Union, Optional
+from typing import Any, cast, Final, Literal, Optional, Union
 
 # Import standard Python dependencies
 import warnings
@@ -11,7 +11,6 @@ import re
 
 # Import other dependencies
 from requests import Session
-import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
@@ -19,25 +18,23 @@ from urllib3.util.retry import Retry
 from .__version__ import __version__
 
 # Import own dependencies
-from .article_search import *
-from .book_reviews import *
-from .movie_reviews import *
+from .helpers import *
 
 # Define all URLs that are needed
-BASE_URL = "api.nytimes.com"
-BASE_TOP_STORIES = BASE_URL + "/svc/topstories/v2/"
-BASE_MOST_POPULAR = BASE_URL + "/svc/mostpopular/v2/"
-BASE_BOOKS = BASE_URL + "/svc/books/v3/"
-BASE_MOVIE_REVIEWS = BASE_URL + "/svc/movies/v2/reviews/search.json"
-BASE_META_DATA = BASE_URL + "/svc/news/v3/content.json"
-BASE_TAGS = BASE_URL + "/svc/semantic/v2/concept/suggest"
-BASE_ARCHIVE_METADATA = BASE_URL + "/svc/archive/v1/"
-BASE_ARTICLE_SEARCH = BASE_URL + "/svc/search/v2/articlesearch.json"
-BASE_LATEST_ARTICLES = BASE_URL + "/svc/news/v3/content/"
-BASE_SECTION_LIST = BASE_URL + "/svc/news/v3/content/section-list.json"
-BASE_BOOK_REVIEWS = BASE_BOOKS + "reviews.json"
-BASE_BEST_SELLERS_LISTS = BASE_BOOKS + "lists/names.json"
-BASE_BEST_SELLERS_LIST = BASE_BOOKS + "lists/"
+BASE_URL: Final = "api.nytimes.com"
+BASE_TOP_STORIES: Final = BASE_URL + "/svc/topstories/v2/"
+BASE_MOST_POPULAR: Final = BASE_URL + "/svc/mostpopular/v2/"
+BASE_BOOKS: Final = BASE_URL + "/svc/books/v3/"
+BASE_MOVIE_REVIEWS: Final = BASE_URL + "/svc/movies/v2/reviews/search.json"
+BASE_META_DATA: Final = BASE_URL + "/svc/news/v3/content.json"
+BASE_TAGS: Final = BASE_URL + "/svc/semantic/v2/concept/suggest"
+BASE_ARCHIVE_METADATA: Final = BASE_URL + "/svc/archive/v1/"
+BASE_ARTICLE_SEARCH: Final = BASE_URL + "/svc/search/v2/articlesearch.json"
+BASE_LATEST_ARTICLES: Final = BASE_URL + "/svc/news/v3/content/"
+BASE_SECTION_LIST: Final = BASE_URL + "/svc/news/v3/content/section-list.json"
+BASE_BOOK_REVIEWS: Final = BASE_BOOKS + "reviews.json"
+BASE_BEST_SELLERS_LISTS: Final = BASE_BOOKS + "lists/names.json"
+BASE_BEST_SELLERS_LIST: Final = BASE_BOOKS + "lists/"
 
 
 class NYTAPI:
@@ -53,7 +50,7 @@ class NYTAPI:
         backoff: bool = True,
         user_agent: Optional[str] = None,
         parse_dates: bool = False,
-    ) -> NYTAPI:
+    ):
         # Raise Error if API key is not given, or wrong type
         if key is None:
             raise ValueError(
@@ -99,7 +96,8 @@ class NYTAPI:
             raise TypeError("backoff needs to be bool")
 
         if backoff:
-            backoff_strategy = Retry(
+            # Any to remove errors from type checker
+            backoff_strategy: Any = Retry(
                 total=10,
                 backoff_factor=1,
                 status_forcelist=[429, 509],
@@ -126,18 +124,17 @@ class NYTAPI:
         parsed_res: dict[str, Any],
         location: Optional[list[str]],
     ) -> list[dict[str, Any]]:
-        # Get the data from the usual results location
-        results: dict[str, Any]
+
         if location is None:
-            results = parsed_res.get("results")
+            return parsed_res["results"]
 
         # Sometimes the results are in a different location,
         # this location can be defined in a list
         # Then load the data from that location
         else:
-            results = parsed_res
+            results: Any = parsed_res
             for loc in location:
-                results = results.get(loc)
+                results = results[loc]
 
         return results
 
@@ -184,7 +181,8 @@ class NYTAPI:
 
     @staticmethod
     def _parse_date(
-        date_string: str, date_type: str
+        date_string: str,
+        date_type: Literal["rfc3339", "date-only", "date-time"],
     ) -> Union[datetime.datetime, datetime.date, None]:
         """Parse the date into datetime.datetime object"""
         # If date_string is None return None
@@ -200,7 +198,7 @@ class NYTAPI:
             )
 
         # Parse date only strings
-        if date_type == "date-only":
+        elif date_type == "date-only":
             if re.match(r"^(\d){4}-00-00$", date_string):
                 date = datetime.datetime.strptime(
                     date_string, "%Y-00-00"
@@ -208,13 +206,16 @@ class NYTAPI:
 
             date = datetime.datetime.strptime(date_string, "%Y-%m-%d").date()
 
-        if date_type == "date-time":
+        elif date_type == "date-time":
             date = datetime.datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
 
         return date
 
     def _parse_dates(
-        self, articles: list, date_type: str, locations: Optional[list] = None
+        self,
+        articles: list[dict[str, str]],
+        date_type: Literal["rfc3339", "date-only", "date-time"],
+        locations: Optional[list] = None,
     ) -> list[dict[str, Any]]:
         """Parse dates to datetime"""
         # Create list locations is None
@@ -226,11 +227,11 @@ class NYTAPI:
             return articles
 
         # Create parsed_articles list
-        parsed_articles = []
+        parsed_articles: list[dict[str, Any]] = []
 
         # For every article parse date_string into datetime.datetime
         for article in articles:
-            parsed_article = article
+            parsed_article: dict[str, Any] = article
             for location in locations:
                 parsed_article[location] = self._parse_date(
                     parsed_article[location], date_type
@@ -249,7 +250,8 @@ class NYTAPI:
         url = BASE_TOP_STORIES + section + ".json"
 
         try:
-            result = self._load_data(url)
+            # FIXME I just don't know why it does this
+            result: list[dict[str, Any]] = self._load_data(url)  # type:ignore
 
         # If 404 error throw invalid section name error
         except RuntimeError:
@@ -275,7 +277,7 @@ class NYTAPI:
 
         # Load the data
         url = BASE_MOST_POPULAR + "viewed/" + str(days) + ".json"
-        result = self._load_data(url)
+        result: list[dict[str, Any]] = self._load_data(url)  # type:ignore
 
         # Parse the dates in the results
         parsed_date_result = self._parse_dates(
@@ -326,7 +328,7 @@ class NYTAPI:
             url += "shared/" + str(days) + "/" + method + ".json"
 
         # Load the data
-        result = self._load_data(url)
+        result: list[dict[str, Any]] = self._load_data(url)  # type:ignore
 
         # Parse the date_strings into datetime.datetime
         parsed_date_result = self._parse_dates(
@@ -360,7 +362,9 @@ class NYTAPI:
 
         # Set URL, load and return data
         url = BASE_BOOK_REVIEWS
-        result = self._load_data(url, options=options)
+        result: list[dict[str, Any]] = self._load_data(
+            url, options=options
+        )  # type:ignore
 
         parsed_result = self._parse_dates(
             result, "date-only", ["publication_dt"]
@@ -372,7 +376,7 @@ class NYTAPI:
         # Set URL, load and return data
         url = BASE_BEST_SELLERS_LISTS
 
-        result = self._load_data(url)
+        result: list[dict[str, Any]] = self._load_data(url)  # type:ignore
 
         parsed_result = self._parse_dates(
             result,
@@ -409,7 +413,9 @@ class NYTAPI:
         # Set location in JSON of results, load and return data
         location = ["results", "books"]
         try:
-            result = self._load_data(url, location=location)
+            result: list[dict[str, Any]] = self._load_data(  # type:ignore
+                url, location=location
+            )
         except RuntimeError:
             raise ValueError("Best sellers list name is invalid")
 
@@ -465,7 +471,7 @@ class NYTAPI:
             params["offset"] = str(offset)
 
             # Load the data from the API and raise if there's an Error
-            res: dict[str, Any] = self._load_data(
+            res: dict[str, Any] = self._load_data(  # type:ignore
                 url,
                 options=params,
                 location=[],
@@ -498,7 +504,9 @@ class NYTAPI:
         url = BASE_META_DATA
 
         # Load, parse and return the data
-        result = self._load_data(url, options=options)
+        result: list[dict[str, Any]] = self._load_data(
+            url, options=options
+        )  # type:ignore
 
         # Check if result is valid
         if result[0].get("published_date") == "0000-12-31T19:03:58-04:56":
@@ -519,7 +527,7 @@ class NYTAPI:
         """Load all sections"""
         # Set URL, load and return the data
         url = BASE_SECTION_LIST
-        return self._load_data(url)
+        return self._load_data(url)  # type:ignore
 
     def latest_articles(
         self, source: str = "all", section: str = "all"
@@ -540,7 +548,7 @@ class NYTAPI:
         # Set URL, load and return data
         url = BASE_LATEST_ARTICLES + source + "/" + section + ".json"
         try:
-            result = self._load_data(url)
+            result: list[dict[str, Any]] = self._load_data(url)  # type:ignore
         except RuntimeError:
             raise ValueError("Section is not a valid option")
 
@@ -589,7 +597,9 @@ class NYTAPI:
 
         # Set URL, load and return data
         url = BASE_TAGS
-        return self._load_data(url, options=options, location=[])[1]
+        return self._load_data(url, options=options, location=[])[
+            1
+        ]  # type:ignore
 
     def archive_metadata(
         self, date: Union[datetime.datetime, datetime.date]
@@ -611,7 +621,9 @@ class NYTAPI:
         # Set URL, load and return data
         url = BASE_ARCHIVE_METADATA + _date + ".json"
 
-        result = self._load_data(url, location=["response", "docs"])
+        result: list[dict[str, Any]] = self._load_data(  # type:ignore
+            url, location=["response", "docs"]
+        )
         parsed_result = self._parse_dates(result, "rfc3339", ["pub_date"])
         return parsed_result
 
@@ -619,7 +631,7 @@ class NYTAPI:
         self,
         query: Optional[str] = None,
         dates: Optional[
-            dict[str, Union[datetime.date, datetime.datetime]]
+            dict[str, Union[datetime.date, datetime.datetime, None]]
         ] = None,
         options: Optional[dict[str, Any]] = None,
         results: int = 10,
@@ -642,6 +654,7 @@ class NYTAPI:
         options = article_search_parse_options(options)
 
         # Parse dates into options
+        # FIXME I really don't get this error
         begin_date, end_date = article_search_parse_dates(dates)
         options["begin_date"] = begin_date
         options["end_date"] = end_date
@@ -660,13 +673,15 @@ class NYTAPI:
 
             location = ["response"]
             # Load data and raise error if there's and error status
-            res = self._load_data(url, options=options, location=location)
+            res: dict[str, Any] = self._load_data(  # type:ignore
+                url, options=options, location=location
+            )
 
             # Parse results and append them to results list
             result += res.get("docs")
 
             # Stop loading if all responses are already loaded
-            if res.get("meta", {}).get("hits") <= i * 10:
+            if res.get("meta", {}).get("hits", 0) <= i * 10:
                 break
 
         # Parse and return results
