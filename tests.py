@@ -22,12 +22,23 @@ class TestNewYorkTimes(unittest.TestCase):
     def test_top_stories(self):
         top_stories = self.nyt.top_stories()
         self.assertIsInstance(top_stories, list)
-        self.assertIsInstance(top_stories[0], dict)
+        self.assertGreater(len(top_stories), 0)
+
+        for top_story in top_stories:
+            self.assertIsInstance(top_story, dict)
+            self.assertIsInstance(top_story["created_date"], datetime.datetime)
+            self.assertIsInstance(
+                top_story["published_date"], datetime.datetime
+            )
 
     def test_top_stories_section(self):
-        top_stories_section = self.nyt.top_stories(section="world")
+        section = "world"
+        top_stories_section = self.nyt.top_stories(section=section)
         self.assertIsInstance(top_stories_section, list)
-        self.assertIsInstance(top_stories_section[0], dict)
+        self.assertGreater(len(top_stories_section), 0)
+
+        for top_story in top_stories_section:
+            self.assertIsInstance(top_story, dict)
 
     def test_top_stories_wrong_section(self):
         with self.assertRaises(ValueError):
@@ -39,6 +50,8 @@ class TestNewYorkTimes(unittest.TestCase):
     def test_most_viewed(self):
         most_viewed = self.nyt.most_viewed()
         self.assertIsInstance(most_viewed, list)
+        self.assertGreater(len(most_viewed), 0)
+
         for most in most_viewed:
             self.assertIsInstance(most, dict)
             self.assertIsInstance(most["media"], list)
@@ -53,6 +66,8 @@ class TestNewYorkTimes(unittest.TestCase):
     def test_most_shared(self):
         most_shared = self.nyt.most_shared()
         self.assertIsInstance(most_shared, list)
+        self.assertGreater(len(most_shared), 0)
+
         for most in most_shared:
             self.assertIsInstance(most, dict)
             self.assertIsInstance(most["published_date"], datetime.date)
@@ -70,10 +85,14 @@ class TestNewYorkTimes(unittest.TestCase):
             self.nyt.most_shared(days="2")
 
     def test_book_reviews(self):
-        book_reviews = self.nyt.book_reviews(author="Barack Obama")
+        author = "Barack Obama"
+        book_reviews = self.nyt.book_reviews(author=author)
         self.assertIsInstance(book_reviews, list)
+        self.assertGreater(len(book_reviews), 0)
+
         for book_review in book_reviews:
             self.assertIsInstance(book_review, dict)
+            self.assertEqual(book_review["book_author"], author)
 
     def test_book_reviews_invalid(self):
         with self.assertRaises(ValueError):
@@ -88,12 +107,16 @@ class TestNewYorkTimes(unittest.TestCase):
     def test_best_sellers_lists(self):
         best_sellers_lists = self.nyt.best_sellers_lists()
         self.assertIsInstance(best_sellers_lists, list)
+        self.assertGreater(len(best_sellers_lists), 0)
 
     def test_best_seller_list(self):
         best_seller_list = self.nyt.best_sellers_list(
             date=datetime.datetime(2019, 1, 1), name="hardcover-fiction"
         )
         self.assertIsInstance(best_seller_list, list)
+        self.assertEqual(
+            best_seller_list[0]["primary_isbn13"], "9780385544153"
+        )
 
     def test_best_seller_list_invalid(self):
         with self.assertRaises(ValueError):
@@ -105,6 +128,7 @@ class TestNewYorkTimes(unittest.TestCase):
     def test_movie_reviews(self):
         movie_reviews = self.nyt.movie_reviews()
         self.assertIsInstance(movie_reviews, list)
+        self.assertGreater(len(movie_reviews), 0)
 
         for movie_review in movie_reviews:
             self.assertIsInstance(movie_review, dict)
@@ -118,8 +142,27 @@ class TestNewYorkTimes(unittest.TestCase):
             "https://www.nytimes.com/live/2021/02/10/us/impeachment-trial/prosecutors-begin-arguments-against-trump-saying-he-became-the-inciter-in-chief-of-a-dangerous-insurrection"
         )
         self.assertIsInstance(article_metadata, list)
+
         for article in article_metadata:
             self.assertIsInstance(article, dict)
+
+        title = "Prosecutors argue that Trump ‘became the inciter in chief’ and retell riot with explicit video."
+        creation_datetime = datetime.datetime(
+            2021,
+            2,
+            10,
+            11,
+            4,
+            8,
+            tzinfo=datetime.timezone(
+                datetime.timedelta(days=-1, seconds=68400)
+            ),
+        )
+        self.assertEqual(article_metadata[0]["title"], title)
+        self.assertEqual(
+            article_metadata[0]["created_date"],
+            creation_datetime,
+        )
 
     def test_article_metadata_invalid(self):
         with self.assertRaises(TypeError):
@@ -136,8 +179,16 @@ class TestNewYorkTimes(unittest.TestCase):
             date=datetime.date.today()
         )
         self.assertIsInstance(archive_metadata, list)
+        self.assertGreater(len(archive_metadata), 0)
+
         for metadata in archive_metadata:
             self.assertIsInstance(metadata, dict)
+            self.assertGreaterEqual(
+                metadata["pub_date"],
+                datetime.datetime.now(tz=datetime.timezone.utc).replace(
+                    day=1, hour=0, minute=0, second=0, microsecond=0
+                ),
+            )
 
     def test_archive_metadata_invalid(self):
         with self.assertRaises(TypeError):
@@ -163,6 +214,8 @@ class TestNewYorkTimes(unittest.TestCase):
     def test_section_list(self):
         section_list = self.nyt.section_list()
         self.assertIsInstance(section_list, list)
+        self.assertGreater(len(section_list), 0)
+
         for section in section_list:
             self.assertIsInstance(section, dict)
 
@@ -188,6 +241,14 @@ class TestNewYorkTimes(unittest.TestCase):
 
         with self.assertRaises(TypeError):
             self.nyt.tag_query("Obama", max_results="2")
+
+    def test_parse_dates_disabled(self):
+        local_nyt = NYTAPI(API_KEY)
+        data = local_nyt.article_metadata(
+            "https://www.nytimes.com/live/2021/02/10/us/impeachment-trial/prosecutors-begin-arguments-against-trump-saying-he-became-the-inciter-in-chief-of-a-dangerous-insurrection"
+        )
+
+        self.assertEqual(data[0]["created_date"], "2021-02-10T11:04:08-05:00")
 
 
 if __name__ == "__main__":
