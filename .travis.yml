@@ -8,7 +8,7 @@ jobs:
       python: 3.8
     - python: 3.9
     - if: branch = main AND env(TRAVIS_EVENT_TYPE) != cron
-      python: "3.10-dev"
+      python: 3.10
     - if: branch = main AND env(TRAVIS_EVENT_TYPE) != cron
       python: "nightly"
     - if: branch = main AND env(TRAVIS_EVENT_TYPE) != cron
@@ -21,7 +21,7 @@ jobs:
       os: windows
       language: shell
       before_install:
-        - choco install python3 --version 3.9.2
+        - choco install python3 --version 3.9.7
       env: PATH=/c/Python39:/c/Python39/Scripts:$PATH
 
   allow_failures:
