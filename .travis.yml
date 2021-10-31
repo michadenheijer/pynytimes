@@ -3,16 +3,12 @@ language: python
 jobs:
   include:
     - if: branch = main AND env(TRAVIS_EVENT_TYPE) != cron
-      python: 3.7
-    - if: branch = main AND env(TRAVIS_EVENT_TYPE) != cron
       python: 3.8
     - python: 3.9
     - if: branch = main AND env(TRAVIS_EVENT_TYPE) != cron
       python: 3.10
     - if: branch = main AND env(TRAVIS_EVENT_TYPE) != cron
       python: "nightly"
-    - if: branch = main AND env(TRAVIS_EVENT_TYPE) != cron
-      python: "pypy3.7-7.3.5"
     - if: branch = main AND env(TRAVIS_EVENT_TYPE) != cron
       os: osx
       osx_image: xcode12.2
