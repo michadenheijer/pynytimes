@@ -1,3 +1,4 @@
+# type: ignore
 import datetime
 import unittest
 
@@ -44,7 +45,7 @@ class TestNewYorkTimes(unittest.TestCase):
 
     def test_most_viewed_invalid_days(self):
         with self.assertRaises(ValueError):
-            self.nyt.most_viewed(days=2)
+            self.nyt.most_viewed(2)
 
         with self.assertRaises(TypeError):
             self.nyt.most_viewed(days="1")
@@ -131,7 +132,9 @@ class TestNewYorkTimes(unittest.TestCase):
             self.nyt.article_metadata("text")
 
     def test_archive_metadata(self):
-        archive_metadata = self.nyt.archive_metadata(date=datetime.date.today())
+        archive_metadata = self.nyt.archive_metadata(
+            date=datetime.date.today()
+        )
         self.assertIsInstance(archive_metadata, list)
         for metadata in archive_metadata:
             self.assertIsInstance(metadata, dict)

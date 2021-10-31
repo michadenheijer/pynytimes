@@ -30,7 +30,6 @@ cd pynytimes
 python setup.py install
 ```
 
-
 ## Usage
 
 You can easily import this library using:
@@ -59,6 +58,7 @@ nyt = NYTAPI("Your API key", parse_dates=True)
 ### Supported APIs
 
 When you have imported this library you can use the following features from the New York Times API.
+
 - [Top stories](#top-stories)
 - [Most viewed articles](#most-viewed-articles)
 - [Most shared articles](#most-shared-articles)
@@ -71,7 +71,6 @@ When you have imported this library you can use the following features from the 
 - [Tag query (TimesTags)](#tag-query)
 - [Archive metadata](#archive-metadata)
 
-
 ### Top stories
 
 You can request the top stories from the New York Times. You can also get the top stories from a specific section.
@@ -83,13 +82,11 @@ top_stories = nyt.top_stories()
 top_science_stories = nyt.top_stories(section = "science")
 ```
 
-
-| Variables       | Description                             | Data type       | Required | 
+| Variables       | Description                             | Data type       | Required |
 |-----------------|-----------------------------------------|-----------------|----------|
 | ```section```   | Get Top Stories from a specific section | ```str```       | False    |
 
 The possible sections are: ```arts```, ```automobiles```, ```books```, ```business```, ```fashion```, ```food```, ```health```, ```home```, ```insider```, ```magazine```, ```movies```, ```national```, ```nyregion```, ```obituaries```, ```opinion```, ```politics```, ```realestate```, ```science```, ```sports```, ```sundayreview```, ```technology```, ```theater```, ```tmagazine```, ```travel```, ```upshot```, and ```world```.
-
 
 ### Most viewed articles
 
@@ -103,11 +100,9 @@ most_viewed = nyt.most_viewed(days = 7)
 most_viewed = nyt.most_viewed(days = 30)
 ```
 
-
 | Variables       | Description                                                              | Data type       | Required | Default |
 |-----------------|--------------------------------------------------------------------------|-----------------|----------|---------|
 | ```days```      | Get most viewed articles over the last ```1```, ```7``` or ```30``` days | ```int```       | False    | ```1``` |
-
 
 ### Most shared articles
 
@@ -135,13 +130,10 @@ most_shared = nyt.most_shared(
 )
 ```
 
-
 | Variables       | Description                                                              | Data type       | Required | Default       |
 |-----------------|--------------------------------------------------------------------------|-----------------|----------|---------------|
 | ```days```      | Get most viewed articles over the last ```1```, ```7``` or ```30``` days | ```int```       | False    | ```1```       |
 | ```method```    | Method of sharing (```email``` or ```facebook```)                        | ```str```       | False    | ```"email"``` |
-
-
 
 ### Article search
 
@@ -198,7 +190,6 @@ articles = nyt.article_search(
 | ```news_desk```         | Results should be from one of these news desks ([valid options](VALID_SEARCH_OPTIONS.md#news-desk-values))      | ```list```      | False    |
 | ```type_of_material```  | Results should be from this type of material ([valid options](VALID_SEARCH_OPTIONS.md#type-of-material-values)) | ```list```      | False    |
 | ```section_name```      | Results should be from this section ([valid options](VALID_SEARCH_OPTIONS.md#section-name-values))              | ```list```      | False    |
-
 
 ### Book reviews
 
@@ -312,7 +303,7 @@ metadata = nyt.article_metadata(
 
 ### Load latest articles
 
-You can easily load the latest articles published by the New York Times. 
+You can easily load the latest articles published by the New York Times.
 
 ```python
 latest = nyt.latest_articles(
@@ -324,9 +315,10 @@ latest = nyt.latest_articles(
 | Variables     | Description                                              | Data type  | Required | Default     |
 |---------------|----------------------------------------------------------|------------|----------|-------------|
 | ```source```  | Source of article (```all```, ```nyt``` and ```inyt```)  | ```str```  | False    | ```"all"``` |
-| ```section``` | Section of articles                                      | ```str```  | False    |             | 
+| ```section``` | Section of articles                                      | ```str```  | False    |             |
 
 You can find all possible sections using:
+
 ```python
 sections = nyt.section_list()
 ```
