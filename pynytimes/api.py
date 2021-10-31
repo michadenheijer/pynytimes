@@ -13,11 +13,6 @@ from requests import Session
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-from pynytimes.helpers.most_shared import (
-    most_shared_check_days,
-    most_shared_check_method,
-)
-
 # Import version from __init__
 from .__version__ import __version__
 
@@ -25,17 +20,17 @@ from .__version__ import __version__
 from .helpers import *
 
 # Define all URLs that are needed
-BASE_URL: Final = "api.nytimes.com"
-BASE_TOP_STORIES: Final = BASE_URL + "/svc/topstories/v2/"
-BASE_MOST_POPULAR: Final = BASE_URL + "/svc/mostpopular/v2/"
-BASE_BOOKS: Final = BASE_URL + "/svc/books/v3/"
-BASE_MOVIE_REVIEWS: Final = BASE_URL + "/svc/movies/v2/reviews/search.json"
-BASE_META_DATA: Final = BASE_URL + "/svc/news/v3/content.json"
-BASE_TAGS: Final = BASE_URL + "/svc/semantic/v2/concept/suggest"
-BASE_ARCHIVE_METADATA: Final = BASE_URL + "/svc/archive/v1/"
-BASE_ARTICLE_SEARCH: Final = BASE_URL + "/svc/search/v2/articlesearch.json"
-BASE_LATEST_ARTICLES: Final = BASE_URL + "/svc/news/v3/content/"
-BASE_SECTION_LIST: Final = BASE_URL + "/svc/news/v3/content/section-list.json"
+BASE_URL: Final = "api.nytimes.com/svc/"
+BASE_TOP_STORIES: Final = BASE_URL + "topstories/v2/"
+BASE_MOST_POPULAR: Final = BASE_URL + "mostpopular/v2/"
+BASE_BOOKS: Final = BASE_URL + "books/v3/"
+BASE_MOVIE_REVIEWS: Final = BASE_URL + "movies/v2/reviews/search.json"
+BASE_META_DATA: Final = BASE_URL + "news/v3/content.json"
+BASE_TAGS: Final = BASE_URL + "semantic/v2/concept/suggest"
+BASE_ARCHIVE_METADATA: Final = BASE_URL + "archive/v1/"
+BASE_ARTICLE_SEARCH: Final = BASE_URL + "search/v2/articlesearch.json"
+BASE_LATEST_ARTICLES: Final = BASE_URL + "news/v3/content/"
+BASE_SECTION_LIST: Final = BASE_URL + "news/v3/content/section-list.json"
 BASE_BOOK_REVIEWS: Final = BASE_BOOKS + "reviews.json"
 BASE_BEST_SELLERS_LISTS: Final = BASE_BOOKS + "lists/names.json"
 BASE_BEST_SELLERS_LIST: Final = BASE_BOOKS + "lists/"
@@ -215,7 +210,9 @@ class NYTAPI:
 
             date = datetime.datetime.strptime(date_string, "%Y-%m-%d").date()
         elif date_type == "date-time":
-            date = datetime.datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
+            date = datetime.datetime.strptime(
+                date_string, "%Y-%m-%d %H:%M:%S"
+            )
 
         return date
 
@@ -258,7 +255,9 @@ class NYTAPI:
         url = BASE_TOP_STORIES + section + ".json"
 
         try:
-            result: list[dict[str, Any]] = self._load_data(url)  # type:ignore
+            result: list[dict[str, Any]] = self._load_data(
+                url
+            )  # type:ignore
         # If 404 error throw invalid section name error
         except RuntimeError:
             raise ValueError("Invalid section name")
@@ -268,7 +267,9 @@ class NYTAPI:
         parsed_result = self._parse_dates(result, "rfc3339", date_locations)
         return parsed_result
 
-    def most_viewed(self, days: Literal[1, 7, 30] = 1) -> list[dict[str, Any]]:
+    def most_viewed(
+        self, days: Literal[1, 7, 30] = 1
+    ) -> list[dict[str, Any]]:
         """Load most viewed articles"""
         days_options = [1, 7, 30]
 
@@ -534,7 +535,9 @@ class NYTAPI:
         # Set URL, load and return data
         url = BASE_LATEST_ARTICLES + source + "/" + section + ".json"
         try:
-            result: list[dict[str, Any]] = self._load_data(url)  # type:ignore
+            result: list[dict[str, Any]] = self._load_data(
+                url
+            )  # type:ignore
         except RuntimeError:
             raise ValueError("Section is not a valid option")
 
