@@ -1,6 +1,9 @@
-name: Python package
+name: Run full tests
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
 
 jobs:
   linux-testing:
@@ -22,6 +25,7 @@ jobs:
       - name: Run unit tests
         env:
           NewYorkTimesAPIKey: ${{ secrets.API_KEY }}
+          FULL_TESTS: "true"
         run: |
           python tests.py
 
@@ -40,6 +44,7 @@ jobs:
       - name: Run unit tests
         env:
           NewYorkTimesAPIKey: ${{ secrets.API_KEY }}
+          FULL_TESTS: "true"
         run: |
           python tests.py
 
@@ -58,5 +63,6 @@ jobs:
       - name: Run unit tests
         env:
           NewYorkTimesAPIKey: ${{ secrets.API_KEY }}
+          FULL_TESTS: "true"
         run: |
           python tests.py
