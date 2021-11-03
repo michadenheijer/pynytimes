@@ -3,6 +3,8 @@ import datetime
 import unittest
 
 import os
+import time
+import random
 from pynytimes import NYTAPI
 
 API_KEY = os.environ["NewYorkTimesAPIKey"]
@@ -10,6 +12,8 @@ API_KEY = os.environ["NewYorkTimesAPIKey"]
 
 class TestNewYorkTimes(unittest.TestCase):
     def setUp(self):
+        random_sleep_seconds = random.randint(0, 60)
+        time.sleep(random_sleep_seconds)
         self.nyt = NYTAPI(API_KEY, parse_dates=True)
 
     def tearDown(self):
