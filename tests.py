@@ -254,7 +254,7 @@ class TestNewYorkTimes(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    random_sleep_seconds = random.randint(0, 60)
+    random_sleep_seconds = random.choice([0, 20, 40, 60, 80, 100])
     print(f"Sleep {random_sleep_seconds} seconds.")
     time.sleep(random_sleep_seconds)
     unittest.main()
