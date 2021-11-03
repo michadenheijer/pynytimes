@@ -12,8 +12,6 @@ API_KEY = os.environ["NewYorkTimesAPIKey"]
 
 class TestNewYorkTimes(unittest.TestCase):
     def setUp(self):
-        random_sleep_seconds = random.randint(0, 60)
-        time.sleep(random_sleep_seconds)
         self.nyt = NYTAPI(API_KEY, parse_dates=True)
 
     def tearDown(self):
@@ -256,4 +254,7 @@ class TestNewYorkTimes(unittest.TestCase):
 
 
 if __name__ == "__main__":
+    random_sleep_seconds = random.randint(0, 60)
+    print(f"Sleep {random_sleep_seconds} seconds.")
+    time.sleep(random_sleep_seconds)
     unittest.main()
