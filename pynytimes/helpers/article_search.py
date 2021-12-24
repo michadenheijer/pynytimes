@@ -54,7 +54,7 @@ def _article_search_check_sort_options(options: dict[str, str]):
         raise ValueError("Sort option is not valid")
 
 
-def _article_search_check_date_types(dates: dict):
+def _article_search_check_date_types(dates: dict[str, Any]):
     # Raise error if date is incorrect type
     date_types = (datetime.datetime, datetime.date, NoneType)
 
@@ -84,18 +84,13 @@ def article_search_check_input(
     _article_search_result_warnings(results)
 
 
-def _convert_date_to_datetime(input: datetime.date) -> datetime.datetime:
-    return datetime.datetime(input.year, input.month, input.day)
-
-
 def _convert_date_to_str(
     date: Union[datetime.datetime, datetime.date, None]
 ) -> Optional[str]:
     if date is not None:
-        if isinstance(date, datetime.date):
-            date = _convert_date_to_datetime(date)
-
-        return date.strftime("%Y%m%d")
+        return datetime.datetime(date.year, date.month, date.day).strftime(
+            "%Y%m%d"
+        )
 
     return None
 
