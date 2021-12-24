@@ -1,3 +1,8 @@
+# Import typings dependencies
+from __future__ import annotations
+from typing import Literal
+
+
 def most_shared_check_method(method: str):
     method_options = ["email", "facebook"]
     # Raise error if method isn't a str
@@ -21,5 +26,14 @@ def most_shared_check_days(days: int):
         raise ValueError("You can only select 1, 7 or 30 days")
 
 
-def most_shared_get_url():
-    pass
+def most_shared_get_url(
+    base_url: str,
+    method: Literal["email", "facebook"],
+    days: Literal[1, 7, 30],
+):
+    if method is None:
+        return f"{base_url}shared/{days}.json"
+    elif method == "email":
+        return f"{base_url}emailed/{days}.json"
+    else:
+        return f"{base_url}shared/{days}/{method}.json"

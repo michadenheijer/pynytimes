@@ -126,3 +126,17 @@ def movie_reviews_parse_dates(
     params["publication-date"] = _publication_dates
 
     return params
+
+
+def movie_reviews_parse_params(
+    params: dict, keyword: Optional[str], options: dict
+):
+    # Set keyword if defined
+    if keyword is not None:
+        params["query"] = keyword
+    # Set critics pick to "Y" if true
+    if options.get("critics_pick") is True:
+        params["critics_pick"] = "Y"
+    # Set API request params if defined
+    params["reviewer"] = options.get("reviewer")
+    params["order"] = options.get("order")

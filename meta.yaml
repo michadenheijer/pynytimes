@@ -1,0 +1,28 @@
+package:
+  name: "pynytimes"
+  version: "0.8.0"
+
+source:
+  git_rev: v0.8.0
+  git_url: https://github.com/michadenheijer/pynytimes
+
+requirements:
+  host:
+    - python
+    - setuptools
+  build:
+    - python
+  run:
+    - "python>=3.8,<4"
+    - requests
+
+about:
+  home: https://github.com/michadenheijer/pynytimes
+  license: MIT
+  license_familY: MIT
+  license_file: LICENSE
+  summary: "Use all the New York Times APIs in Python!"
+
+extra:
+  recipe-maintainers:
+    - michadenheijer
