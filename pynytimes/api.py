@@ -64,12 +64,15 @@ class NYTAPI:
         """Creates the New York Times API class.
 
         Args:
-            key (str, optional): Your key to access the NYT developer API. Get your key at https://developer.nytimes.nl. Defaults to None.
+            key (str, optional): Your key to access the NYT developer API.
+            Get your key at https://developer.nytimes.nl. Defaults to None.
             https (bool, optional): Optionally disable HTTPS, not advised. Defaults to True.
             session (Session, optional): Use your own Session object. Defaults to None.
-            backoff (bool, optional): Optionally disable the automatic backoff, this is only advised if you implement your own. Defaults to True.
+            backoff (bool, optional): Optionally disable the automatic backoff,
+            this is only advised if you implement your own. Defaults to True.
             user_agent (str, optional): Set your own user-agent. Defaults to None.
-            parse_dates (bool, optional): Optionally parse all dates into datetime objects. It is advised to enable this. Defaults to False.
+            parse_dates (bool, optional): Optionally parse all dates into datetime objects.
+            It is advised to enable this. Defaults to False.
         """
         self.__set_key(key)
         self.__set_session(session)
@@ -204,7 +207,8 @@ class NYTAPI:
         """Load Top Stories
 
         Args:
-            section (str, optional): The section to load the top stories from. Defaults to "home".
+            section (str, optional): The section to load the top stories from.
+            Defaults to "home".
 
         Raises:
             TypeError: Section can only be a string
@@ -235,7 +239,8 @@ class NYTAPI:
         """Get most viewed articles
 
         Args:
-            days (Literal[1, 7, 30], optional): Select the period of which you want to get the most viewed articles. Defaults to 1.
+            days (Literal[1, 7, 30], optional): Select the period of which you
+            want to get the most viewed articles. Defaults to 1.
 
         Returns:
             list[dict[str, Any]]: Most viewed article metadata
@@ -263,8 +268,10 @@ class NYTAPI:
         """Get most shared articles
 
         Args:
-            days (Literal[1, 7, 30], optional): Period of the most shared articles. Defaults to 1.
-            method (Literal["email, "facebook"], optional): Choose the source of shared articles. Defaults to "email".
+            days (Literal[1, 7, 30], optional): Period of the most shared articles.
+            Defaults to 1.
+            method (Literal["email, "facebook"], optional): Choose the source
+            of shared articles. Defaults to "email".
 
         Returns:
             list[dict[str, Any]]: Most shared articles
@@ -320,7 +327,8 @@ class NYTAPI:
         return parsed_result
 
     def best_sellers_lists(self) -> list[dict[str, Any]]:
-        """Get all the best sellers lists (not the contents of these lists, but just all the lists).
+        """Get all the best sellers lists (not the contents of these lists,
+        but just all the lists).
 
         Returns:
             list[dict[str, Any]]: Bestsellers lists
@@ -345,7 +353,8 @@ class NYTAPI:
         """Load all books on a best sellers lists
 
         Args:
-            date (Union[datetime.date, datetime.datetime, None], optional): The list closest to this date. If left empty loads most recent. Defaults to None.
+            date (Union[datetime.date, datetime.datetime, None], optional):
+            The list closest to this date. If left empty loads most recent. Defaults to None.
             name (str, optional): Name of the list. Defaults to "combined-print-and-e-book-fiction".
 
         Raises:
@@ -407,9 +416,13 @@ class NYTAPI:
         """Load movie reviews
 
         Args:
-            keyword (Optional[str], optional): Keyword to find the movie. Defaults to None.
-            options (Optional[dict[str, Any]], optional): Options object where certain requirements can be set. Check for more https://github.com/michadenheijer/pynytimes. Defaults to None.
-            dates (Optional[ dict[str, Union[datetime.date, datetime.datetime]] ], optional): Dates between the review was written or movie was first shown. Defaults to None.
+            keyword (Optional[str], optional): Keyword to find the movie.
+            Defaults to None.
+            options (Optional[dict[str, Any]], optional): Options object
+            where certain requirements can be set. Check for more
+            https://github.com/michadenheijer/pynytimes. Defaults to None.
+            dates (Optional[ dict[str, Union[datetime.date, datetime.datetime]] ], optional):
+            Dates between the review was written or movie was first shown. Defaults to None.
 
         Returns:
             list[dict[str, Any]]: Movie reviews
@@ -481,8 +494,10 @@ class NYTAPI:
         """Load latest articles
 
         Args:
-            source (Literal["all", "nyt", "inyt"], optional): Select sources to get all articles from. Defaults to "all".
-            section (str, optional): Section to get all latest articles from. Defaults to "all".
+            source (Literal["all", "nyt", "inyt"], optional): Select sources to get all
+            articles from. Defaults to "all".
+            section (str, optional): Section to get all latest articles from.
+            Defaults to "all".
 
         Raises:
             ValueError: Section is not a valid option
@@ -519,9 +534,12 @@ class NYTAPI:
 
         Args:
             query (str): Search query to find a tag
-            filter_option (Optional[dict[str, Any]], optional): Filter the tags. Defaults to None.
-            filter_options (Optional[str], optional): Filter options. Defaults to None.
-            max_results (Optional[int], optional): Maximum number of results. None means no limit. Defaults to None.
+            filter_option (Optional[dict[str, Any]], optional): Filter the tags.
+            Defaults to None.
+            filter_options (Optional[str], optional): Filter options. Defaults
+            to None.
+            max_results (Optional[int], optional): Maximum number of results.
+            None means no limit. Defaults to None.
 
         Returns:
             list[str]: List of tags
@@ -551,7 +569,8 @@ class NYTAPI:
         """Load all article metadata from the last month
 
         Args:
-            date (Union[datetime.datetime, datetime.date]): The month of which you want to load all article metadata from
+            date (Union[datetime.datetime, datetime.date]): The month of
+            which you want to load all article metadata from
 
         Raises:
             TypeError: Date is not a datetime or date object
@@ -613,8 +632,10 @@ class NYTAPI:
 
         Args:
             query (Optional[str], optional): Search query. Defaults to None.
-            dates (Optional[ dict[str, Union[datetime.date, datetime.datetime, None]] ], optional): Values between which results should be. Defaults to None.
-            options (Optional[dict[str, Any]], optional): Options for the search results. Defaults to None.
+            dates (Optional[ dict[str, Union[datetime.date, datetime.datetime, None]] ], optional):
+            Values between which results should be. Defaults to None.
+            options (Optional[dict[str, Any]], optional): Options for the search results.
+            Defaults to None.
             results (int, optional): Load at most this many articles. Defaults to 10.
 
         Returns:
