@@ -1,10 +1,10 @@
 """Book Reviews helper functions"""
 # Import typings dependencies
 from __future__ import annotations
-from typing import Optional, Union
+from typing import Final, Optional, Union
 
 # Shorten type(None)
-NoneType: type = type(None)
+NoneType: Final = type(None)
 
 
 def book_reviews_check_input(

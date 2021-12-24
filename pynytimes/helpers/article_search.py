@@ -1,13 +1,13 @@
 """Article Search helper functions"""
 # Import typings dependencies
 from __future__ import annotations
-from typing import Any, Optional, Union
+from typing import Any, Final, Optional, Union
 
 # Import Python dependencies
 import datetime
 import warnings
 
-NoneType = type(None)
+NoneType: Final = type(None)
 
 
 def _article_search_result_warnings(results: int):

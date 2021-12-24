@@ -39,7 +39,9 @@ TIMEOUT: Final = (10, 30)
 
 
 class NYTAPI:
-    """New York Times API Class. Interacts with user."""
+    """
+    New York Times API Class loads data from the NYT API.
+    """
 
     key: str
     https: bool
@@ -59,6 +61,16 @@ class NYTAPI:
         user_agent: Optional[str] = None,
         parse_dates: bool = False,
     ):
+        """Creates the New York Times API class.
+
+        Args:
+            key (str, optional): Your key to access the NYT developer API. Get your key at https://developer.nytimes.nl. Defaults to None.
+            https (bool, optional): Optionally disable HTTPS, not advised. Defaults to True.
+            session (Session, optional): Use your own Session object. Defaults to None.
+            backoff (bool, optional): Optionally disable the automatic backoff, this is only advised if you implement your own. Defaults to True.
+            user_agent (str, optional): Set your own user-agent. Defaults to None.
+            parse_dates (bool, optional): Optionally parse all dates into datetime objects. It is advised to enable this. Defaults to False.
+        """
         self.__set_key(key)
         self.__set_session(session)
         self.__set_parse_dates(parse_dates)
@@ -67,6 +79,15 @@ class NYTAPI:
         self.__set_user_agent(user_agent)
 
     def __set_key(self, key: Optional[str]):
+        """Set key of the class
+
+        Args:
+            key (str): The New York Times developer key
+
+        Raises:
+            ValueError: You have not set an API key, set one
+            TypeError: Your API key is not a string
+        """
         # Raise Error if API key is not given, or wrong type
         if key is None:
             raise ValueError(
@@ -180,7 +201,18 @@ class NYTAPI:
         )
 
     def top_stories(self, section: str = "home") -> list[dict[str, Any]]:
-        """Load the top stories"""
+        """Load Top Stories
+
+        Args:
+            section (str, optional): The section to load the top stories from. Defaults to "home".
+
+        Raises:
+            TypeError: Section can only be a string
+            ValueError: A non-existant section is given
+
+        Returns:
+            list[dict[str, Any]]: Top stories metadata
+        """
         # Raise error if section is not a str
         if not isinstance(section, str):
             raise TypeError("Section can only be a str")
@@ -200,7 +232,14 @@ class NYTAPI:
         return parsed_result
 
     def most_viewed(self, days: Literal[1, 7, 30] = 1) -> list[dict[str, Any]]:
-        """Load most viewed articles"""
+        """Get most viewed articles
+
+        Args:
+            days (Literal[1, 7, 30], optional): Select the period of which you want to get the most viewed articles. Defaults to 1.
+
+        Returns:
+            list[dict[str, Any]]: Most viewed article metadata
+        """
         most_viewed_check_values(days)
 
         # Load the data
@@ -221,7 +260,15 @@ class NYTAPI:
         days: Literal[1, 7, 30] = 1,
         method: Literal["email", "facebook"] = "email",
     ) -> list[dict[str, Any]]:
-        """Load most shared articles"""
+        """Get most shared articles
+
+        Args:
+            days (Literal[1, 7, 30], optional): Period of the most shared articles. Defaults to 1.
+            method (Literal["email, "facebook"], optional): Choose the source of shared articles. Defaults to "email".
+
+        Returns:
+            list[dict[str, Any]]: Most shared articles
+        """
         most_shared_check_days(days)
         most_shared_check_method(method)
 
@@ -246,7 +293,16 @@ class NYTAPI:
         isbn: Union[str, int, None] = None,
         title: Optional[str] = None,
     ) -> list[dict[str, Any]]:
-        """Load book reviews"""
+        """Load book reviews
+
+        Args:
+            author (Optional[str], optional): Name of author. Defaults to None.
+            isbn (Union[str, int, None], optional): ISBN of book. Defaults to None.
+            title (Optional[str], optional): Title of book. Defaults to None.
+
+        Returns:
+            list[dict[str, Any]]: Reviews of books
+        """
         # Set request options params
         options = book_reviews_extract_options(author, isbn, title)
 
@@ -264,7 +320,11 @@ class NYTAPI:
         return parsed_result
 
     def best_sellers_lists(self) -> list[dict[str, Any]]:
-        """Load all the best seller lists"""
+        """Get all the best sellers lists (not the contents of these lists, but just all the lists).
+
+        Returns:
+            list[dict[str, Any]]: Bestsellers lists
+        """
         # Set URL, load and return data
         result: list[dict[str, Any]] = self.__load_data(
             url=BASE_BEST_SELLERS_LISTS
@@ -282,7 +342,18 @@ class NYTAPI:
         date: Union[datetime.date, datetime.datetime, None] = None,
         name: str = "combined-print-and-e-book-fiction",
     ) -> list[dict[str, Any]]:
-        """Load a best seller list"""
+        """Load all books on a best sellers lists
+
+        Args:
+            date (Union[datetime.date, datetime.datetime, None], optional): The list closest to this date. If left empty loads most recent. Defaults to None.
+            name (str, optional): Name of the list. Defaults to "combined-print-and-e-book-fiction".
+
+        Raises:
+            ValueError: List does not exist
+
+        Returns:
+            list[dict[str, Any]]: Books that are on the best sellers list
+        """
         _date = best_sellers_parse_date(date)
 
         # Set URL and include data
@@ -333,7 +404,16 @@ class NYTAPI:
             dict[str, Union[datetime.date, datetime.datetime]]
         ] = None,
     ) -> list[dict[str, Any]]:
-        """Load movie reviews"""
+        """Load movie reviews
+
+        Args:
+            keyword (Optional[str], optional): Keyword to find the movie. Defaults to None.
+            options (Optional[dict[str, Any]], optional): Options object where certain requirements can be set. Check for more https://github.com/michadenheijer/pynytimes. Defaults to None.
+            dates (Optional[ dict[str, Union[datetime.date, datetime.datetime]] ], optional): Dates between the review was written or movie was first shown. Defaults to None.
+
+        Returns:
+            list[dict[str, Any]]: Movie reviews
+        """
         # Set options and dates if not defined
         options = options or {}
         dates = dates or {}
@@ -358,7 +438,14 @@ class NYTAPI:
         return parsed_results
 
     def article_metadata(self, url: str) -> list[dict[str, Any]]:
-        """Load the metadata from an article"""
+        """Load metadata of an article by url
+
+        Args:
+            url (str): URL of an New York Times article
+
+        Returns:
+            list[dict[str, Any]]: List of article metadata
+        """
         options = article_metadata_set_url(url)
 
         # Load, parse and return the data
@@ -378,7 +465,11 @@ class NYTAPI:
         return parsed_result
 
     def section_list(self) -> list[dict[str, Any]]:
-        """Load all sections"""
+        """Load all list of all sections
+
+        Returns:
+            list[dict[str, Any]]: List of sections
+        """
         # Set URL, load and return the data
         return self.__load_data(url=BASE_SECTION_LIST)  # type:ignore
 
@@ -387,7 +478,18 @@ class NYTAPI:
         source: Literal["all", "nyt", "inyt"] = "all",
         section: str = "all",
     ) -> list[dict[str, Any]]:
-        """Load the latest articles"""
+        """Load latest articles
+
+        Args:
+            source (Literal["all", "nyt", "inyt"], optional): Select sources to get all articles from. Defaults to "all".
+            section (str, optional): Section to get all latest articles from. Defaults to "all".
+
+        Raises:
+            ValueError: Section is not a valid option
+
+        Returns:
+            list[dict[str, Any]]: List of metadata of latest articles
+        """
         latest_articles_check_types(source, section)
 
         # Set URL, load and return data
@@ -413,7 +515,17 @@ class NYTAPI:
         filter_options: Optional[str] = None,
         max_results: Optional[int] = None,
     ) -> list[str]:
-        """Load TimesTags"""
+        """Load Times Tags
+
+        Args:
+            query (str): Search query to find a tag
+            filter_option (Optional[dict[str, Any]], optional): Filter the tags. Defaults to None.
+            filter_options (Optional[str], optional): Filter options. Defaults to None.
+            max_results (Optional[int], optional): Maximum number of results. None means no limit. Defaults to None.
+
+        Returns:
+            list[str]: List of tags
+        """
         # Raise error for TypeError
         tag_query_check_types(query, max_results)
 
@@ -436,7 +548,17 @@ class NYTAPI:
     def archive_metadata(
         self, date: Union[datetime.datetime, datetime.date]
     ) -> list[dict[str, Any]]:
-        """Load all the metadata from one month"""
+        """Load all article metadata from the last month
+
+        Args:
+            date (Union[datetime.datetime, datetime.date]): The month of which you want to load all article metadata from
+
+        Raises:
+            TypeError: Date is not a datetime or date object
+
+        Returns:
+            list[dict[str, Any]]: List of article metadata
+        """
         # Raise Error if date is not defined
         if not isinstance(date, (datetime.datetime, datetime.date)):
             raise TypeError("Date has to be datetime or date")
@@ -487,7 +609,17 @@ class NYTAPI:
         options: Optional[dict[str, Any]] = None,
         results: int = 10,
     ) -> list[dict[str, Any]]:
-        """Load articles from search"""
+        """Search New York Times articles
+
+        Args:
+            query (Optional[str], optional): Search query. Defaults to None.
+            dates (Optional[ dict[str, Union[datetime.date, datetime.datetime, None]] ], optional): Values between which results should be. Defaults to None.
+            options (Optional[dict[str, Any]], optional): Options for the search results. Defaults to None.
+            results (int, optional): Load at most this many articles. Defaults to 10.
+
+        Returns:
+            list[dict[str, Any]]: Article metadata
+        """
         # Set if None
         dates = dates or {}
         options = options or {}

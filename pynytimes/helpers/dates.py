@@ -1,6 +1,6 @@
 # Import typings dependencies
 from __future__ import annotations
-from typing import Any, Final, Literal, Optional, Union
+from typing import Any, Literal, Optional, Union
 
 import datetime
 import re
