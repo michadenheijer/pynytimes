@@ -66,12 +66,14 @@ class NYTAPI:
         Args:
             key (str, optional): Your key to access the NYT developer API.
             Get your key at https://developer.nytimes.nl. Defaults to None.
-            https (bool, optional): Optionally disable HTTPS, not advised. Defaults to True.
+            https (bool, optional): Optionally disable HTTPS, not advised.
+            Defaults to True.
             session (Session, optional): Use your own Session object. Defaults to None.
             backoff (bool, optional): Optionally disable the automatic backoff,
             this is only advised if you implement your own. Defaults to True.
             user_agent (str, optional): Set your own user-agent. Defaults to None.
-            parse_dates (bool, optional): Optionally parse all dates into datetime objects.
+            parse_dates (bool, optional): Optionally parse all dates into datetime
+            objects.
             It is advised to enable this. Defaults to False.
         """
         self.__set_key(key)
@@ -268,8 +270,8 @@ class NYTAPI:
         """Get most shared articles
 
         Args:
-            days (Literal[1, 7, 30], optional): Period of the most shared articles.
-            Defaults to 1.
+            days (Literal[1, 7, 30], optional): Period of the most shared
+            articles. Defaults to 1.
             method (Literal["email, "facebook"], optional): Choose the source
             of shared articles. Defaults to "email".
 
@@ -354,8 +356,10 @@ class NYTAPI:
 
         Args:
             date (Union[datetime.date, datetime.datetime, None], optional):
-            The list closest to this date. If left empty loads most recent. Defaults to None.
-            name (str, optional): Name of the list. Defaults to "combined-print-and-e-book-fiction".
+            The list closest to this date. If left empty loads most recent.
+            Defaults to None.
+            name (str, optional): Name of the list. Defaults to
+            "combined-print-and-e-book-fiction".
 
         Raises:
             ValueError: List does not exist
@@ -421,8 +425,10 @@ class NYTAPI:
             options (Optional[dict[str, Any]], optional): Options object
             where certain requirements can be set. Check for more
             https://github.com/michadenheijer/pynytimes. Defaults to None.
-            dates (Optional[ dict[str, Union[datetime.date, datetime.datetime]] ], optional):
-            Dates between the review was written or movie was first shown. Defaults to None.
+            dates (Optional[ dict[str, Union[datetime.date, datetime.datetime]] ],
+            optional):
+            Dates between the review was written or movie was first shown.
+            Defaults to None.
 
         Returns:
             list[dict[str, Any]]: Movie reviews
@@ -632,9 +638,11 @@ class NYTAPI:
 
         Args:
             query (Optional[str], optional): Search query. Defaults to None.
-            dates (Optional[ dict[str, Union[datetime.date, datetime.datetime, None]] ], optional):
+            dates (Optional[ dict[str, Union[datetime.date, datetime.datetime, None]]
+            ], optional):
             Values between which results should be. Defaults to None.
-            options (Optional[dict[str, Any]], optional): Options for the search results.
+            options (Optional[dict[str, Any]], optional): Options for the
+            search results.
             Defaults to None.
             results (int, optional): Load at most this many articles. Defaults to 10.
 
