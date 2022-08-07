@@ -1,8 +1,9 @@
 # Import typings dependencies
 from __future__ import annotations
+from typing import Literal
 
 
-def most_viewed_check_values(days: int):
+def most_viewed_check_values(days: Literal[1, 7, 30]):
     days_options = [1, 7, 30]
 
     # Raise an TypeError if days is not a int

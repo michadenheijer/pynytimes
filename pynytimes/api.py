@@ -6,7 +6,6 @@ from typing import Any, Final, Literal, Optional, Union
 # Import standard Python dependencies
 import datetime
 import math
-import re
 
 # Import other dependencies
 from requests import Session
@@ -14,7 +13,7 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 # Import version from __init__
-from .__version__ import __version__
+from .__version__ import __title__, __version__
 
 # Import own dependencies
 from .helpers import *
@@ -35,7 +34,13 @@ BASE_BOOK_REVIEWS: Final = BASE_BOOKS + "reviews.json"
 BASE_BEST_SELLERS_LISTS: Final = BASE_BOOKS + "lists/names.json"
 BASE_BEST_SELLERS_LIST: Final = BASE_BOOKS + "lists/"
 
+# Define Requests variables
 TIMEOUT: Final = (10, 30)
+BACKOFF_FACTOR = 1
+RETRY_STATUS_CODES = [429, 509]
+MAX_RETRIES = 10
+RESULTS_MOVIE = 20
+RESULTS_SEARCH = 10
 
 
 class NYTAPI:
@@ -54,7 +59,7 @@ class NYTAPI:
 
     def __init__(
         self,
-        key: str = None,
+        key: str,
         https: bool = True,
         session: Optional[Session] = None,
         backoff: bool = True,
@@ -64,7 +69,7 @@ class NYTAPI:
         """Creates the New York Times API class.
 
         Args:
-            key (str, optional): Your key to access the NYT developer API.
+            key (str): Your key to access the NYT developer API.
             Get your key at https://developer.nytimes.nl. Defaults to None.
             https (bool, optional): Optionally disable HTTPS, not advised.
             Defaults to True.
@@ -114,6 +119,8 @@ class NYTAPI:
             self._local_session = True
             session = Session()
 
+        # FIXME maybe also support other types of requests compatible
+        # Session instances
         if not isinstance(session, Session):
             raise TypeError("Session needs to be a Session object")
 
@@ -143,20 +150,21 @@ class NYTAPI:
 
         if backoff:
             # Any to remove errors from type checker
-            backoff_strategy: Any = Retry(
-                total=10,
-                backoff_factor=1,
-                status_forcelist=[429, 509],
+            # FIXME maybe set this as a constant
+            backoff_strategy = Retry(
+                total=MAX_RETRIES,
+                backoff_factor=BACKOFF_FACTOR,
+                status_forcelist=RETRY_STATUS_CODES,
             )
 
             adapter = HTTPAdapter(max_retries=backoff_strategy)
 
-            self.session.mount(self.protocol + "api.nytimes.com/", adapter)
+            self.session.mount(self.protocol + BASE_URL, adapter)
 
     def __set_user_agent(self, user_agent: Optional[str]):
         # Set header to show that this wrapper is used
         if user_agent is None:
-            user_agent = "pynytimes/" + __version__
+            user_agent = f"{__title__}/{__version__}"
 
         if not isinstance(user_agent, str):
             raise TypeError("user_agent needs to be str")
@@ -233,8 +241,11 @@ class NYTAPI:
             raise ValueError("Invalid section name")
 
         # Parse dates from string to datetime.datetime
+        # FIXME probably this should be a constant
         date_locations = ["updated_date", "created_date", "published_date"]
-        parsed_result = self.__parse_dates(result, "rfc3339", date_locations)
+        parsed_result = self.__parse_dates(
+            result, "rfc3339", date_locations
+        )  # FIXME this could just be a direct return
         return parsed_result
 
     def most_viewed(self, days: Literal[1, 7, 30] = 1) -> list[dict[str, Any]]:
@@ -388,10 +399,10 @@ class NYTAPI:
         # Set results list
         results = []
 
-        requests_needed = math.ceil(max_results / 20)
+        requests_needed = math.ceil(max_results / RESULTS_MOVIE)
         for i in range(requests_needed):
             # Set offset for second request
-            offset = i * 20
+            offset = i * RESULTS_MOVIE
             params["offset"] = str(offset)
 
             # Load the data from the API and raise if there's an Error
@@ -404,7 +415,7 @@ class NYTAPI:
             results += res.get("results")  # type:ignore
 
             # Quit loading more data if no more data is available
-            if res.get("has_more") is False:
+            if not res.get("has_more"):
                 break
 
         return results
@@ -442,10 +453,11 @@ class NYTAPI:
         params = movie_reviews_parse_dates(dates)
         movie_reviews_parse_params(params, keyword, options)
 
-        max_results = options.get("max_results", 20)
+        max_results = options.get("max_results", RESULTS_MOVIE)
         results = self.__load_movie_reviews(max_results, params)
 
         # Parse and return the results
+        # FIXME this part really seems unclear
         parsed_results = self.__parse_dates(
             self.__parse_dates(
                 results, "date-only", ["publication_date", "opening_date"]
@@ -474,6 +486,7 @@ class NYTAPI:
 
         article_metadata_check_valid(result)
 
+        # FIXME this looks like it should be a constant
         date_locations = [
             "updated_date",
             "created_date",
@@ -520,6 +533,7 @@ class NYTAPI:
         except RuntimeError:
             raise ValueError("Section is not a valid option")
 
+        # FIXME looks like this should be a constant
         date_locations = [
             "updated_date",
             "created_date",
@@ -565,6 +579,7 @@ class NYTAPI:
             options["max"] = str(max_results)
 
         # Set URL, load and return data
+        # FIXME what is this, why is this?
         return self.__load_data(url=BASE_TAGS, options=options, location=[])[
             1
         ]  # type:ignore
@@ -591,6 +606,7 @@ class NYTAPI:
         # Set URL, load and return data
         url = f"{BASE_ARCHIVE_METADATA}{date.year}/{date.month}.json"
 
+        # FIXME why not return immidiatly? what it is doing is also unclear
         parsed_result = self.__parse_dates(
             self.__load_data(  # type:ignore
                 url, location=["response", "docs"]
@@ -600,13 +616,14 @@ class NYTAPI:
         )
         return parsed_result
 
+    # FIXME should this not be in a helper function?
     def __article_search_load_data(
         self,
         results: int,
         options: dict[str, Any],
     ) -> list[dict[str, Any]]:
         result = []
-        for i in range(math.ceil(results / 10)):
+        for i in range(math.ceil(results / RESULTS_SEARCH)):
             # Set page
             options["page"] = str(i)
 
@@ -620,11 +637,12 @@ class NYTAPI:
             result += res.get("docs")  # type:ignore
 
             # Stop loading if all responses are already loaded
-            if res.get("meta", {}).get("hits", 0) <= i * 10:
+            if res.get("meta", {}).get("hits", 0) <= i * RESULTS_SEARCH:
                 break
 
         return result
 
+    # FIXME this appears to try to do to much
     def article_search(
         self,
         query: Optional[str] = None,
@@ -689,10 +707,10 @@ class NYTAPI:
     # Close session before delete
     def __del__(self) -> None:
         """Close session on deletion"""
-        if getattr(self, "_local_session", False) is True:
+        if getattr(self, "_local_session", False):
             self.close()
 
     def __exit__(self, *args) -> None:
         """Close session on exit"""
-        if getattr(self, "_local_session", False) is True:
+        if getattr(self, "_local_session", False):
             self.close()
