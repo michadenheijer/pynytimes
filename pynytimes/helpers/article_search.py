@@ -9,17 +9,20 @@ import warnings
 
 NoneType: Final = type(None)
 
+LARGE_RESULTS_WARN = 100
+MAXIMUM_RESULTS = 2010
+
 
 def _article_search_result_warnings(results: int):
     # Show warnings when a lot of results are requested
-    if results >= 100:
+    if results >= LARGE_RESULTS_WARN:
         warnings.warn(
             "Asking for a lot of results, because of rate"
             + " limits it can take a while."
         )
 
     # Show waring when above maximum amount of results
-    if results >= 2010:
+    if results >= MAXIMUM_RESULTS:
         warnings.warn(
             "Asking for more results then the API can provide,"
             + "loading maximum results."

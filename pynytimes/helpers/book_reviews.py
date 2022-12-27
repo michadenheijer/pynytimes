@@ -33,6 +33,7 @@ def book_reviews_extract_options(
     title: Optional[str],
 ) -> dict[str, str]:
 
+    # FIXME this is just overly complicated
     options = {
         "author": author,
         "isbn": str(isbn) if isbn is not None else None,

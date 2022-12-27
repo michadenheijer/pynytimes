@@ -31,6 +31,7 @@ def most_shared_get_url(
     method: Literal["email", "facebook"],
     days: Literal[1, 7, 30],
 ):
+    # FIXME checking for none, while it is not a valid option
     if method is None:
         return f"{base_url}shared/{days}.json"
     elif method == "email":

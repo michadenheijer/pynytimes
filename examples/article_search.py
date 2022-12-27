@@ -13,7 +13,7 @@ biden = nyt.article_search("biden")
 
 # You can optionally define the dates between which you want the articles to be
 biden_january = nyt.article_search(
-    query="biden", dates={"start": date(2021, 1, 1), "end": date(2021, 1, 31)}
+    query="biden", dates={"begin": date(2021, 1, 1), "end": date(2021, 1, 31)}
 )
 
 # Optionally you can also define
