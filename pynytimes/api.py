@@ -58,7 +58,9 @@ ArticleSearchOptions = TypedDict(
 MovieReviewsOptions = TypedDict(
     "MovieReviewsOptions",
     {
-        "order": Literal["by-title", "by-publication-date", "by-opening-date"],
+        "order": Literal[
+            "by-title", "by-publication-date", "by-opening-date"
+        ],
         "reviewer": str,
         "critics_pick": bool,
     },
@@ -258,7 +260,9 @@ class NYTAPI:
         url = f"{BASE_TOP_STORIES}{section}.json"
 
         try:
-            result: list[dict[str, Any]] = self.__load_data(url)  # type:ignore
+            result: list[dict[str, Any]] = self.__load_data(
+                url
+            )  # type:ignore
         # If 404 error throw invalid section name error
         except RuntimeError:
             raise ValueError("Invalid section name")
@@ -271,7 +275,9 @@ class NYTAPI:
         )  # FIXME this could just be a direct return
         return parsed_result
 
-    def most_viewed(self, days: Literal[1, 7, 30] = 1) -> list[dict[str, Any]]:
+    def most_viewed(
+        self, days: Literal[1, 7, 30] = 1
+    ) -> list[dict[str, Any]]:
         """Get most viewed articles
 
         Args:
@@ -682,8 +688,9 @@ class NYTAPI:
 
         Args:
             query (Optional[str], optional): Search query. Defaults to None.
-            dates (Optional[dict[Literal["begin", "end"], DateType]], optional):
-            Dictionary with "begin" and "end" of search range. Defaults to None.
+            dates (Optional[dict[Literal["begin", "end"], DateType]],
+            optional): Dictionary with "begin" and "end" of search range.
+            Defaults to None.
             options (Optional[dict[str, Any]], optional): Options for the
             search results.
             Defaults to None.
