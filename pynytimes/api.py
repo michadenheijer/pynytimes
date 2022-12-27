@@ -1,11 +1,11 @@
 """Main function of the wrapper"""
 # Import typings dependencies
 from __future__ import annotations
-from typing import Any, Final, Literal, Optional, Union
 
 # Import standard Python dependencies
 import datetime
 import math
+from typing import Any, Final, Literal, Optional, Union, TypedDict, cast
 
 # Import other dependencies
 from requests import Session
@@ -41,6 +41,29 @@ RETRY_STATUS_CODES = [429, 509]
 MAX_RETRIES = 10
 RESULTS_MOVIE = 20
 RESULTS_SEARCH = 10
+
+# Set type hints
+DateType = Union[datetime.date, datetime.datetime, None]
+ArticleSearchOptions = TypedDict(
+    "ArticleSearchOptions",
+    {
+        "sort": Literal["oldest", "newest", "relevance"],
+        "sources": "list[str]",
+        "news_desk": "list[str]",
+        "type_of_material": "list[str]",
+        "section_name": "list[str]",
+    },
+    total=False,
+)
+MovieReviewsOptions = TypedDict(
+    "MovieReviewsOptions",
+    {
+        "order": Literal["by-title", "by-publication-date", "by-opening-date"],
+        "reviewer": str,
+        "critics_pick": bool,
+    },
+    total=False,
+)
 
 
 class NYTAPI:
@@ -310,14 +333,14 @@ class NYTAPI:
     def book_reviews(
         self,
         author: Optional[str] = None,
-        isbn: Union[str, int, None] = None,
+        isbn: Optional[Union[str, int]] = None,
         title: Optional[str] = None,
     ) -> list[dict[str, Any]]:
         """Load book reviews
 
         Args:
             author (Optional[str], optional): Name of author. Defaults to None.
-            isbn (Union[str, int, None], optional): ISBN of book. Defaults to None.
+            isbn (Optional[Union[str, int]], optional): ISBN of book. Defaults to None.
             title (Optional[str], optional): Title of book. Defaults to None.
 
         Returns:
@@ -347,9 +370,10 @@ class NYTAPI:
             list[dict[str, Any]]: Bestsellers lists
         """
         # Set URL, load and return data
-        result: list[dict[str, Any]] = self.__load_data(
-            url=BASE_BEST_SELLERS_LISTS
-        )  # type:ignore
+        result = cast(
+            list[dict[str, Any]],
+            self.__load_data(url=BASE_BEST_SELLERS_LISTS),
+        )
 
         parsed_result = self.__parse_dates(
             result,
@@ -360,7 +384,7 @@ class NYTAPI:
 
     def best_sellers_list(
         self,
-        date: Union[datetime.date, datetime.datetime, None] = None,
+        date: Optional[DateType] = None,
         name: str = "combined-print-and-e-book-fiction",
     ) -> list[dict[str, Any]]:
         """Load all books on a best sellers lists
@@ -385,8 +409,9 @@ class NYTAPI:
 
         # Set location in JSON of results, load and return data
         try:
-            result: list[dict[str, Any]] = self.__load_data(  # type:ignore
-                url, location=["results", "books"]
+            result = cast(
+                list[dict[str, Any]],
+                self.__load_data(url, location=["results", "books"]),
             )
         except RuntimeError:
             raise ValueError("Best sellers list name is invalid")
@@ -397,7 +422,7 @@ class NYTAPI:
         self, max_results: int, params: dict[str, Any]
     ) -> list[dict[str, Any]]:
         # Set results list
-        results = []
+        results: list[dict[str, Any]] = []
 
         requests_needed = math.ceil(max_results / RESULTS_MOVIE)
         for i in range(requests_needed):
@@ -406,10 +431,13 @@ class NYTAPI:
             params["offset"] = str(offset)
 
             # Load the data from the API and raise if there's an Error
-            res: dict[str, Any] = self.__load_data(  # type:ignore
-                url=BASE_MOVIE_REVIEWS,
-                options=params,
-                location=[],
+            res = cast(
+                dict[str, Any],
+                self.__load_data(
+                    url=BASE_MOVIE_REVIEWS,
+                    options=params,
+                    location=[],
+                ),
             )
 
             results += res.get("results")  # type:ignore
@@ -423,10 +451,8 @@ class NYTAPI:
     def movie_reviews(
         self,
         keyword: Optional[str] = None,
-        options: Optional[dict[str, Any]] = None,
-        dates: Optional[
-            dict[str, Union[datetime.date, datetime.datetime]]
-        ] = None,
+        options: Optional[MovieReviewsOptions] = None,
+        dates: Optional[dict[Literal["begin", "end"], DateType]] = None,
     ) -> list[dict[str, Any]]:
         """Load movie reviews
 
@@ -436,7 +462,7 @@ class NYTAPI:
             options (Optional[dict[str, Any]], optional): Options object
             where certain requirements can be set. Check for more
             https://github.com/michadenheijer/pynytimes. Defaults to None.
-            dates (Optional[ dict[str, Union[datetime.date, datetime.datetime]] ],
+            dates (Optional[MovieReviewsDateType],
             optional):
             Dates between the review was written or movie was first shown.
             Defaults to None.
@@ -445,15 +471,15 @@ class NYTAPI:
             list[dict[str, Any]]: Movie reviews
         """
         # Set options and dates if not defined
-        options = options or {}
+        _options = cast(dict[str, Any], options or {})
         dates = dates or {}
 
         # Check input types and values
-        movie_reviews_check_input(keyword, options, dates)
+        movie_reviews_check_input(keyword, _options, dates)
         params = movie_reviews_parse_dates(dates)
-        movie_reviews_parse_params(params, keyword, options)
+        movie_reviews_parse_params(params, keyword, _options)
 
-        max_results = options.get("max_results", RESULTS_MOVIE)
+        max_results = _options.get("max_results", RESULTS_MOVIE)
         results = self.__load_movie_reviews(max_results, params)
 
         # Parse and return the results
@@ -480,9 +506,10 @@ class NYTAPI:
         options = article_metadata_set_url(url)
 
         # Load, parse and return the data
-        result: list[dict[str, Any]] = self.__load_data(
-            url=BASE_META_DATA, options=options
-        )  # type:ignore
+        result = cast(
+            list[dict[str, Any]],
+            self.__load_data(url=BASE_META_DATA, options=options),
+        )
 
         article_metadata_check_valid(result)
 
@@ -503,7 +530,10 @@ class NYTAPI:
             list[dict[str, Any]]: List of sections
         """
         # Set URL, load and return the data
-        return self.__load_data(url=BASE_SECTION_LIST)  # type:ignore
+        return cast(
+            list[dict[str, Any]],
+            self.__load_data(url=BASE_SECTION_LIST),
+        )
 
     def latest_articles(
         self,
@@ -529,7 +559,7 @@ class NYTAPI:
         # Set URL, load and return data
         url = f"{BASE_LATEST_ARTICLES}{source}/{section}.json"
         try:
-            result: list[dict[str, Any]] = self.__load_data(url)  # type:ignore
+            result = cast(list[dict[str, Any]], self.__load_data(url))
         except RuntimeError:
             raise ValueError("Section is not a valid option")
 
@@ -584,9 +614,7 @@ class NYTAPI:
             1
         ]  # type:ignore
 
-    def archive_metadata(
-        self, date: Union[datetime.datetime, datetime.date]
-    ) -> list[dict[str, Any]]:
+    def archive_metadata(self, date: DateType) -> list[dict[str, Any]]:
         """Load all article metadata from the last month
 
         Args:
@@ -646,19 +674,16 @@ class NYTAPI:
     def article_search(
         self,
         query: Optional[str] = None,
-        dates: Optional[
-            dict[str, Union[datetime.date, datetime.datetime, None]]
-        ] = None,
-        options: Optional[dict[str, Any]] = None,
+        dates: Optional[dict[Literal["begin", "end"], DateType]] = None,
+        options: Optional[ArticleSearchOptions] = None,
         results: int = 10,
     ) -> list[dict[str, Any]]:
         """Search New York Times articles
 
         Args:
             query (Optional[str], optional): Search query. Defaults to None.
-            dates (Optional[ dict[str, Union[datetime.date, datetime.datetime, None]]
-            ], optional):
-            Values between which results should be. Defaults to None.
+            dates (Optional[dict[Literal["begin", "end"], DateType]], optional):
+            Dictionary with "begin" and "end" of search range. Defaults to None.
             options (Optional[dict[str, Any]], optional): Options for the
             search results.
             Defaults to None.
@@ -669,29 +694,29 @@ class NYTAPI:
         """
         # Set if None
         dates = dates or {}
-        options = options or {}
+        _options = cast(dict[str, Any], options or {})
 
         # Check if input is valid
-        article_search_check_input(query, dates, options, results)
+        article_search_check_input(query, dates, _options, results)
 
         # Limit results loading to 2010
         results = min(results, 2010)
 
         # Resolve filter options into fq
-        options = article_search_parse_options(options)
+        _options = article_search_parse_options(_options)
 
         # Parse dates into options
         # FIXME I really don't get this error
         begin_date, end_date = article_search_parse_dates(dates)
-        options["begin_date"] = begin_date
-        options["end_date"] = end_date
+        _options["begin_date"] = begin_date
+        _options["end_date"] = end_date
 
         # Set query if defined
         if query is not None:
-            options["q"] = query
+            _options["q"] = query
 
         # Set result list and add request as much data as needed
-        result = self.__article_search_load_data(results, options)
+        result = self.__article_search_load_data(results, _options)
 
         # Parse and return results
         parsed_result = self.__parse_dates(result, "rfc3339", ["pub_date"])

@@ -18,7 +18,7 @@ class TestNewYorkTimes(unittest.TestCase):
         self.nyt.close()
 
     def test_empty_api_key(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             NYTAPI()
 
     def test_top_stories(self):

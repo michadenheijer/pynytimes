@@ -17,7 +17,7 @@ def _convert_date_to_datetime(input: datetime.date) -> datetime.datetime:
 def _movie_reviews_check_types(
     keyword: Optional[str],
     options: Optional[dict[str, Any]],
-    dates: Optional[dict[str, Union[datetime.date, datetime.datetime]]],
+    dates: Optional[dict[str, Union[datetime.date, datetime.datetime, None]]],
 ):
     # Raise error if keyword is not a string or NoneType
     if not isinstance(keyword, (str, NoneType)):
@@ -55,7 +55,7 @@ def _check_order_option(options: dict):
 def movie_reviews_check_input(
     keyword: Optional[str],
     options: Optional[dict[str, Any]],
-    dates: Optional[dict[str, Union[datetime.date, datetime.datetime]]],
+    dates: Optional[dict[str, Union[datetime.date, datetime.datetime, None]]],
 ):
     _movie_reviews_check_types(keyword, options, dates)
     assert isinstance(dates, dict)
@@ -74,7 +74,7 @@ def movie_reviews_check_input(
 
 
 def movie_reviews_parse_dates(
-    dates: dict[str, Union[datetime.date, datetime.datetime]]
+    dates: dict[str, Union[datetime.date, datetime.datetime, None]]
 ) -> dict:
     # Convert datetime.date to datetime.datetime
     for date in dates.items():
@@ -105,19 +105,23 @@ def movie_reviews_parse_dates(
     _publication_dates = None
 
     if dates.get("opening_date_start") is not None:
+        assert dates["opening_date_start"]  # Just to stop type checker
         _opening_dates = dates["opening_date_start"].strftime("%Y-%m-%d")
         _opening_dates += ";"
 
         if dates.get("opening_date_end") is not None:
+            assert dates["opening_date_end"]  # Just to stop type checker
             _opening_dates += dates["opening_date_end"].strftime("%Y-%m-%d")
 
     if dates.get("publication_date_start") is not None:
+        assert dates["publication_date_start"]
         _publication_dates = dates["publication_date_start"].strftime(
             "%Y-%m-%d"
         )
         _publication_dates += ";"
 
         if dates.get("publication_date_end") is not None:
+            assert dates["publication_date_end"]
             _publication_dates += dates["publication_date_end"].strftime(
                 "%Y-%m-%d"
             )
