@@ -34,3 +34,7 @@
 
 * [Close Connection](advanced-usage/close-connection.md)
 * [Automatic Connection](advanced-usage/automatic-connection.md)
+
+***
+
+* [Repository](https://github.com/michadenheijer/pynytimes)
