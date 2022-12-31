@@ -1,4 +1,4 @@
-# Import
+# Usage
 
 You can easily import this library using:
 
@@ -13,6 +13,10 @@ nyt = NYTAPI("Your API key", parse_dates=True)
 ```
 
 **Make sure that if you commit your code to GitHub you** [**don't accidentially commit your API key**](https://towardsdatascience.com/how-to-hide-your-api-keys-in-python-fb2e1a61b0a0)**.**
+
+The following parameters can be set, only the `key` parameter is required.
+
+## Parameters
 
 | Variables     | Description                                                                      | Data type                   | Required | Default               |
 | ------------- | -------------------------------------------------------------------------------- | --------------------------- | -------- | --------------------- |
