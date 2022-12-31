@@ -5,6 +5,10 @@
 
 Use all (actually most) New York Times APIs, get all the data you need from the Times!
 
+## Documentation
+
+Extensive documentation is available at: https://pynytimes.michadenheijer.com/.
+
 ## Installation
 
 There are multiple options to install and ugprade pynytimes, but the easiest is by just installing it using ```pip``` (or ```pip3```).
@@ -19,28 +23,6 @@ pip install --upgrade pynytimes
 ```shell
 python -m pip install --upgrade pynytimes
 ```
-
-### Development
-
-You can also install ```pynytimes``` manually from GitHub itself. This can be done by cloning this repository first, and then installing it using Python. *This might install an unreleased version, installation using this method is only advised if you want to modify the code or help maintain this library.*
-
-```bash
-git clone https://github.com/michadenheijer/pynytimes.git
-cd pynytimes
-python setup.py install
-```
-
-### Older Python versions
-
-The current version of ```pynytimes``` only supports the most recent Python versions (3.8, 3.9, and 3.10) however you still might be running older versions of Python. Luckily most of ```pynytimes``` features are still available. In the table below you can see which version of ```pynytimes``` still supports your Python version.
-
-| Python version | ```pynytimes``` version | Missing features                             |
-|----------------|-------------------------|----------------------------------------------|
-| 3.7            | ```0.7.0```             | Some type hints, small bugfixes              |
-| 3.6            | ```0.6.1```             | Type hints, small bugfixes, ```with``` usage |
-| 3.5            | ```0.4.2```             | Times Tags, no date parsing                  |
-
-You can install an older version by ```pip install --upgrade pynytimes==0.7.0```.
 
 ## Usage
 
@@ -58,150 +40,68 @@ nyt = NYTAPI("Your API key", parse_dates=True)
 
 **Make sure that if you commit your code to GitHub you [don't accidentially commit your API key](https://towardsdatascience.com/how-to-hide-your-api-keys-in-python-fb2e1a61b0a0).**
 
-| Variables        | Description                                                           | Data type                       | Required | Default                   |
-|------------------|-----------------------------------------------------------------------|---------------------------------|----------|---------------------------|
-| ```key```        | The API key from [The New York Times](https://developer.nytimes.com/) | ```str```                       | True     | ```None```                |
-| ```https```      | Use [HTTPS](https://en.wikipedia.org/wiki/HTTPS)                      | ```bool```                      | False    | ```True```                |
-| ```session```    | Optionally set your own ```request.session```                         | ```requests.sessions.Session``` | False    | ```requests.Session()```  |
-| ```backoff```    | Enable [exponential backoff](https://en.wikipedia.org/wiki/Exponential_backoff) | ```bool```            | False    | ```True```                |
-| ```user_agent``` | Set the [User Agent](https://en.wikipedia.org/wiki/User_agent)        | ```str```                       | False    | ```pynytimes/[version]``` |
-| ```parse_dates```| Enable the parsing of dates into ```datetime.datetime``` or ```datetime.date``` objects | ```bool```    | False    | ```False```               |
-
-### Supported APIs
+## Supported APIs
 
 When you have imported this library you can use the following features from the New York Times API.
 
-- [Top stories](#top-stories)
-- [Most viewed articles](#most-viewed-articles)
-- [Most shared articles](#most-shared-articles)
-- [Article search](#article-search)
-- [Book reviews](#book-reviews)
-- [Movie reviews](#movie-reviews)
-- [Best sellers lists](#best-sellers-lists)
-- [Article metadata (Times Wire)](#article-metadata)
-- [Load latest articles (Times Wire)](#load-latest-articles)
-- [Tag query (TimesTags)](#tag-query)
-- [Archive metadata](#archive-metadata)
+**Search**
+- [Article search](https://pynytimes.michadenheijer.com/search/article-search)
+- [Book reviews](https://pynytimes.michadenheijer.com/search/book-reviews)
+- [Movie reviews](https://pynytimes.michadenheijer.com/search/movie-reviews)
+
+**Popular**
+- [Top stories](https://pynytimes.michadenheijer.com/popular/top-stories)
+- [Most viewed articles](https://pynytimes.michadenheijer.com/popular/most-viewed)
+- [Most shared articles](https://pynytimes.michadenheijer.com/popular/most-shared)
+- [Best sellers lists](https://pynytimes.michadenheijer.com/popular/best-sellers-lists)
+
+**Metadata**
+- [Article metadata](https://pynytimes.michadenheijer.com/metadata/article-metadata)
+- [Archive metadata](https://pynytimes.michadenheijer.com/metadata/archive-metadata)
+- [Load latest articles](https://pynytimes.michadenheijer.com/metadata/latest-articles)
+
+**Other**
+- [Tag query (TimesTags)](https://pynytimes.michadenheijer.com/other/tags)
 
 ### Top stories
 
-You can request the top stories from the New York Times. You can also get the top stories from a specific section.
+To get the current top stories use:
 
 ```python
 top_stories = nyt.top_stories()
-
-# Get all the top stories from a specific category
-top_science_stories = nyt.top_stories(section = "science")
 ```
-
-| Variables       | Description                             | Data type       | Required |
-|-----------------|-----------------------------------------|-----------------|----------|
-| ```section```   | Get Top Stories from a specific section | ```str```       | False    |
-
-The possible sections are: ```arts```, ```automobiles```, ```books```, ```business```, ```fashion```, ```food```, ```health```, ```home```, ```insider```, ```magazine```, ```movies```, ```national```, ```nyregion```, ```obituaries```, ```opinion```, ```politics```, ```realestate```, ```science```, ```sports```, ```sundayreview```, ```technology```, ```theater```, ```tmagazine```, ```travel```, ```upshot```, and ```world```.
+Read [the documentation](https://pynytimes.michadenheijer.com/popular/top-stories) to find the top stories per section.
 
 ### Most viewed articles
 
-The New York Times API can provide the most popular articles from the last day, week or month.
+You can also get todays most viewed articles:
 
 ```python
 most_viewed = nyt.most_viewed()
-
-# Get most viewed articles of last 7 or 30 days
-most_viewed = nyt.most_viewed(days = 7)
-most_viewed = nyt.most_viewed(days = 30)
 ```
-
-| Variables       | Description                                                              | Data type       | Required | Default |
-|-----------------|--------------------------------------------------------------------------|-----------------|----------|---------|
-| ```days```      | Get most viewed articles over the last ```1```, ```7``` or ```30``` days | ```int```       | False    | ```1``` |
+Read [the documentation](https://pynytimes.michadenheijer.com/popular/most-viewed) to get the most viewed articles per week or month.
 
 ### Most shared articles
 
-Not only can you request the most viewed articles from the New York Times API, you can also request the most shared articles. You can even request the articles that are most shared by email and Facebook. You can get the most shared articles per day, week or month.
+To get the most shared articles (shared over email) use:
 
 ```python
 most_shared = nyt.most_shared()
-
-# Get most emailed articles of the last day
-most_shared = myt.most_shared(
-    days = 1,
-    method = "email"
-)
-
-# Get most shared articles to Facebook of the last 7 days
-most_shared = nyt.most_shared(
-    days = 7,
-    method = "facebook"    
-)
-
-# Get most shared articles to Facebook of the last 30 days
-most_shared = nyt.most_shared(
-    days = 30,
-    method = "facebook"
-)
 ```
 
-| Variables       | Description                                                              | Data type       | Required | Default       |
-|-----------------|--------------------------------------------------------------------------|-----------------|----------|---------------|
-| ```days```      | Get most viewed articles over the last ```1```, ```7``` or ```30``` days | ```int```       | False    | ```1```       |
-| ```method```    | Method of sharing (```email``` or ```facebook```)                        | ```str```       | False    | ```"email"``` |
+Read [the documentation](https://pynytimes.michadenheijer.com/popular/most-shared) to get the most shared articles using facebook.
+
 
 ### Article search
 
-You can also search all New York Times articles. Optionally you can define your search query (using the ```query``` option), the amount of results (using ```results```) and the amount of results you'd like. You can even add more options so you can filter the results.
+Search articles using a query using:
 
 ```python
-import datetime
-
-articles = nyt.article_search(
-    query = "Obama",
-    results = 30,
-    dates = {
-        "begin": datetime.datetime(2019, 1, 31),
-        "end": datetime.datetime(2019, 2, 28)
-    },
-    options = {
-        "sort": "oldest",
-        "sources": [
-            "New York Times",
-            "AP",
-            "Reuters",
-            "International Herald Tribune"
-        ],
-        "news_desk": [
-            "Politics"
-        ],
-        "type_of_material": [
-            "News Analysis"
-        ]
-    }
-)
+articles = nyt.article_search(query="Obama")
 ```
 
-| Variables                   | Description                                                                           | Data type       | Required |
-|-----------------------------|---------------------------------------------------------------------------------------|-----------------|----------|
-| ```query```                 | What you want to search for                                                           | ```str```       | False    |
-| ```results```               | The amount of results that you want to receive (returns a multiple of 10)             | ```int```       | False    |
-| [```dates```](#dates)       | A dictionary of the dates you'd like the results to be between                        | ```dict```      | False    |
-| [```options```](#options)   | A dictionary of additional options                                                    | ```dict```      | False    |
+The definition of search query (using the ```query``` option), the amount of results (using ```results```) and the amount of results is optional. Read [the documentation](https://pynytimes.michadenheijer.com/search/article-search) to see how.
 
-#### ```dates```
-
-| Variables       | Description                                        | Data type                                      | Required |
-|-----------------|----------------------------------------------------|------------------------------------------------|----------|
-| ```begin```     | Results should be published at or after this date  | ```datetime.datetime``` or ```datetime.date``` | False    |
-| ```end```       | Results should be published at or before this date | ```datetime.datetime``` or ```datetime.date``` | False    |
-
-#### ````options````
-
-| Variables               | Description                                                                                                     | Data type       | Required |
-|-------------------------|-----------------------------------------------------------------------------------------------------------------|-----------------|----------|
-| ```sort```              | How you want the results to be sorted (```oldest```, ```newest``` or ```relevance```)                           | ```str```       | False    |
-| ```sources```           | Results should be from one of these sources                                                                     | ```list```      | False    |
-| ```news_desk```         | Results should be from one of these news desks ([valid options](VALID_SEARCH_OPTIONS.md#news-desk-values))      | ```list```      | False    |
-| ```type_of_material```  | Results should be from this type of material ([valid options](VALID_SEARCH_OPTIONS.md#type-of-material-values)) | ```list```      | False    |
-| ```section_name```      | Results should be from this section ([valid options](VALID_SEARCH_OPTIONS.md#section-name-values))              | ```list```      | False    |
 
 ### Book reviews
 
@@ -209,95 +109,37 @@ You can easily find book reviews for every book you've read. You can find those 
 
 ```python
 # Get reviews by author (first and last name)
-reviews = nyt.book_reviews(author = "George Orwell")
+reviews = nyt.book_reviews(author="George Orwell")
 
 # Get reviews by ISBN
-reviews = nyt.book_reviews(isbn = 9780062963673)
+reviews = nyt.book_reviews(isbn="9780062963673")
 
 # Get book reviews by title
-reviews = nyt.book_reviews(title = "Becoming")
+reviews = nyt.book_reviews(title="Becoming")
 ```
 
-| Variables     | Description                       | Data type | Required           |
-|---------------|-----------------------------------|-----------|--------------------|
-| ```author```  | Reviews of books from this author | ```str``` | One of these three |
-| ```isbn```    | Reviews of books with this ISBN   | ```str``` | One of these three |
-| ```title```   | Reviews of books with this title  | ```str``` | One of these three |
+Read [the documentation](https://pynytimes.michadenheijer.com/search/book-reviews) to find more information about additional parameters.
 
 ### Movie reviews
 
 You can not only get the book reviews, but the movie reviews too.
 
 ```python
-import datetime
-
-reviews = nyt.movie_reviews(
-    keyword = "Green Book",
-    options = {
-        "order": "by-opening-date",
-        "reviewer": "A.O. Scott",
-        "critics_pick": False
-    },
-    dates = {
-        "opening_date_start": datetime.datetime(2017, 1, 1),
-        "opening_date_end": datetime.datetime(2019, 1, 1),
-        "publication_date_start": datetime.datetime(2017, 1, 1),
-        "publication_date_end": datetime.datetime(2019, 1, 1)
-})
+reviews = nyt.movie_reviews(keyword="Green Book")
 ```
 
-| Variables     | Description                          | Data type  | Required           |
-|---------------|--------------------------------------|------------|--------------------|
-| ```keyword``` | Reviews of movies with this keyword  | ```str```  | False              |
-| ```options``` | Dictionary of search options         | ```dict``` | False              |
-| ```dates```   | Dictionary of dates about the review | ```dict``` | False              |
-
-#### ```options```
-
-| Variables          | Description                                                                                 | Data type   | Required |
-|--------------------|---------------------------------------------------------------------------------------------|-------------|----------|
-| ```order```        | How to sort the results (```by-title```, ```by-publication-date```or ```by-opening-date```) | ```str```   | False    |
-| ```reviewer```     | Name of the reviewer                                                                        | ```str```   | False    |
-| ```critics_pick``` | Only return critics' pick if ```True```                                                     | ```bool```  | False    |
-
-#### ```dates```
-
-| Variables                    | Description                                           | Data type                | Required |
-|------------------------------|-------------------------------------------------------|--------------------------|----------|
-| ```opening_date_start```     | Reviews about movies released at or after this date   | ```datetime.datetime```  | False    |
-| ```opening_date_end```       | Reviews about movies released at or before this date  | ```datetime.datetime```  | False    |
-| ```publication_date_start``` | Reviews released at or after this date                | ```datetime.datetime```  | False    |
-| ```publication_date_end```   | Reviews released at or before this date               | ```datetime.datetime```  | False    |
+Read [the documentation](https://pynytimes.michadenheijer.com/search/movie-reviews) to find more information about additional parameters.
 
 ### Best sellers lists
 
-The New York Times has multiple best sellers lists. You can easily request those lists using this library.
+The New York Times has multiple best sellers lists. To get from the fiction best seller list:
 
 ```python
-# Get all the available New York Times best sellers lists
-lists = nyt.best_sellers_lists()
-
 # Get fiction best sellers list
 books = nyt.best_sellers_list()
-
-# Get non-fiction best sellers list
-books = nyt.best_sellers_list(
-    name = "combined-print-and-e-book-nonfiction"
-)
-
-# Get best sellers lists from other date
-import datetime
-
-books = nyt.best_sellers_list(
-    name = "combined-print-and-e-book-nonfiction",
-    date = datetime.datetime(2019, 1, 1)
-)
 ```
 
-| Variables   | Description               | Data type               | Required | Default                                   |
-|-------------|---------------------------|-------------------------|----------|-------------------------------------------|
-| ```name```  | Name of best sellers list | ```str```               | False    | ```"combined-print-and-e-book-fiction"``` |
-| ```date```  | Date of best sellers list | ```datetime.datetime``` | False    | Today                                     |
+Read how to get the other best seller lists in [the documentation](https://pynytimes.michadenheijer.com/popular/best-sellers-lists).
 
 ### Article metadata
 
@@ -308,10 +150,7 @@ metadata = nyt.article_metadata(
     url = "https://www.nytimes.com/2019/10/20/world/middleeast/erdogan-turkey-nuclear-weapons-trump.html"
 )
 ```
-
-| Variables | Description        | Data type  | Required |
-|-----------|--------------------|------------|----------|
-| ```url``` | URL of the article | ```str```  | True     |
+Read additional parameters in [the documentation](https://pynytimes.michadenheijer.com/metadata/article-metadata).
 
 ### Load latest articles
 
@@ -324,16 +163,7 @@ latest = nyt.latest_articles(
 )
 ```
 
-| Variables     | Description                                              | Data type  | Required | Default     |
-|---------------|----------------------------------------------------------|------------|----------|-------------|
-| ```source```  | Source of article (```all```, ```nyt``` and ```inyt```)  | ```str```  | False    | ```"all"``` |
-| ```section``` | Section of articles                                      | ```str```  | False    |             |
-
-You can find all possible sections using:
-
-```python
-sections = nyt.section_list()
-```
+Additional parameters can be found in [the documentation](https://pynytimes.michadenheijer.com/metadata/latest-articles).
 
 ### Tag query
 
@@ -346,11 +176,7 @@ tags = nyt.tag_query(
 )
 ```
 
-| Variables            | Description                | Data type  | Required | Default  |
-|----------------------|----------------------------|------------|----------|----------|
-| ```query```          | Tags you're looking for    | ```str```  | True     |          |
-| ```max_results```    | Maximum results you'd like | ```int```  | False    | ```20``` |
-| ```filter_options``` | Filter options             | ```list``` | False    |          |
+Additional parameters can be found in [the documentation](https://pynytimes.michadenheijer.com/other/tags).
 
 ### Archive metadata
 
@@ -364,26 +190,7 @@ data = nyt.archive_metadata(
 )
 ```
 
-| Variables  | Description                       | Data type               | Required |
-|------------|-----------------------------------|-------------------------|----------|
-| ```date``` | Date of month of all the metadata | ```datetime.datetime``` | True     |
-
-### Close session
-
-Optionally you close the ```requests.Session()``` connection with the New York Times server.
-
-```python
-nyt.close()
-```
-
-### ```with``` usage
-
-If you want to auto close the connection then usage using the ```with``` statement is supported.
-
-```python
-with NYTAPI("Your API Key", parse_dates=True) as nyt:
-    nyt.most_viewed()
-```
+[Read more in the documentation](https://pynytimes.michadenheijer.com/metadata/archive-metadata).
 
 ## License
 
