@@ -1,7 +1,7 @@
 """Version data for the pynytimes library"""
 __title__ = "pynytimes"
 __description__ = "A Python wrapper for (most) New York Times APIs"
-__url__ = "https://github.com/michadenheijer/pynytimes"
+__url__ = "https://pynytimes.michadenheijer.com/"
 __version__ = "0.9.0"
 __author__ = "Micha den Heijer"
 __author_email__ = "micha@michadenheijer.com"
