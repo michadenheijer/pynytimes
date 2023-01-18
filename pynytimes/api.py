@@ -707,7 +707,7 @@ class NYTAPI:
         article_search_check_input(query, dates, _options, results)
 
         # Limit results loading to 2010
-        results = min(results, 2010)
+        results = min(results, 300000)
 
         # Resolve filter options into fq
         _options = article_search_parse_options(_options)
