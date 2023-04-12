@@ -1,7 +1,7 @@
 # pynytimes
 
 [<img src="https://raw.githubusercontent.com/michadenheijer/pynytimes/main/.github/poweredby_nytimes.png" height="20px">](https://developer.nytimes.com/) [![Run full tests](https://github.com/michadenheijer/pynytimes/actions/workflows/python-full-tests.yaml/badge.svg)](https://github.com/michadenheijer/pynytimes/actions/workflows/python-full-tests.yaml)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pynytimes)](https://pypi.org/project/pynytimes/) [![PyPI](https://img.shields.io/pypi/v/pynytimes)](https://pypi.org/project/pynytimes/) [![Downloads](https://pepy.tech/badge/pynytimes)](https://pepy.tech/project/pynytimes) [![Maintainability](https://api.codeclimate.com/v1/badges/7a5ad012587ba707271c/maintainability)](https://codeclimate.com/github/michadenheijer/pynytimes/maintainability)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pynytimes)](https://pypi.org/project/pynytimes/) [![PyPI](https://img.shields.io/pypi/v/pynytimes)](https://pypi.org/project/pynytimes/) [![Downloads](https://pepy.tech/badge/pynytimes)](https://pepy.tech/project/pynytimes) [![DOI](https://zenodo.org/badge/{github_id}.svg)](https://zenodo.org/badge/latestdoi/{github_id})
 
 Use all (actually most) New York Times APIs, get all the data you need from the Times!
 
