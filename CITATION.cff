@@ -1,0 +1,9 @@
+cff-version: 1.1.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: den Heijer
+    given-names: Micha
+    orcid: https://orcid.org/0009-0009-5151-3897
+title: michadenheijer/pynytimes: 0.9.2
+version: 0.9.2
+date-released: 2023-04-12
