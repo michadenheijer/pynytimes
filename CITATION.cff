@@ -21,3 +21,4 @@ repository-code: "https://github.com/michadenheijer/pynytimes"
 title: "pynytimes"
 version: 0.9.2
 doi: 10.5281/zenodo.7821090
+url: "https://pynytimes.michadenheijer.com/"
