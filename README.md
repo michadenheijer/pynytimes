@@ -1,7 +1,7 @@
 # pynytimes
 
 [<img src="https://raw.githubusercontent.com/michadenheijer/pynytimes/main/.github/poweredby_nytimes.png" height="20px">](https://developer.nytimes.com/) [![Run full tests](https://github.com/michadenheijer/pynytimes/actions/workflows/python-full-tests.yaml/badge.svg)](https://github.com/michadenheijer/pynytimes/actions/workflows/python-full-tests.yaml)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pynytimes)](https://pypi.org/project/pynytimes/) [![PyPI](https://img.shields.io/pypi/v/pynytimes)](https://pypi.org/project/pynytimes/) [![Downloads](https://pepy.tech/badge/pynytimes)](https://pepy.tech/project/pynytimes) [![DOI](https://zenodo.org/badge/{github_id}.svg)](https://zenodo.org/badge/latestdoi/{github_id})
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pynytimes)](https://pypi.org/project/pynytimes/) [![PyPI](https://img.shields.io/pypi/v/pynytimes)](https://pypi.org/project/pynytimes/) [![Downloads](https://pepy.tech/badge/pynytimes)](https://pepy.tech/project/pynytimes) [![DOI](https://zenodo.org/badge/216087297.svg)](https://zenodo.org/badge/latestdoi/216087297)
 
 Use all (actually most) New York Times APIs, get all the data you need from the Times!
 
@@ -191,6 +191,23 @@ data = nyt.archive_metadata(
 ```
 
 [Read more in the documentation](https://pynytimes.michadenheijer.com/metadata/archive-metadata).
+
+## Citing this Repository
+If you use ```pynytimes```, a citation would be very much appriciated. If you're using BibTeX you can use the following citation:
+
+```bib
+@software{Den_Heijer_pynytimes_2023,
+    author = {Den Heijer, Micha},
+    license = {MIT},
+    title = {{pynytimes}},
+    url = {https://github.com/michadenheijer/pynytimes},
+    version = {[CITATION VERSION]},
+    year = {[CITATION YEAR]},
+    doi = {10.5281/zenodo.7821090}
+}
+```
+
+If you're not using BibTeX, you can [retrieve the preferred citation from Zenodo](https://doi.org/10.5281/zenodo.7821090).
 
 ## License
 
