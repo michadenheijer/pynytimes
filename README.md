@@ -192,7 +192,7 @@ data = nyt.archive_metadata(
 
 [Read more in the documentation](https://pynytimes.michadenheijer.com/metadata/archive-metadata).
 
-## Citating this Repository
+## Citing this Repository
 If you use ```pynytimes```, a citation would be very much appriciated. If you're using BibTeX you can use the following citation:
 
 ```bib
