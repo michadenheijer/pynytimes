@@ -1,24 +1,24 @@
-abstract: "Accessing all the New York Times API functions in Python"
-authors:
-  - family-names: "den Heijer"
-    given-names: "Micha"
-    orcid: "https://orcid.org/0009-0009-5151-3897"
 cff-version: 1.2.0
-date-released: "2023-04-12"
+title: pynytimes
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Micha
+    family-names: Den Heijer
+    affiliation: Vrije Universiteit Amsterdam
+    orcid: 'https://orcid.org/0009-0009-5151-3897'
 identifiers:
-  - description: "This is the collection of archived snapshots of all versions of pynytimes"
-    type: doi
+  - type: doi
     value: 10.5281/zenodo.7821090
-  - description: "This is the archived snapshot of version 0.9.1 of pynytimes"
-    type: doi
-    value: 10.5281/zenodo.7821091
+    description: Collective DOI of all versions
+repository-code: 'https://github.com/michadenheijer/pynytimes'
+url: 'https://pynytimes.michadenheijer.com/'
+abstract: A simple Python Library for using the New York Times APIs.
 keywords:
-  - "New York Times"
   - news
+  - API wrapper
 license: MIT
-message: "If you use this software, please cite it using the metadata from this file."
-repository-code: "https://github.com/michadenheijer/pynytimes"
-title: "pynytimes"
 version: 0.9.2
-doi: 10.5281/zenodo.7821090
-url: "https://pynytimes.michadenheijer.com/"
+date-released: '2023-04-15'
