@@ -192,6 +192,23 @@ data = nyt.archive_metadata(
 
 [Read more in the documentation](https://pynytimes.michadenheijer.com/metadata/archive-metadata).
 
+## Citating this Repository
+If you use ```pynytimes```, a citation would be very much appriciated. If you're using BibTeX you can use the following citation:
+
+```bib
+@software{Den_Heijer_pynytimes_2023,
+    author = {Den Heijer, Micha},
+    license = {MIT},
+    title = {{pynytimes}},
+    url = {https://github.com/michadenheijer/pynytimes},
+    version = {[CITATION VERSION]},
+    year = {[CITATION YEAR]},
+    doi = {10.5281/zenodo.7821090}
+}
+```
+
+If you're not using BibTeX, you can [retrieve the preferred citation from Zenodo](https://doi.org/10.5281/zenodo.7821090).
+
 ## License
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
