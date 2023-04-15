@@ -6,6 +6,7 @@
 
 * [Installation](getting-started/installation.md)
 * [Usage](getting-started/usage.md)
+* [Citation](getting-started/citation.md)
 
 ## Search
 
