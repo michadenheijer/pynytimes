@@ -12,6 +12,18 @@ NoneType: Final = type(None)
 LARGE_RESULTS_WARN = 100
 MAXIMUM_RESULTS = 2010
 
+# Set query options that are currently supported
+CURRENT_FILTER_SUPPORT: list[str] = [
+    "source",
+    "news_desk",
+    "section_name",
+    "glocation",
+    "type_of_material",
+    "subject",
+    "body",
+    "headline",
+]
+
 
 def _article_search_result_warnings(results: int):
     # Show warnings when a lot of results are requested
@@ -109,6 +121,12 @@ def article_search_parse_dates(
 
 
 def _filter_input(values: list) -> str:
+    if not isinstance(values, list):
+        raise TypeError(
+            "One of the parameters in the Article Search function,"
+            " is not a list while it should be"
+        )
+
     input = ""
     # Add all the data in the list to the filter
     for i, value in enumerate(values):
@@ -125,21 +143,16 @@ def article_search_parse_options(options: dict[str, Any]) -> dict:
     # Get options already defined in fq (filter query)
     fq = options.get("fq", "")
 
-    # Set query options that are currently supported
-    current_filter_support = [
-        "source",
-        "news_desk",
-        "section_name",
-        "glocation",
-        "type_of_material",
-    ]
-
     # Run for every filter
-    for _filter in current_filter_support:
+    for _filter in CURRENT_FILTER_SUPPORT:
         # Get data for filter if it's not defined continue to next filter
         values = options.get(_filter)
         if values is None:
             continue
+
+        # Notice that this does not support OR statements, however
+        # implementing would complicate this function a lot.
+        # This may be worth it in the future, but not now.
 
         # Check if filter query is already defined. If it is then add
         # " AND " to the query

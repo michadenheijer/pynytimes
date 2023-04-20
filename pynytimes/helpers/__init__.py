@@ -12,6 +12,9 @@ from .load_data import raise_for_status, get_from_location
 from .most_shared import most_shared_check_method, most_shared_check_days
 from .most_shared import most_shared_get_url
 from .most_viewed import most_viewed_check_values
-from .movie_reviews import movie_reviews_check_input, movie_reviews_parse_dates
+from .movie_reviews import (
+    movie_reviews_check_input,
+    movie_reviews_parse_dates,
+)
 from .movie_reviews import movie_reviews_parse_params
 from .tag_query import tag_query_check_types, tag_query_get_filter_options
