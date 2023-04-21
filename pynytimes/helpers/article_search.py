@@ -12,6 +12,8 @@ NoneType: Final = type(None)
 LARGE_RESULTS_WARN = 100
 MAXIMUM_RESULTS = 2010
 
+# FIXME not all filters are implemented
+
 # Set query options that are currently supported
 CURRENT_FILTER_SUPPORT: list[str] = [
     "source",
