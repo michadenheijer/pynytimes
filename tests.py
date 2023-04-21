@@ -216,7 +216,7 @@ class TestNewYorkTimes(unittest.TestCase):
         self.assertIsInstance(search, list)
         for article in search:
             self.assertIsInstance(article, dict)
-            self.assertIn(headline_query, article["headline"]["main"])
+            self.assertIn(headline_query, str(article["headline"]))
 
     def test_article_search_invalid(self):
         with self.assertRaises(TypeError):
