@@ -99,8 +99,7 @@ Search articles using a query using:
 ```python
 articles = nyt.article_search(query="Obama")
 ```
-
-The definition of search query (using the ```query``` option), the amount of results (using ```results```) and the amount of results is optional. Read [the documentation](https://pynytimes.michadenheijer.com/search/article-search) to see how.
+In this example we have just defined the content of the search query (Obama), but we can add many more search parameters. Read [the documentation](https://pynytimes.michadenheijer.com/search/article-search) to see how.
 
 
 ### Book reviews
@@ -201,8 +200,8 @@ If you use ```pynytimes```, a citation would be very much appriciated. If you're
     license = {MIT},
     title = {{pynytimes}},
     url = {https://github.com/michadenheijer/pynytimes},
-    version = {[CITATION VERSION]},
-    year = {[CITATION YEAR]},
+    version = {0.10.0},
+    year = {2023},
     doi = {10.5281/zenodo.7821090}
 }
 ```

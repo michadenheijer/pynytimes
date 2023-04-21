@@ -1,9 +1,9 @@
 package:
   name: "pynytimes"
-  version: "0.8.0"
+  version: "0.10.0"
 
 source:
-  git_rev: v0.8.0
+  git_rev: v0.10.0
   git_url: https://github.com/michadenheijer/pynytimes
 
 requirements:
@@ -13,7 +13,7 @@ requirements:
   build:
     - python
   run:
-    - "python>=3.8,<4"
+    - "python>=3.9,<4"
     - requests
 
 about:

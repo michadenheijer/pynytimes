@@ -52,6 +52,10 @@ ArticleSearchOptions = TypedDict(
         "news_desk": "list[str]",
         "type_of_material": "list[str]",
         "section_name": "list[str]",
+        "subject": "list[str]",
+        "body": "list[str]",
+        "headline": "list[str]",
+        "fq": "str",
     },
     total=False,
 )
@@ -691,7 +695,7 @@ class NYTAPI:
             dates (Optional[dict[Literal["begin", "end"], DateType]],
             optional): Dictionary with "begin" and "end" of search range.
             Defaults to None.
-            options (Optional[dict[str, Any]], optional): Options for the
+            options (Optional[ArticleSearchOptions], optional): Options for the
             search results.
             Defaults to None.
             results (int, optional): Load at most this many articles. Defaults to 10.
