@@ -1,9 +1,9 @@
 package:
   name: "pynytimes"
-  version: "0.8.0"
+  version: "0.9.2"
 
 source:
-  git_rev: v0.8.0
+  git_rev: v0.9.2
   git_url: https://github.com/michadenheijer/pynytimes
 
 requirements:
