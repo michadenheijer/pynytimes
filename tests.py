@@ -28,7 +28,9 @@ class TestNewYorkTimes(unittest.TestCase):
 
         for top_story in top_stories:
             self.assertIsInstance(top_story, dict)
-            self.assertIsInstance(top_story["created_date"], datetime.datetime)
+            self.assertIsInstance(
+                top_story["created_date"], datetime.datetime
+            )
             self.assertIsInstance(
                 top_story["published_date"], datetime.datetime
             )
@@ -205,6 +207,16 @@ class TestNewYorkTimes(unittest.TestCase):
         self.assertEqual(80, len(search))
         for article in search:
             self.assertIsInstance(article, dict)
+
+    def test_article_search_headline(self):
+        headline_query = "Biden"
+        search = self.nyt.article_search(
+            options={"headline": [headline_query]}
+        )
+        self.assertIsInstance(search, list)
+        for article in search:
+            self.assertIsInstance(article, dict)
+            self.assertIn(headline_query, article["headline"]["main"])
 
     def test_article_search_invalid(self):
         with self.assertRaises(TypeError):
