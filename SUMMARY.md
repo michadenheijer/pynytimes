@@ -39,3 +39,4 @@
 ***
 
 * [Repository](https://github.com/michadenheijer/pynytimes)
+* [PyPI](https://pypi.org/project/pynytimes/)
