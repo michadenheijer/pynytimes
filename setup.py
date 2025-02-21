@@ -27,7 +27,7 @@ setuptools.setup(
     include_package_data=True,
     url=about_module["__url__"],
     license=about_module["__license__"],
-    install_requires=["requests>=2.10.0,<3.0.0", "urllib3"],
+    install_requires=["requests>=2.10.0,<3.0.0", "urllib3>=2.0.0"],
     classifiers=[
         "License :: OSI Approved :: MIT License",
         "Development Status :: 5 - Production/Stable",
