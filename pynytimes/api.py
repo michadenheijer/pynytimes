@@ -1,9 +1,11 @@
 """Main function of the wrapper"""
+
 # Import typings dependencies
 from __future__ import annotations
 
 # Import standard Python dependencies
 import datetime
+import warnings
 import math
 from typing import Any, Final, Literal, Optional, Union, TypedDict, cast
 
@@ -37,6 +39,8 @@ BASE_BEST_SELLERS_LIST: Final = BASE_BOOKS + "lists/"
 # Define Requests variables
 TIMEOUT: Final = (10, 30)
 BACKOFF_FACTOR = 1
+BACKOFF_MAX = 10
+BACKOFF_JITTER = 0.5
 RETRY_STATUS_CODES = [429, 509]
 MAX_RETRIES = 10
 RESULTS_MOVIE = 20
@@ -62,9 +66,7 @@ ArticleSearchOptions = TypedDict(
 MovieReviewsOptions = TypedDict(
     "MovieReviewsOptions",
     {
-        "order": Literal[
-            "by-title", "by-publication-date", "by-opening-date"
-        ],
+        "order": Literal["by-title", "by-publication-date", "by-opening-date"],
         "reviewer": str,
         "critics_pick": bool,
     },
@@ -183,7 +185,9 @@ class NYTAPI:
             backoff_strategy = Retry(
                 total=MAX_RETRIES,
                 backoff_factor=BACKOFF_FACTOR,
+                backoff_max=BACKOFF_MAX,
                 status_forcelist=RETRY_STATUS_CODES,
+                backoff_jitter=BACKOFF_JITTER,
             )
 
             adapter = HTTPAdapter(max_retries=backoff_strategy)
@@ -264,9 +268,7 @@ class NYTAPI:
         url = f"{BASE_TOP_STORIES}{section}.json"
 
         try:
-            result: list[dict[str, Any]] = self.__load_data(
-                url
-            )  # type:ignore
+            result: list[dict[str, Any]] = self.__load_data(url)  # type:ignore
         # If 404 error throw invalid section name error
         except RuntimeError:
             raise ValueError("Invalid section name")
@@ -279,9 +281,7 @@ class NYTAPI:
         )  # FIXME this could just be a direct return
         return parsed_result
 
-    def most_viewed(
-        self, days: Literal[1, 7, 30] = 1
-    ) -> list[dict[str, Any]]:
+    def most_viewed(self, days: Literal[1, 7, 30] = 1) -> list[dict[str, Any]]:
         """Get most viewed articles
 
         Args:
@@ -367,9 +367,7 @@ class NYTAPI:
             url=BASE_BOOK_REVIEWS, options=options
         )  # type:ignore
 
-        parsed_result = self.__parse_dates(
-            result, "date-only", ["publication_dt"]
-        )
+        parsed_result = self.__parse_dates(result, "date-only", ["publication_dt"])
         return parsed_result
 
     def best_sellers_lists(self) -> list[dict[str, Any]]:
@@ -480,6 +478,11 @@ class NYTAPI:
         Returns:
             list[dict[str, Any]]: Movie reviews
         """
+        warnings.warn(
+            "This function is deprecated and will be removed in the next version.",
+            DeprecationWarning,
+        )
+
         # Set options and dates if not defined
         _options = cast(dict[str, Any], options or {})
         dates = dates or {}
@@ -513,6 +516,10 @@ class NYTAPI:
         Returns:
             list[dict[str, Any]]: List of article metadata
         """
+        warnings.warn(
+            "This function is deprecated and will be removed in the next version.",
+            DeprecationWarning,
+        )
         options = article_metadata_set_url(url)
 
         # Load, parse and return the data
@@ -607,9 +614,7 @@ class NYTAPI:
         # Raise error for TypeError
         tag_query_check_types(query, max_results)
 
-        _filter_options = (
-            tag_query_get_filter_options(filter_options) or filter_option
-        )
+        _filter_options = tag_query_get_filter_options(filter_options) or filter_option
 
         # Add options to request params
         options = {"query": query, "filter": _filter_options}

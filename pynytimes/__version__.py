@@ -2,7 +2,7 @@
 __title__ = "pynytimes"
 __description__ = "A Python wrapper for (most) New York Times APIs"
 __url__ = "https://pynytimes.michadenheijer.com/"
-__version__ = "0.10.0"
+__version__ = "0.10.1"
 __author__ = "Micha den Heijer"
 __author_email__ = "micha@michadenheijer.com"
 __license__ = "MIT"

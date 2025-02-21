@@ -200,7 +200,7 @@ If you use ```pynytimes```, a citation would be very much appriciated. If you're
     license = {MIT},
     title = {{pynytimes}},
     url = {https://github.com/michadenheijer/pynytimes},
-    version = {0.10.0},
+    version = {0.10.1},
     year = {2023},
     doi = {10.5281/zenodo.7821090}
 }
