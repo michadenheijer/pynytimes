@@ -11,7 +11,7 @@ Extensive documentation is available at: https://pynytimes.michadenheijer.com/.
 
 ## Installation
 
-There are multiple options to install and ugprade pynytimes, but the easiest is by just installing it using ```pip``` (or ```pip3```).
+There are multiple options to install and upgrade pynytimes, but the easiest is by just installing it using ```pip``` (or ```pip3```).
 ### Linux and Mac
 
 ```bash
